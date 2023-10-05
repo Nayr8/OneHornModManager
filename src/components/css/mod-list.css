@@ -10,20 +10,4 @@
     display: grid;
     grid-template-areas: "name description";
     grid-template-columns: 20em auto;
-
-    border-style: solid;
-    border-radius: 0.3em;
-    margin: 0.1em;
-    padding: 0.2em 0.5em;
-
-    border-color: var(--border);
-    background: var(--unselected-option);
-}
-
-.mod-element:hover {
-    background: var(--hovered-option);
-}
-
-.mod-element-selected {
-    background: var(--selected-option);
 }

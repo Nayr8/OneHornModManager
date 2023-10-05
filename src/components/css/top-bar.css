@@ -12,24 +12,3 @@
     background: var(--top-bar);
     border-bottom: solid var(--border);
 }
-
-.top-bar-element {
-    background: var(--unselected-option);
-    border: var(--border) solid;
-    border-radius: 0.3em;
-
-    width: max-content;
-    align-self: center;
-    padding: 0.25em 0.6em 0.25em 0.6em;
-}
-
-.top-bar-element:hover {
-    background: var(--hovered-option);
-    cursor: pointer;
-}
-
-.top-bar-element-disabled, .top-bar-element-disabled:hover {
-    background: var(--top-bar);
-    color: var(--text-disabled);
-    cursor: default;
-}

@@ -44,27 +44,10 @@
     display: grid;
     grid-template-areas: "icon name";
     grid-template-columns: 3em auto;
-
-    border-style: solid;
-    border-radius: 0.3em;
-    margin: 0.1em;
-    padding: 0.2em 0.5em;
-
-    border-color: var(--border);
-    background: var(--unselected-option);
 }
 
 .dir {
     background: var(--unselected-option-light);
-}
-
-.file-selected {
-    background: var(--selected-option);
-}
-
-.file:hover {
-    background: var(--hovered-option);
-    cursor: pointer;
 }
 
 .file-base {
@@ -88,43 +71,12 @@
     grid-column: current-file-start / current-file-end;
     grid-row: current-file-start / current-file-end;
 
-    border-style: solid;
-    border-radius: 0.3em;
-    margin: 0.1em;
-    padding: 0.2em 0.5em;
-    height: 1.5em;
-    grid-gap: 0.5em;
-
-    border-color: var(--border);
-    background: var(--unselected-option);
-    cursor: default;
-
     overflow: scroll;
 }
 
 .current-file-confirm {
     grid-column: current-file-confirm-start / current-file-confirm-end;
     grid-row: current-file-confirm-start / current-file-confirm-end;
-
-    border-style: solid;
-    border-radius: 0.3em;
-    margin: 0.1em;
-    padding: 0.2em 0.5em;
-    height: 1.5em;
-
-    border-color: var(--border);
-    background: var(--unselected-option);
-}
-
-.current-file-confirm:hover {
-    background: var(--hovered-option);
-    cursor: pointer;
-}
-
-.current-file-confirm-disabled, .current-file-confirm-disabled:hover {
-    background: var(--top-bar);
-    color: var(--text-disabled);
-    cursor: default;
 }
 
 .file-location-outer {
@@ -147,17 +99,6 @@
 .file-location {
     grid-column: location-start / location-end;
     grid-row: location-start / location-end;
-
-    border-style: solid;
-    border-radius: 0.3em;
-    margin: 0.1em;
-    padding: 0.2em 0.5em;
-    height: 1.5em;
-    grid-gap: 0.5em;
-
-    border-color: var(--border);
-    background: var(--unselected-option);
-    cursor: default;
 
     overflow: scroll;
 }

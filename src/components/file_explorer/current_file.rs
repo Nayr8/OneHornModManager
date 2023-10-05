@@ -18,11 +18,11 @@ pub fn files(props: &CurrentFileProps) -> Html {
     html! {
         <div class="file-base">
             if let Some(current_file) = props.current_file.deref() {
-                <div class="current-file">{&current_file.name}</div>
-                <div class="current-file-confirm">{"Confirm"}</div>
+                <div class="current-file element">{&current_file.name}</div>
+                <div class="current-file-confirm element element-button">{"Confirm"}</div>
             } else {
-                <div class="current-file"></div>
-                <div class="current-file-confirm current-file-confirm-disabled">{"Confirm"}</div>
+                <div class="current-file element"></div>
+                <div class="current-file-confirm element element-disable">{"Confirm"}</div>
             }
         </div>
     }

@@ -1,0 +1,33 @@
+.element {
+    border-style: solid;
+    border-radius: 0.3em;
+    margin: 0.1em;
+    padding: 0.25em 0.6em 0.25em 0.6em;
+    height: 1.5em;
+
+    align-self: center;
+
+    border-color: var(--border);
+    background: var(--unselected-option);
+}
+
+.element-thin {
+    height: 1.2em
+}
+
+.element-disable {
+    background: var(--top-bar);
+}
+
+.element-selected {
+    background: var(--selected-option);
+}
+
+.element-disable:hover {
+    cursor: default;
+}
+
+.element-button:hover {
+    background: var(--hovered-option);
+    cursor: pointer;
+}

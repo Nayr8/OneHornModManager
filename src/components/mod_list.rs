@@ -40,7 +40,7 @@ fn mod_component(props: &ModElementProps) -> Html {
             };
 
             return html! {
-                <div class="mod-element mod-element-selected" onclick={onclick}>
+                <div class="element element-button element-selected mod-element" onclick={onclick}>
                     <div>{props.mod_info.name.clone()}</div>
                     <div>{props.mod_info.description.clone()}</div>
                 </div>
@@ -56,7 +56,7 @@ fn mod_component(props: &ModElementProps) -> Html {
     };
 
     html! {
-        <div class="mod-element" onclick={onclick}>
+        <div class="element element-button mod-element" onclick={onclick}>
             <div>{props.mod_info.name.clone()}</div>
             <div>{props.mod_info.description.clone()}</div>
         </div>
