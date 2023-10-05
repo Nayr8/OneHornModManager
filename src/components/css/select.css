@@ -1,0 +1,100 @@
+/*
+.select-wrapper {
+    position: relative;
+    user-select: none;
+    width: 20vh;
+    top: 50%;
+    height: 50px;
+    transform: translateY(-2vh);
+    display: inline-block;
+}
+.select {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-width: 0 2px 0 2px;
+    border-style: none;
+    border-color: var(--top-bar);
+}
+.select__trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    height: 50px;
+    line-height: 50px;
+    background: var(--selected-option);
+    cursor: pointer;
+    border-width: 2px 0 2px 0;
+    border-style: solid;
+    border-color: var(--top-bar);
+}
+.custom-options {
+    position: relative;
+    display: block;
+    top: 100%;
+    border: 2px solid var(--top-bar);
+    border-top: 0;
+    background: var(--unselected-option);
+    transition: all 0.5s;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+.select.open .custom-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+}
+.custom-option {
+    height: 50px;
+    position: relative;
+    display: block;
+    padding: 0 10px 0 10px;
+    line-height: 32px;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+.custom-option:hover {
+    cursor: pointer;
+    background-color: var(--hovered-option);
+}
+.custom-option.selected {
+    background-color: var(--selected-option);
+}
+
+
+.arrow {
+    position: relative;
+    height: 15px;
+    width: 15px;
+}
+.arrow::before, .arrow::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    width: 0.15rem;
+    height: 100%;
+    transition: all 0.5s;
+}
+.arrow::before {
+    left: -5px;
+    transform: rotate(45deg);
+    background-color: var(--top-bar);
+}
+.arrow::after {
+    left: 5px;
+    transform: rotate(-45deg);
+    background-color: var(--top-bar);
+}
+.open .arrow::before {
+    left: -5px;
+    transform: rotate(-45deg);
+}
+.open .arrow::after {
+    left: 5px;
+    transform: rotate(45deg);
+}
+*/

@@ -1,0 +1,12 @@
+:root {
+    --top-bar: #20293e;
+    --selected-option: #37496b;
+    --unselected-option: #28334c;
+    --unselected-option-light: #1d2945;
+    --hovered-option: #475d87;
+    --text: #c8d3f2;
+    --text-disabled: #6c7181;
+    --background: #212b50;
+    --border: #121723;
+    --debug: #ff00ff;
+}
