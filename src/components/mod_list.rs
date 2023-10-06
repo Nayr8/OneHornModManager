@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use yew::prelude::*;
 use models::Mod;
-use crate::components::button::Button;
+use crate::components::Button;
 
 #[derive(Properties, PartialEq)]
 pub struct ModListProps {

@@ -1,31 +1,26 @@
 .file-explorer {
     grid-row: main-start / main-end;
     grid-column: main-start / main-end;
-    padding: 0.6em 0.6em 0.5em 0.5em;
     overflow: hidden;
 
-    width: 98.7%;
-    height: 97.3%;
+    width: 100%;
+    height: 100%;
 
     display: grid;
-    grid-template-areas: "file-nav file-location"
-                         "file-nav file-main"
-                         "file-nav file-base";
-    grid-template-columns: 15em 1fr;
+    grid-template-areas: "file-nav file-location .."
+                         "file-nav file-main     .."
+                         "file-nav file-base     ..";
+    grid-template-columns: 15em 1fr 3.5em;
     grid-template-rows: 3em 1fr 3.5em;
+    background: var(--top-bar);
 }
 
 .file-nav {
     grid-row: file-nav-start / file-nav-end;
     grid-column: file-nav-start / file-nav-end;
 
-    border-left: solid var(--border);
-    border-top: solid var(--border);
-    border-bottom: solid var(--border);
 
     overflow: scroll;
-
-    background: var(--top-bar);
 }
 
 .files {
@@ -33,9 +28,9 @@
     grid-row: file-main-start / file-main-end;
     padding: 0.6em 0.8em 0 0.5em;
 
-    border-left: solid var(--border);
-    border-top: solid var(--border);
-    border-bottom: solid var(--border);
+    border: solid var(--border);
+    border-radius: 0.3em;
+    background: var(--background);
 
     overflow: scroll;
 }
@@ -47,7 +42,8 @@
 }
 
 .dir {
-    background: var(--unselected-option-light);
+    @extend .file;
+    background: var(--unselected-option-dark);
 }
 
 .file-base {
@@ -63,8 +59,6 @@
 
     background: var(--top-bar);
 
-    border-bottom: solid var(--border);
-    border-right: solid var(--border);
 }
 
 .current-file {
@@ -90,10 +84,6 @@
     grid-template-rows: 1fr max-content 1fr;
     grid-template-columns: 0.5em 1fr 0.5em;
 
-    background: var(--top-bar);
-
-    border-top: solid var(--border);
-    border-right: solid var(--border);
 }
 
 .file-location {

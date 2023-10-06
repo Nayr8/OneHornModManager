@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use crate::components::button::Button;
+use crate::components::Button;
 
 #[derive(Properties, PartialEq)]
 pub struct TopBarProps {

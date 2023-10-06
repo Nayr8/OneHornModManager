@@ -3,7 +3,7 @@ use yew::prelude::*;
 use models::{EntryType, FileEntry};
 use crate::bindings::FileBrowser;
 use crate::components::file_explorer::current_file::FileInfo;
-use crate::components::button::Button;
+use crate::components::Button;
 
 
 #[derive(Properties, PartialEq)]
@@ -60,7 +60,7 @@ pub fn directory_parent(props: &DirectoryParentProps) -> Html {
     };
 
     html! {
-        <Button class="file dir" onclick={onclick}>
+        <Button class="dir" onclick={onclick}>
             <div />
             <div>{".."}</div>
         </Button>
@@ -105,7 +105,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
             ("DIR", Callback::from(move |_: MouseEvent| {
                 FileBrowser::redirect_browser(path.clone());
                 FileBrowser::read_current_dir_into(current_path.clone(), current_entries.clone());
-            }), "file dir")
+            }), "dir")
         }
     };
 
