@@ -3,6 +3,7 @@ use yew::prelude::*;
 use models::{EntryType, FileEntry};
 use crate::bindings::FileBrowser;
 use crate::components::file_explorer::current_file::FileInfo;
+use crate::components::button::Button;
 
 
 #[derive(Properties, PartialEq)]
@@ -59,10 +60,10 @@ pub fn directory_parent(props: &DirectoryParentProps) -> Html {
     };
 
     html! {
-        <div class="element element-button file dir" onclick={onclick}>
+        <Button class="file dir" onclick={onclick}>
             <div />
             <div>{".."}</div>
-        </div>
+        </Button>
     }
 }
 
@@ -76,64 +77,44 @@ pub struct DirectoryEntryProps {
 
 #[function_component(DirectoryEntry)]
 pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
-    let navigate_to = {
-        let path = props.entry.path.clone();
-        let current_path = props.current_path.clone();
-        let current_entries = props.current_entries.clone();
-        move |_: MouseEvent| {
-            FileBrowser::redirect_browser(path.clone());
-            FileBrowser::read_current_dir_into(current_path.clone(), current_entries.clone());
-        }
-    };
-
     let is_selected = if let Some(selected_file) = props.current_file.as_ref() {
         selected_file.path == props.entry.path
     } else {
         false
     };
 
-    let select_file = {
-        let file_info = FileInfo {
-            name: props.entry.file_name.clone(),
-            path: props.entry.path.clone(),
-        };
-        let current_file = props.current_file.clone();
-        move |_:MouseEvent| {
-            if is_selected {
-                current_file.set(None);
-            } else {
-                current_file.set(Some(file_info.clone()));
-            }
+    let (type_name, onclick, class): (&str, Callback<MouseEvent>, &str) = match props.entry.entry_type {
+        EntryType::File => {
+            let file_info = FileInfo {
+                name: props.entry.file_name.clone(),
+                path: props.entry.path.clone(),
+            };
+            let current_file = props.current_file.clone();
+            ("FILE", Callback::from(move |_:MouseEvent| {
+                if is_selected {
+                    current_file.set(None);
+                } else {
+                    current_file.set(Some(file_info.clone()));
+                }
+            }), "file")
+        }
+        EntryType::Directory => {
+            let path = props.entry.path.clone();
+            let current_path = props.current_path.clone();
+            let current_entries = props.current_entries.clone();
+            ("DIR", Callback::from(move |_: MouseEvent| {
+                FileBrowser::redirect_browser(path.clone());
+                FileBrowser::read_current_dir_into(current_path.clone(), current_entries.clone());
+            }), "file dir")
         }
     };
 
-    match props.entry.entry_type {
-        EntryType::File => if is_selected {
-            html! {
-                <div class="element element-button-thin-selected file" onclick={select_file}>
-                    <div>{"FILE"}</div>
-                    <div>
-                        { &props.entry.file_name }
-                    </div>
-                </div>
-            }
-        } else {
-            html! {
-                <div class="element element-button-thin file" onclick={select_file}>
-                    <div>{"FILE"}</div>
-                    <div>
-                        { &props.entry.file_name }
-                    </div>
-                </div>
-            }
-        },
-        EntryType::Directory => html! {
-            <div class="element element-button-thin file dir" onclick={navigate_to}>
-                <div>{"DIR"}</div>
-                <div>
-                    { &props.entry.file_name }
-                </div>
+    html! {
+        <Button class={classes!(class)} thin=true selected={is_selected} onclick={onclick}>
+            <div>{type_name}</div>
+            <div>
+                { &props.entry.file_name }
             </div>
-        },
+        </Button>
     }
 }

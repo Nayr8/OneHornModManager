@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use yew::prelude::*;
 use models::Mod;
+use crate::components::button::Button;
 
 #[derive(Properties, PartialEq)]
 pub struct ModListProps {
@@ -29,36 +30,29 @@ pub struct ModElementProps {
 }
 #[function_component(ModElement)]
 fn mod_component(props: &ModElementProps) -> Html {
+    let selected = if let Some(selected_index) = *props.selected_mod {
+        selected_index == props.index
+    } else {
+        false
+    };
 
-    if let Some(selected_index) = *props.selected_mod {
-        if selected_index == props.index {
-            let onclick = {
-                let selected_mod = props.selected_mod.clone();
-                move |_| {
-                    selected_mod.set(None);
-                }
-            };
-
-            return html! {
-                <div class="element-button-selected mod-element" onclick={onclick}>
-                    <div>{props.mod_info.name.clone()}</div>
-                    <div>{props.mod_info.description.clone()}</div>
-                </div>
-            }
-        }
-    }
-    let onclick = {
+    let onclick = if selected {
+        let selected_mod = props.selected_mod.clone();
+        Callback::from(move |_: MouseEvent| {
+            selected_mod.set(None);
+        })
+    } else {
         let selected_mod = props.selected_mod.clone();
         let index = props.index;
-        move |_| {
+        Callback::from(move |_: MouseEvent| {
             selected_mod.set(Some(index))
-        }
+        })
     };
 
     html! {
-        <div class="element-button mod-element" onclick={onclick}>
+        <Button class="mod-element" onclick={onclick} selected={selected}>
             <div>{props.mod_info.name.clone()}</div>
             <div>{props.mod_info.description.clone()}</div>
-        </div>
+        </Button>
     }
 }

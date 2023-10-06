@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use crate::components::button::Button;
 
 #[derive(Properties, PartialEq)]
 pub struct TopBarProps {
@@ -11,22 +12,31 @@ pub fn top_bar(props: &TopBarProps) -> Html {
     let toggle_file_explorer = {
         let file_explorer_open = props.file_explorer_open.clone();
         let selected_mod = props.selected_mod.clone();
-        move |_| {
+        move |_: MouseEvent| {
             file_explorer_open.set(!*file_explorer_open);
             selected_mod.set(None);
         }
     };
+
     html! {
         <div class="top-bar">
             if *props.file_explorer_open {
-                <div class="element-button" onclick={toggle_file_explorer}>{"Back to Mod List"}</div>
+                <Button onclick={toggle_file_explorer.clone()}>
+                    {"Back to Mod List"}
+                </Button>
             } else {
-                <div class="element-button" onclick={toggle_file_explorer}>{"Add Mod"}</div>
+                <Button onclick={toggle_file_explorer.clone()}>
+                    {"Add Mod"}
+                </Button>
 
                 if let Some(_mod_index) = *props.selected_mod {
-                    <div class="element-button">{"Remove Mod"}</div>
+                    <Button>
+                        {"Remove Mod"}
+                    </Button>
                 } else {
-                    <div class="element-disabled">{"Remove Mod"}</div>
+                    <Button disabled=true>
+                        {"Remove Mod"}
+                    </Button>
                 }
             }
         </div>
