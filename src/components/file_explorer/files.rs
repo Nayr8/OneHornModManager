@@ -1,16 +1,16 @@
 use std::path::PathBuf;
+use std::rc::Rc;
 use yew::prelude::*;
 use models::{EntryType, FileEntry};
 use crate::bindings::FileBrowser;
-use crate::components::file_explorer::current_file::FileInfo;
 use crate::components::Button;
 
 
 #[derive(Properties, PartialEq)]
 pub struct FilesProps {
-    pub current_path: UseStateHandle<PathBuf>,
+    pub current_path: UseStateHandle<Rc<PathBuf>>,
     pub current_entries: UseStateHandle<Vec<FileEntry>>,
-    pub current_file: UseStateHandle<Option<FileInfo>>,
+    pub current_file: UseStateHandle<Option<FileEntry>>,
 }
 
 #[function_component(Files)]
@@ -31,7 +31,7 @@ pub fn files(props: &FilesProps) -> Html {
         <div class="files">
             if let Some(parent) = parent {
                 <DirectoryParent
-                parent={parent.to_owned()}
+                parent={Rc::new(parent.to_owned())}
                 current_path={props.current_path.clone()}
                 current_entries={props.current_entries.clone()} />
             }
@@ -42,8 +42,8 @@ pub fn files(props: &FilesProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct DirectoryParentProps {
-    parent: PathBuf,
-    current_path: UseStateHandle<PathBuf>,
+    parent: Rc<PathBuf>,
+    current_path: UseStateHandle<Rc<PathBuf>>,
     current_entries: UseStateHandle<Vec<FileEntry>>,
 }
 
@@ -70,9 +70,9 @@ pub fn directory_parent(props: &DirectoryParentProps) -> Html {
 #[derive(Properties, PartialEq)]
 pub struct DirectoryEntryProps {
     entry: FileEntry,
-    current_path: UseStateHandle<PathBuf>,
+    current_path: UseStateHandle<Rc<PathBuf>>,
     current_entries: UseStateHandle<Vec<FileEntry>>,
-    current_file: UseStateHandle<Option<FileInfo>>,
+    current_file: UseStateHandle<Option<FileEntry>>,
 }
 
 #[function_component(DirectoryEntry)]
@@ -85,10 +85,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
 
     let (type_name, onclick, class): (&str, Callback<MouseEvent>, &str) = match props.entry.entry_type {
         EntryType::File => {
-            let file_info = FileInfo {
-                name: props.entry.file_name.clone(),
-                path: props.entry.path.clone(),
-            };
+            let file_info = props.entry.clone();
             let current_file = props.current_file.clone();
             ("FILE", Callback::from(move |_:MouseEvent| {
                 if is_selected {

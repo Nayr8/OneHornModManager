@@ -1,10 +1,11 @@
 use std::path::PathBuf;
+use std::rc::Rc;
 use yew::prelude::*;
 use models::FileEntry;
 use crate::bindings::FileBrowser;
 use location::FileExplorerLocation;
 use files::Files;
-use current_file::{CurrentFile, FileInfo};
+use current_file::CurrentFile;
 use file_nav::FileNav;
 
 mod location;
@@ -18,10 +19,10 @@ pub struct FileExplorerProps {
 }
 #[function_component(FileExplorer)]
 pub fn file_explorer(_props: &FileExplorerProps) -> Html {
-    let current_path = use_state(|| PathBuf::new());
+    let current_path = use_state(|| Rc::new(PathBuf::new()));
     let current_entries = use_state(|| Vec::<FileEntry>::new());
 
-    let current_file: UseStateHandle<Option<FileInfo>> = use_state(|| None);
+    let current_file: UseStateHandle<Option<FileEntry>> = use_state(|| None);
 
     use_effect_with_deps(|(current_path, current_entries)| {
         FileBrowser::read_current_dir_into((*current_path).clone(), (*current_entries).clone());

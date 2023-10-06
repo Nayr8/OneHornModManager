@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::rc::Rc;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
@@ -11,11 +12,11 @@ pub struct FileBrowser;
 
 #[derive(Serialize, Deserialize)]
 struct RedirectBrowserArgs {
-    path: PathBuf
+    path: Rc<PathBuf>,
 }
 
 impl FileBrowser {
-    pub fn redirect_browser(path: PathBuf) {
+    pub fn redirect_browser(path: Rc<PathBuf>) {
         let args = RedirectBrowserArgs {
             path
         };
@@ -29,11 +30,11 @@ impl FileBrowser {
         });
     }
 
-    pub fn read_current_dir_into(path: UseStateHandle<PathBuf>, entries: UseStateHandle<Vec<FileEntry>>) {
+    pub fn read_current_dir_into(path: UseStateHandle<Rc<PathBuf>>, entries: UseStateHandle<Vec<FileEntry>>) {
         spawn_local(async move {
             let current_dir = invoke("read_current_dir", JsValue::null()).await;
             let (new_path, new_entries) =
-                serde_wasm_bindgen::from_value::<(PathBuf, Vec<FileEntry>)>(current_dir).unwrap();
+                serde_wasm_bindgen::from_value::<(Rc<PathBuf>, Vec<FileEntry>)>(current_dir).unwrap();
 
             path.set(new_path);
             entries.set(new_entries);
