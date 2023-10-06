@@ -4,6 +4,7 @@ use crate::components::mod_list::ModList;
 use crate::components::file_explorer::FileExplorer;
 use crate::components::top_bar::TopBar;
 use crate::components::bottom_bar::BottomBar;
+use crate::components::console::Console;
 use models::Mod;
 
 
@@ -25,6 +26,7 @@ pub fn app() -> Html {
     ]));
 
     let file_explorer_open = use_state(|| false);
+    let console_open = use_state(|| false);
     let selected_mod: UseStateHandle<Option<usize>> = use_state(|| None);
 
     html! {
@@ -40,7 +42,10 @@ pub fn app() -> Html {
                     mods={(*mods).clone()}
                     selected_mod={selected_mod.clone()} />
             }
-            <BottomBar />
+            if *console_open {
+                <Console />
+            }
+            <BottomBar console_open={console_open} />
         </div>
     }
 }

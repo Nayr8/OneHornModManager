@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use circular_buffer::CircularBuffer;
 use spin::{Mutex, MutexGuard};
 use models::{EntryType, FileBrowserRedirectError, FileEntry};
@@ -111,8 +112,8 @@ impl FileBrowser {
         if meta.is_dir() {
             return Some(FileEntry {
                 entry_type: EntryType::Directory,
-                path,
-                file_name,
+                path: Rc::new(path), // TODO decide whether to use Rc or have a different model in each side
+                file_name: Rc::new(file_name),
             });
         }
         if meta.is_file() {
@@ -120,8 +121,8 @@ impl FileBrowser {
             if file_name.ends_with(".pak") {
                 return Some(FileEntry {
                     entry_type: EntryType::File,
-                    path,
-                    file_name,
+                    path: Rc::new(path),
+                    file_name: Rc::new(file_name),
                 });
             }
             return None;
@@ -136,7 +137,7 @@ impl FileBrowser {
         match Self::resolve_symlink(&path) {
             Ok(path) => {
                 let mut entry = Self::decode_entry(path)?;
-                entry.file_name = file_name;
+                entry.file_name = file_name.into();
                 Some(entry)
             },
             Err(e) => {

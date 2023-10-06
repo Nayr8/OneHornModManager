@@ -8,11 +8,12 @@ html, body {
 
 .app {
     display: grid;
-    grid-template-areas: "top   "
-                         "main  "
-                         "bottom";
+    grid-template-areas: "top    "
+                         "main   "
+                         "bottom "
+                         "console";
     grid-template-columns: auto;
-    grid-template-rows: 3em 1fr 3em;
+    grid-template-rows: 3em 1fr 3em auto;
     height: 100%;
 
     overflow: hidden;

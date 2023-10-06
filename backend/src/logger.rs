@@ -1,10 +1,9 @@
 use std::backtrace::Backtrace;
-use std::fmt::{Display, Formatter};
 use std::fs::OpenOptions;
 use std::io::Write;
-use chrono::{DateTime, Local};
+use chrono::Local;
 use spin::Mutex;
-use models::LogSeverity;
+use models::{LogLine, LogSeverity};
 
 static LOGGER: Mutex<Logger> = Mutex::new(Logger::new());
 
@@ -45,6 +44,11 @@ pub fn log_error(message: String) {
     Logger::log_error(message)
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub fn get_log_messages() -> Vec<LogLine> {
+    LOGGER.lock().log_lines.clone()
+}
+
 pub(crate) struct Logger {
     log_lines: Vec<LogLine>,
 }
@@ -70,7 +74,7 @@ impl Logger {
         let timestamp = Local::now();
         let log_line = LogLine {
             severity,
-            timestamp,
+            timestamp: timestamp.timestamp(),
             message: message.to_string(),
         };
 
@@ -117,20 +121,5 @@ impl Logger {
 impl Default for Logger {
     fn default() -> Self {
         Logger::new()
-    }
-}
-
-struct LogLine {
-    severity: LogSeverity,
-    timestamp: DateTime<Local>,
-    message: String,
-}
-
-impl Display for LogLine {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let timestamp = self.timestamp.format("%Y-%m-%d %H:%M:%S");
-        let severity = &self.severity;
-        let message = &self.message;
-        write!(f, "[{timestamp}] [{severity}]: {message}")
     }
 }

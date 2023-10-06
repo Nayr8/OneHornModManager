@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
+use yew::UseStateHandle;
+use models::LogLine;
 use crate::invoke;
 
 
@@ -28,6 +30,14 @@ struct LogArgs {
 pub(crate) struct Logger;
 #[allow(dead_code)]
 impl Logger {
+    pub fn read_logs_into(log_lines: UseStateHandle<Vec<LogLine>>) {
+        spawn_local(async move {
+            let messages = invoke("get_log_messages", JsValue::null()).await;
+            let messages = serde_wasm_bindgen::from_value::<Vec<LogLine>>(messages).unwrap();
+            log_lines.set(messages);
+        });
+    }
+
     pub fn log_info(message: impl ToString) {
         let args = Self::build_args(message);
         spawn_local(async move {

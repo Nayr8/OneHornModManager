@@ -1,0 +1,25 @@
+.console {
+  background: var(--console);
+  height: 10em;
+  overflow: scroll;
+
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+
+  display: flex;
+  flex-direction: column-reverse;
+
+  border: solid var(--border);
+}
+
+.console-info {
+  color: var(--console-info);
+}
+
+.console-warning {
+  color: var(--console-warning);
+}
+
+.console-error {
+  color: var(--console-error);
+}
