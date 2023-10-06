@@ -110,7 +110,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
     match props.entry.entry_type {
         EntryType::File => if is_selected {
             html! {
-                <div class="element element-button element-thin element-selected file" onclick={select_file}>
+                <div class="element element-button-thin-selected file" onclick={select_file}>
                     <div>{"FILE"}</div>
                     <div>
                         { &props.entry.file_name }
@@ -119,7 +119,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
             }
         } else {
             html! {
-                <div class="element element-button element-thin file" onclick={select_file}>
+                <div class="element element-button-thin file" onclick={select_file}>
                     <div>{"FILE"}</div>
                     <div>
                         { &props.entry.file_name }
@@ -128,7 +128,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
             }
         },
         EntryType::Directory => html! {
-            <div class="element element-button element-thin file dir" onclick={navigate_to}>
+            <div class="element element-button-thin file dir" onclick={navigate_to}>
                 <div>{"DIR"}</div>
                 <div>
                     { &props.entry.file_name }

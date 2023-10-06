@@ -19,14 +19,14 @@ pub fn top_bar(props: &TopBarProps) -> Html {
     html! {
         <div class="top-bar">
             if *props.file_explorer_open {
-                <div class="element element-button" onclick={toggle_file_explorer}>{"Back to Mod List"}</div>
+                <div class="element-button" onclick={toggle_file_explorer}>{"Back to Mod List"}</div>
             } else {
-                <div class="element element-button" onclick={toggle_file_explorer}>{"Add Mod"}</div>
+                <div class="element-button" onclick={toggle_file_explorer}>{"Add Mod"}</div>
 
                 if let Some(_mod_index) = *props.selected_mod {
-                    <div class="element element-button">{"Remove Mod"}</div>
+                    <div class="element-button">{"Remove Mod"}</div>
                 } else {
-                    <div class="element element-disable">{"Remove Mod"}</div>
+                    <div class="element-disabled">{"Remove Mod"}</div>
                 }
             }
         </div>

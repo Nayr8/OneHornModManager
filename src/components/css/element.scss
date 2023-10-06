@@ -1,3 +1,5 @@
+
+
 .element {
   border-style: solid;
   border-radius: 0.3em;
@@ -12,22 +14,48 @@
 }
 
 .element-thin {
-  height: 1.2em
+  @extend .element;
+  height: 1.2em;
 }
 
-.element-disable {
+.element-disabled-thin {
+  @extend .element-thin;
+  @extend .element-disabled;
+}
+
+.element-button-thin {
+  @extend .element-button;
+  @extend .element-thin;
+}
+
+.element-button-thin-selected {
+  @extend .element-button-thin;
+  @extend .element-selected;
+}
+
+.element-button {
+  @extend .element;
+  &:hover {
+    background: var(--hovered-option);
+    cursor: pointer;
+  }
+}
+
+.element-disabled {
+  @extend .element;
   background: var(--top-bar);
+  color: var(--text-disabled);
+  &:hover {
+    cursor: default;
+  }
 }
 
-.element-selected {
+.element-button-selected {
+  @extend .element-button;
   background: var(--selected-option);
 }
 
-.element-disable:hover {
-  cursor: default;
-}
-
-.element-button:hover {
-  background: var(--hovered-option);
-  cursor: pointer;
+.element-selected {
+  @extend .element;
+  background: var(--selected-option);
 }
