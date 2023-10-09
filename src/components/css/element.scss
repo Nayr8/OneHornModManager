@@ -9,6 +9,10 @@
 
   align-self: center;
 
+  white-space: nowrap;
+  overflow-x: scroll;
+  overflow-y: hidden;
+
   border-color: var(--border);
   background: var(--unselected-option);
 }
