@@ -7,10 +7,11 @@ use location::FileExplorerLocation;
 use files::Files;
 use current_file::CurrentFile;
 use file_nav::FileNav;
-
+use add_new_mod::AddNewModMenu;
 mod location;
 mod files;
 mod current_file;
+mod add_new_mod;
 mod file_nav;
 
 #[derive(Properties, PartialEq)]
@@ -30,7 +31,14 @@ pub fn file_explorer(_props: &FileExplorerProps) -> Html {
 
     let current_directory_str = current_path.to_string_lossy().to_string();
 
-    html! {
+    let add_mod_menu = use_state(|| false);
+
+    if *add_mod_menu {
+        html! {
+            <AddNewModMenu current_file={current_file.clone()} />
+        }
+    } else {
+        html! {
         <div class="file-explorer">
             <FileNav />
             <FileExplorerLocation current_directory={current_directory_str} />
@@ -38,7 +46,12 @@ pub fn file_explorer(_props: &FileExplorerProps) -> Html {
                 current_path={current_path.clone()}
                 current_entries={current_entries.clone()}
                 current_file={current_file.clone()} />
-            <CurrentFile current_file={current_file.clone()} />
+            <CurrentFile
+                current_file={current_file.clone()}
+                add_mod_menu={add_mod_menu.clone()} />
         </div>
+        }
     }
+
+
 }

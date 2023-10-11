@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
 pub struct FileEntry {
     pub entry_type: EntryType,
     pub path: Rc<PathBuf>,
