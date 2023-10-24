@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
-use models::{FileBrowserRedirectError, FileEntry};
+use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod};
 use crate::{error, invoke};
 
 
@@ -38,6 +38,34 @@ impl FileBrowser {
 
             path.set(new_path);
             entries.set(new_entries);
+        });
+    }
+}
+
+pub struct ModManager;
+
+#[derive(Serialize)]
+struct GetModDetailsArgs {
+    file_path: Rc<PathBuf>,
+}
+
+impl ModManager {
+    pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Option<Rc<Mod>>>) {
+        let args = GetModDetailsArgs {
+            file_path: current_file
+        };
+
+        spawn_local(async move {
+            let details_result = invoke("get_mod_details", serde_wasm_bindgen::to_value(&args).unwrap()).await;
+
+
+
+            let details =
+                serde_wasm_bindgen::from_value::<MMResult<Rc<Mod>, ()>>(details_result).unwrap();
+
+            if let MMResult::Ok(details) = details {
+                mod_details.set(Some(details));
+            }
         });
     }
 }

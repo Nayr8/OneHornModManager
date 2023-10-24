@@ -13,3 +13,19 @@ pub struct Mod {
     pub name: String,
     pub description: String,
 }
+
+// This is needed because of the awkward way results are handled in the translation from tauri -> js -> yew
+#[derive(Serialize, Deserialize)]
+pub enum MMResult<OK, ERR> {
+    Ok(OK),
+    Err(ERR)
+}
+
+impl<OK, ERR> From<Result<OK, ERR>> for MMResult<OK, ERR> {
+    fn from(value: Result<OK, ERR>) -> Self {
+        match value {
+            Ok(ok) => MMResult::Ok(ok),
+            Err(err) => MMResult::Err(err),
+        }
+    }
+}

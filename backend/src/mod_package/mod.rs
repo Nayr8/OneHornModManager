@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use spin::Mutex;
 
 use models::UnpackingFileError::*;
+use crate::{info};
 
 
 #[derive(Debug)]
@@ -56,6 +57,7 @@ impl TryFrom<FileEntry> for Option<PackagedFileInfo> {
     fn try_from(entry: FileEntry) -> Result<Self, Self::Error> {
 
         let name = PackagedFileInfo::create_string_from_entry(&entry)?;
+        info!("{name}");
         if !name.ends_with("meta.lsx") {
             return Ok(None);
         }
@@ -87,6 +89,7 @@ impl ModPackage {
             return Err(InvalidFileSignature);
         }
         let header = PackageHeader::read(&mut file)?;
+        info!("{header:?}");
 
         Ok(ModPackage {
             file_info: Self::read_file_list(&mut file, &header)?,
@@ -95,16 +98,20 @@ impl ModPackage {
     }
 
     fn read_file_list(file: &mut File, header: &PackageHeader) -> Result<Vec<PackagedFileInfo>, UnpackingFileError> {
+        info!("0");
         file.seek(SeekFrom::Start(header.file_list_offset as u64)).map_err(|_| InvalidFileList)?;
 
         let number_of_files = file.read_u32::<LE>().map_err(|_| InvalidFileList)? as usize;
         let compressed_size = file.read_u32::<LE>().map_err(|_| InvalidFileList)? as usize;
+        info!("1 filecount {}", number_of_files);
 
         let mut compressed_file_list = vec![0_u8; compressed_size];
         file.read_exact(&mut compressed_file_list).map_err(|_| InvalidFileList)?;
+        info!("2");
 
         const FILE_ENTRY_SIZE: usize = 274;
         let file_buffer_size = FILE_ENTRY_SIZE * number_of_files;
+        info!("3");
 
         let uncompressed_list = match lz4_flex::decompress(compressed_file_list.as_slice(), file_buffer_size) {
             Ok(uncompressed_list) => if uncompressed_list.len() != file_buffer_size {
@@ -114,9 +121,11 @@ impl ModPackage {
             },
             Err(_) => return Err(InvalidFileList),
         };
+        info!("4");
 
         let mut file_infos: Vec<PackagedFileInfo> = Vec::with_capacity(number_of_files);
         let mut list_reader = Cursor::new(uncompressed_list);
+        info!("5");
         for _ in 0..number_of_files {
             if let Some(file_entry) = FileEntry::read(&mut list_reader)? {
                 if let Some(packaged_file_info) = Option::<PackagedFileInfo>::try_from(file_entry)? {
@@ -142,26 +151,31 @@ impl ModPackage {
     }
 
     pub fn read_package_meta(&self) -> Result<ModMeta, UnpackingFileError> { // TODO add option to specify the file in mods to use for packages with multiple meta files like gustav
+        info!("A {}", self.file_info.len());
         let meta_file_info = self.file_info.iter().find(|file_info| {
             regex::Regex::new("^Mods/[^/]+/meta.lsx$")
                 .expect("Meta data regex is invalid").is_match(file_info.name())
         }).ok_or(MissingMetaData)?;
+        info!("B");
 
         let meta_file = String::from_utf8(self.read_file(meta_file_info)?)
             .map_err(|_| MetaDataInvalidUtf8)?;
+        info!("C");
 
         let meta_xml = roxmltree::Document::parse(&meta_file)
             .map_err(|_| MetaDataNotXml)?;
+        info!("D");
 
         let module_info = meta_xml.descendants().find(|n| {
             n.attribute("id") == Some("ModuleInfo")
         }).ok_or(MetaDataMissingModuleInfo)?;
+        info!("E");
 
         ModMeta::new(module_info)
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ModInfoNode {
     pub value_type: String,
     pub value: String,
@@ -176,7 +190,7 @@ impl ModInfoNode {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ModMeta {
     pub name: ModInfoNode,
     pub description: ModInfoNode,
@@ -191,11 +205,19 @@ impl ModMeta {
         let name = Self::read_property(&module_info, "Name")?;
         let folder = Self::read_property(&module_info, "Folder")?;
         let uuid = Self::read_property(&module_info, "UUID")?;
-        let md5 = Self::read_property(&module_info, "MD5")?;
-        let version64 = Self::read_property(&module_info, "Version64")?;
+        let md5 = Self::read_property(&module_info, "MD5")
+            .unwrap_or(ModInfoNode {
+                value_type: String::from("LSString"),
+                value: String::new(),
+            });
+        let version64 = Self::read_property(&module_info, "Version64")
+            .unwrap_or(ModInfoNode {
+                value_type: String::from("int64"),
+                value: String::from("36028797018963968"),
+            });
         let description = Self::read_property(&module_info, "Description")
             .unwrap_or(ModInfoNode {
-                value_type:  String::from("LSString"),
+                value_type: String::from("LSString"),
                 value: String::new(),
             });
 
@@ -217,6 +239,7 @@ impl ModMeta {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 struct PackageHeader {
     version: u32,
     file_list_offset: usize,
@@ -268,6 +291,7 @@ impl FileEntry {
         let mut name = [0_u8; 256];
         cursor.read_exact(&mut name).map_err(|_| InvalidFileList)?;
         if &name[0..4] != b"Mods" {
+            info!("start: {}", std::str::from_utf8(&name[0..4]).unwrap_or(""));
             return Ok(None);
         }
 
