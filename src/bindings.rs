@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
-use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod};
+use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod, ModDetailsError};
 use crate::{error, invoke};
 
 
@@ -50,7 +50,7 @@ struct GetModDetailsArgs {
 }
 
 impl ModManager {
-    pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Option<Rc<Mod>>>) {
+    pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Option<Rc<Mod>>>, mod_details_error: UseStateHandle<Option<ModDetailsError>>) {
         let args = GetModDetailsArgs {
             file_path: current_file
         };
@@ -58,13 +58,12 @@ impl ModManager {
         spawn_local(async move {
             let details_result = invoke("get_mod_details", serde_wasm_bindgen::to_value(&args).unwrap()).await;
 
-
-
             let details =
-                serde_wasm_bindgen::from_value::<MMResult<Rc<Mod>, ()>>(details_result).unwrap();
+                serde_wasm_bindgen::from_value::<MMResult<Rc<Mod>, ModDetailsError>>(details_result).unwrap();
 
-            if let MMResult::Ok(details) = details {
-                mod_details.set(Some(details));
+            match details {
+                MMResult::Ok(details) => mod_details.set(Some(details)),
+                MMResult::Err(error) => mod_details_error.set(Some(error)),
             }
         });
     }

@@ -42,3 +42,14 @@ pub enum SaveStateError {
 pub enum FileBrowserRedirectError {
     PathDoesNotLeadToDir
 }
+
+
+
+
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Copy, Clone)]
+pub enum ModDetailsError {
+    FilePathDoesNotLeadToValidFile,
+    CannotUnpackPackageFile,
+    CannotReadPackageMeta,
+}

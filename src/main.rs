@@ -13,8 +13,5 @@ extern "C" {
 }
 
 fn main() {
-    info!("Info Test");
-    warn!("Warning Test");
-    error!("Error Test");
     yew::Renderer::<App>::new().render();
 }

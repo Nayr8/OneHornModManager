@@ -6,7 +6,6 @@ use std::rc::Rc;
 use circular_buffer::CircularBuffer;
 use spin::{Mutex, MutexGuard};
 use models::{EntryType, FileBrowserRedirectError, FileEntry};
-use crate::extensions::*;
 use crate::warn;
 
 static FILE_BROWSER: Mutex<FileBrowser> = Mutex::new(FileBrowser {
@@ -96,18 +95,26 @@ impl FileBrowser {
             return None;
         }
 
-        let meta = fs::metadata(&path).on_err(|e| {
-            let path = path.display();
-            warn!("Cannot determine entry type of {path}: {e}");
-        }).ok()?;
+        let meta = match fs::metadata(&path) {
+            Ok(meta) => meta,
+            Err(error) => {
+                let path = path.display();
+                warn!("Cannot determine entry type of {path}: {error}");
+                return None;
+            }
+        };
 
-        let file_name = path.file_name().on_none(|| {
-            let path = path.display();
-            warn!("Could not find filename from path {path}");
-        }).map(|file_name| {
-            let file_name = file_name.to_string_lossy();
-            format!("{file_name}")
-        })?;
+        let file_name = match path.file_name() {
+            Some(file_name) => {
+                let file_name = file_name.to_string_lossy();
+                format!("{file_name}")
+            }
+            None => {
+                let path = path.display();
+                warn!("Could not find filename from path {path}");
+                return None;
+            }
+        };
 
         if meta.is_dir() {
             return Some(FileEntry {

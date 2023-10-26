@@ -20,6 +20,8 @@ fn main() {
     State::load();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            logger::log_trace,
+            logger::log_debug,
             logger::log_info,
             logger::log_warn,
             logger::log_error,

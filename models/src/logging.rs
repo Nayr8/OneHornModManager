@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Copy, Clone)]
 pub enum LogSeverity {
+    Trace,
+    Debug,
     Info,
     Warn,
     Error,
@@ -13,6 +15,8 @@ pub enum LogSeverity {
 impl Display for LogSeverity {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
+            LogSeverity::Trace => "Trace",
+            LogSeverity::Debug => "Debug",
             LogSeverity::Info => "Info",
             LogSeverity::Warn => "Warn",
             LogSeverity::Error => "Error",

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use spin::Mutex;
 
 use models::UnpackingFileError::*;
-use crate::{info};
+use crate::{debug, error, trace};
 
 
 #[derive(Debug)]
@@ -57,7 +57,6 @@ impl TryFrom<FileEntry> for Option<PackagedFileInfo> {
     fn try_from(entry: FileEntry) -> Result<Self, Self::Error> {
 
         let name = PackagedFileInfo::create_string_from_entry(&entry)?;
-        info!("{name}");
         if !name.ends_with("meta.lsx") {
             return Ok(None);
         }
@@ -85,34 +84,61 @@ impl ModPackage {
     const SIGNATURE: u32 = 0x4B50534C;
 
     pub fn new(mut file: File) -> Result<ModPackage, UnpackingFileError> {
-        if file.read_u32::<LE>().map_err(|_| InvalidFileSignature)? != Self::SIGNATURE{
+        debug!("Reading meta from package");
+        trace!("Checking that file signature is 0x{:X}", Self::SIGNATURE);
+        let signature = file.read_u32::<LE>().map_err(|_| {
+            error!("Package signature exceeds end of file");
+            InvalidFileSignature
+        })?;
+        if signature != Self::SIGNATURE{
+            error!("Signature 0x{signature:X} is invaild");
             return Err(InvalidFileSignature);
         }
-        let header = PackageHeader::read(&mut file)?;
-        info!("{header:?}");
+
+        let header = match PackageHeader::read(&mut file) {
+            Ok(header) => header,
+            Err(error) => {
+                error!("Package header exceeds end of file");
+                return Err(error);
+            }
+        };
+
+
+        if header.version != 18 {
+            error!("Unsupported package version: {}", header.version);
+            return Err(UnsupportedPackageVersion {
+                version: header.version
+            })
+        }
 
         Ok(ModPackage {
-            file_info: Self::read_file_list(&mut file, &header)?,
+            file_info: match Self::read_file_list(&mut file, &header) {
+                Ok(file_info) => file_info,
+                Err(error) => {
+                    error!("Could not read file list: {error:?}");
+                    return Err(error);
+                }
+            },
             file: Mutex::new(file),
         })
     }
 
     fn read_file_list(file: &mut File, header: &PackageHeader) -> Result<Vec<PackagedFileInfo>, UnpackingFileError> {
-        info!("0");
+        debug!("Reading package file list");
         file.seek(SeekFrom::Start(header.file_list_offset as u64)).map_err(|_| InvalidFileList)?;
 
         let number_of_files = file.read_u32::<LE>().map_err(|_| InvalidFileList)? as usize;
+        trace!("{number_of_files} files found in package");
         let compressed_size = file.read_u32::<LE>().map_err(|_| InvalidFileList)? as usize;
-        info!("1 filecount {}", number_of_files);
+        trace!("File list compressed size: {compressed_size}");
 
         let mut compressed_file_list = vec![0_u8; compressed_size];
         file.read_exact(&mut compressed_file_list).map_err(|_| InvalidFileList)?;
-        info!("2");
 
         const FILE_ENTRY_SIZE: usize = 274;
         let file_buffer_size = FILE_ENTRY_SIZE * number_of_files;
-        info!("3");
 
+        trace!("Decompressing file list");
         let uncompressed_list = match lz4_flex::decompress(compressed_file_list.as_slice(), file_buffer_size) {
             Ok(uncompressed_list) => if uncompressed_list.len() != file_buffer_size {
                 uncompressed_list
@@ -121,17 +147,36 @@ impl ModPackage {
             },
             Err(_) => return Err(InvalidFileList),
         };
-        info!("4");
 
         let mut file_infos: Vec<PackagedFileInfo> = Vec::with_capacity(number_of_files);
         let mut list_reader = Cursor::new(uncompressed_list);
-        info!("5");
+
+        trace!("Searching for meta files");
         for _ in 0..number_of_files {
             if let Some(file_entry) = FileEntry::read(&mut list_reader)? {
                 if let Some(packaged_file_info) = Option::<PackagedFileInfo>::try_from(file_entry)? {
                     file_infos.push(packaged_file_info);
                 }
             }
+        }
+        match file_infos.len() {
+            0 => {
+                error!("Could not find a meta file ");
+                return Err(MissingMetaData);
+            },
+            1 => debug!("1 metadata file found: {}", file_infos[0].name),
+            meta_file_count => {
+                let mut found_meta_files = String::new();
+                found_meta_files.push('[');
+                for i in 0..meta_file_count - 1 {
+                    found_meta_files.push_str(&file_infos[i].name);
+                    found_meta_files.push(',');
+                    found_meta_files.push(' ');
+                }
+                found_meta_files.push_str(&file_infos[meta_file_count - 1].name);
+                found_meta_files.push(']');
+                debug!("{meta_file_count} metadata files found: {}", found_meta_files)
+            },
         }
 
         Ok(file_infos)
@@ -151,25 +196,36 @@ impl ModPackage {
     }
 
     pub fn read_package_meta(&self) -> Result<ModMeta, UnpackingFileError> { // TODO add option to specify the file in mods to use for packages with multiple meta files like gustav
-        info!("A {}", self.file_info.len());
-        let meta_file_info = self.file_info.iter().find(|file_info| {
+        debug!("Searching for first meta.lsx");
+        let meta_file_info = match self.file_info.iter().find(|file_info| {
             regex::Regex::new("^Mods/[^/]+/meta.lsx$")
                 .expect("Meta data regex is invalid").is_match(file_info.name())
-        }).ok_or(MissingMetaData)?;
-        info!("B");
+        }) {
+            Some(meta_file_info) => meta_file_info,
+            None => {
+                error!("Could not find a meta file");
+                return Err(MissingMetaData)
+            }
+        };
 
         let meta_file = String::from_utf8(self.read_file(meta_file_info)?)
-            .map_err(|_| MetaDataInvalidUtf8)?;
-        info!("C");
+            .map_err(|error| {
+                error!("Metafile invalid UTF-8: {error:?}");
+                MetaDataInvalidUtf8
+            })?;
 
         let meta_xml = roxmltree::Document::parse(&meta_file)
-            .map_err(|_| MetaDataNotXml)?;
-        info!("D");
+            .map_err(|error| {
+                error!("Metafile invalid XML: {error:?}");
+                MetaDataNotXml
+            })?;
 
         let module_info = meta_xml.descendants().find(|n| {
             n.attribute("id") == Some("ModuleInfo")
-        }).ok_or(MetaDataMissingModuleInfo)?;
-        info!("E");
+        }).ok_or({
+            error!("Metadata missing ModuleInfo");
+            MetaDataMissingModuleInfo
+        })?;
 
         ModMeta::new(module_info)
     }
@@ -202,9 +258,27 @@ pub struct ModMeta {
 
 impl ModMeta {
     fn new(module_info: Node) -> Result<ModMeta, UnpackingFileError> {
-        let name = Self::read_property(&module_info, "Name")?;
-        let folder = Self::read_property(&module_info, "Folder")?;
-        let uuid = Self::read_property(&module_info, "UUID")?;
+        let name = match Self::read_property(&module_info, "Name") {
+            Ok(name) => name,
+            Err(error) => {
+                error!("Meta missing mod name");
+                return Err(error);
+            }
+        };
+        let folder = match Self::read_property(&module_info, "Folder") {
+            Ok(name) => name,
+            Err(error) => {
+                error!("Meta missing mod name");
+                return Err(error);
+            }
+        };
+        let uuid = match Self::read_property(&module_info, "UUID") {
+            Ok(name) => name,
+            Err(error) => {
+                error!("Meta missing mod name");
+                return Err(error);
+            }
+        };
         let md5 = Self::read_property(&module_info, "MD5")
             .unwrap_or(ModInfoNode {
                 value_type: String::from("LSString"),
@@ -252,6 +326,7 @@ struct PackageHeader {
 
 impl PackageHeader {
     fn read(file: &mut File) -> Result<PackageHeader, UnpackingFileError> {
+        debug!("Reading package header");
         const HEADER_START: u64 = 4;
         file.seek(SeekFrom::Start(HEADER_START)).map_err(|_| InvalidHeader)?;
 
@@ -291,7 +366,6 @@ impl FileEntry {
         let mut name = [0_u8; 256];
         cursor.read_exact(&mut name).map_err(|_| InvalidFileList)?;
         if &name[0..4] != b"Mods" {
-            info!("start: {}", std::str::from_utf8(&name[0..4]).unwrap_or(""));
             return Ok(None);
         }
 

@@ -4,7 +4,7 @@ use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
-use log::{error, info};
+use crate::{error, info};
 use models::{AddModError, Mod, RemoveModError, SaveStateError};
 use models::AddModError::InvalidFilePath;
 use crate::mod_package::{ModMeta, ModPackage};

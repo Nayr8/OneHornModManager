@@ -1,53 +1,65 @@
 use std::fs::File;
-use std::path::PathBuf;
-use log::error;
-use models::{MMResult, Mod};
-use crate::mod_package::ModPackage;
+use std::path::{Path, PathBuf};
+use spin::Mutex;
+use models::{MMResult, Mod, ModDetailsError};
+use crate::extensions::HasExtension;
+use crate::{debug, error, info, trace};
+use crate::mod_package::{ModMeta, ModPackage};
+
+static CURRENT_MOD_META: Mutex<Option<(PathBuf, ModMeta)>> = Mutex::new(None);
 
 #[tauri::command(rename_all = "snake_case")]
-pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ()> {
+pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
+    info!("Fetching mod details");
 
-    if let Some(extension) = file_path.extension() {
-        let extension = extension.to_string_lossy();
-        if extension.as_ref() != "pak" {
-            return MMResult::Err(());
-        }
-    } else {
-        return MMResult::Err(());
+    if !file_path.has_extension("pak") {
+        error!("File {file_path:?} is not a pak file");
+        return MMResult::Err(ModDetailsError::FilePathDoesNotLeadToValidFile)
     }
 
-    let file = match File::open(file_path) {
-        Ok(file) => {
-            file
-        },
-        Err(error) => {
-            error!("Not a file: {error:?}");
-            return MMResult::Err(());
+    trace!("Checking cache for the meta data for this package");
+    let mut current_mod_meta = CURRENT_MOD_META.lock();
+    if let Some((path, meta)) = current_mod_meta.as_ref() {
+        if *path == file_path {
+            debug!("Retrieved meta from cache");
+            let details = Mod {
+                name: meta.name.value.clone(),
+                description: meta.description.value.clone(),
+            };
+            info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
+            return MMResult::Ok(details)
         }
+    }
+
+    let meta = match get_mod_meta(&file_path) {
+        Ok(meta) => meta,
+        Err(error) => return MMResult::Err(error)
     };
 
-    get_mod_details_inner(file).into()
+    let details = Mod {
+        name: meta.name.value.clone(),
+        description: meta.description.value.clone(),
+    };
+
+    *current_mod_meta = Some((file_path, meta));
+
+    info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
+    MMResult::Ok(details)
 }
 
-fn get_mod_details_inner(file: File) -> Result<Mod, ()> {
-    let package = match ModPackage::new(file) {
-        Ok(package) => package,
-        Err(error) => {
-            error!("Cannot unpack file: {:?}", error);
-            return Err(())
-        }
-    };
+fn get_mod_meta(file_path: &Path) -> Result<ModMeta, ModDetailsError> {
+    trace!("Attempting to retrieve meta data from path: {file_path:?}");
+    let file = File::open(file_path).map_err(|error| {
+        error!("Not a file: {error:?}");
+        ModDetailsError::FilePathDoesNotLeadToValidFile
+    })?;
+    trace!("Successfully opened file: {file_path:?}");
 
-    let meta = match package.read_package_meta() {
-        Ok(meta) => meta,
-        Err(error) => {
-            error!("Cannot read package meta: {:?}", error);
-            return Err(())
-        }
-    };
-
-    Ok(Mod {
-        name: meta.name.value,
-        description: meta.description.value,
+    ModPackage::new(file).map_err(|error| {
+        error!("Cannot unpack file: {:?}", error);
+        ModDetailsError::CannotUnpackPackageFile
+    })?.read_package_meta().map_err(|error| {
+        error!("Cannot read package meta: {:?}", error);
+        ModDetailsError::CannotReadPackageMeta
     })
 }
