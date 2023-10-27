@@ -50,6 +50,15 @@ struct GetModDetailsArgs {
 }
 
 impl ModManager {
+    pub fn get_mods(mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
+        spawn_local(async move {
+            let fetched_mods = invoke("get_mods", JsValue::null()).await;
+
+            let fetched_mods = serde_wasm_bindgen::from_value::<Rc<Vec<Mod>>>(fetched_mods).unwrap();
+
+            mods.set(Some(fetched_mods));
+        });
+    }
     pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Option<Rc<Mod>>>, mod_details_error: UseStateHandle<Option<ModDetailsError>>) {
         let args = GetModDetailsArgs {
             file_path: current_file

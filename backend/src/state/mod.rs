@@ -12,7 +12,22 @@ use crate::mod_settings_builder::ModSettingsBuilder;
 
 static STATE: Mutex<State> = Mutex::new(State::new());
 
-// TODO logging at some point
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn get_mods() -> Vec<Mod> {
+    let state = State::get();
+
+    let mut mods = Vec::with_capacity(state.mods.len());
+
+    for (meta, _file_name) in &state.mods {
+        mods.push(Mod {
+            name: meta.name.value.clone(),
+            description: meta.description.value.clone(),
+        });
+    }
+
+    mods
+}
 
 const STEAM_APPS: &'static str = "/home/ryan/.steam/steam/steamapps";
 // compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3

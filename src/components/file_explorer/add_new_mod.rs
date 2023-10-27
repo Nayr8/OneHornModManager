@@ -20,8 +20,10 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
     }, (props.current_file.deref().clone().unwrap(), details.clone(), details_error.clone()));
 
     let close_mod_menu = {
+        let current_file = props.current_file.clone();
         let add_mod_menu = props.add_mod_menu.clone();
         move |_: MouseEvent| {
+            current_file.set(None);
             add_mod_menu.set(false);
         }
     };

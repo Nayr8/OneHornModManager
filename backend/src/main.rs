@@ -28,7 +28,8 @@ fn main() {
             logger::get_log_messages,
             file_browser::read_current_dir,
             file_browser::redirect_browser,
-            mod_details::get_mod_details
+            mod_details::get_mod_details,
+            state::get_mods,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -36,7 +36,7 @@ pub fn button(props: &ButtonProps) -> Html {
     if let Some(onclick) = &props.onclick {
         if !props.disabled {
             return html! {
-                <div class={classes!(class, props.class.clone())} onclick={onclick}>
+                <div class={classes!(class, props.class.clone())} style={props.style.clone()} onclick={onclick}>
                     {props.children.clone()}
                 </div>
             };

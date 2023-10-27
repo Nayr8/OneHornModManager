@@ -10,20 +10,7 @@ use models::Mod;
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let mods: UseStateHandle<Rc<Vec<Mod>>> = use_state(|| Rc::new(vec![
-        Mod {
-            name: String::from("The Test Mod"),
-            description: String::from("The Test mod for testing things")
-        },
-        Mod {
-            name: String::from("The Test Mod 2"),
-            description: String::from("The second Test mod for testing things")
-        },
-        Mod {
-            name: String::from("The Test Mod 3"),
-            description: String::from("The third Test mod for testing things")
-        },
-    ]));
+    let mods: UseStateHandle<Option<Rc<Vec<Mod>>>> = use_state(|| None);
 
     let file_explorer_open = use_state(|| false);
     let console_open = use_state(|| false);
@@ -39,8 +26,9 @@ pub fn app() -> Html {
                     file_explorer_open={file_explorer_open.clone()} />
             } else {
                 <ModList
-                    mods={(*mods).clone()}
-                    selected_mod={selected_mod.clone()} />
+                    mods={mods.clone()}
+                    selected_mod={selected_mod.clone()}
+                    file_explorer_open={file_explorer_open.clone()} />
             }
             if *console_open {
                 <Console />
