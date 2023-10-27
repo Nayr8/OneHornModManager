@@ -9,6 +9,7 @@ use crate::components::Button;
 pub struct AddNewModMenuProps {
     pub current_file: UseStateHandle<Option<FileEntry>>,
     pub add_mod_menu: UseStateHandle<bool>,
+    pub file_explorer_open: UseStateHandle<bool>,
 }
 #[function_component(AddNewModMenu)]
 pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
@@ -28,6 +29,18 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
         }
     };
 
+    let add_mod = {
+        let current_file = props.current_file.clone();
+        let add_mod_menu = props.add_mod_menu.clone();
+        let file_explorer_open = props.file_explorer_open.clone();
+        move |_: MouseEvent| {
+            ModManager::add_mod();
+            current_file.set(None);
+            add_mod_menu.set(false);
+            file_explorer_open.set(false);
+        }
+    };
+
     match details_error.as_ref() {
         Some(error) => html! {
             <div style="margin: auto;text-align: center">
@@ -42,8 +55,8 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
                 <div style="font-size: 2.5em">{format!("{}", details.name)}</div>
                 <div>{format!("{}", details.description)}</div>
                 <div style="font-size: 1.5em;margin-top: 2em;display: flex;justify-content: center">
-                    <Button onclick={close_mod_menu}  style="width: min-content">{"Back"}</Button>
-                    <Button style="width: min-content">{"Add mod"}</Button>
+                    <Button onclick={close_mod_menu} style="width: min-content">{"Back"}</Button>
+                    <Button onclick={add_mod} style="width: min-content">{"Add mod"}</Button>
                 </div>
             </div>
             },

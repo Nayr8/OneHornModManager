@@ -11,7 +11,6 @@ mod mod_settings_builder;
 mod logger;
 mod file_browser;
 mod extensions;
-mod mod_details;
 
 
 fn main() {
@@ -28,8 +27,9 @@ fn main() {
             logger::get_log_messages,
             file_browser::read_current_dir,
             file_browser::redirect_browser,
-            mod_details::get_mod_details,
+            state::get_mod_details,
             state::get_mods,
+            state::add_current_mod,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

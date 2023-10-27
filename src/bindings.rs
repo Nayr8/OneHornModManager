@@ -50,6 +50,11 @@ struct GetModDetailsArgs {
 }
 
 impl ModManager {
+    pub fn add_mod() {
+        spawn_local(async {
+            invoke("add_current_mod", JsValue::null()).await;
+        });
+    }
     pub fn get_mods(mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
         spawn_local(async move {
             let fetched_mods = invoke("get_mods", JsValue::null()).await;

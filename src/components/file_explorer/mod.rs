@@ -19,7 +19,7 @@ pub struct FileExplorerProps {
     pub file_explorer_open: UseStateHandle<bool>,
 }
 #[function_component(FileExplorer)]
-pub fn file_explorer(_props: &FileExplorerProps) -> Html {
+pub fn file_explorer(props: &FileExplorerProps) -> Html {
     let current_path = use_state(|| Rc::new(PathBuf::new()));
     let current_entries = use_state(|| Vec::<FileEntry>::new());
 
@@ -35,7 +35,7 @@ pub fn file_explorer(_props: &FileExplorerProps) -> Html {
 
     if *add_mod_menu {
         html! {
-            <AddNewModMenu current_file={current_file.clone()} add_mod_menu={add_mod_menu.clone()} />
+            <AddNewModMenu current_file={current_file.clone()} add_mod_menu={add_mod_menu.clone()} file_explorer_open={props.file_explorer_open.clone()} />
         }
     } else {
         html! {

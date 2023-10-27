@@ -1,14 +1,12 @@
-use std::fs::{File, OpenOptions};
-use std::io::{ErrorKind, Read, Write};
-use std::ops::Deref;
+use std::fs::File;
+use std::io::{ErrorKind, Read};
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
-use crate::{error, info};
-use models::{AddModError, Mod, RemoveModError, SaveStateError};
-use models::AddModError::InvalidFilePath;
+use models::{Mod, MMResult, ModDetailsError};
+use crate::{error, info, debug, trace};
 use crate::mod_package::{ModMeta, ModPackage};
-use crate::mod_settings_builder::ModSettingsBuilder;
+use crate::extensions::HasExtension;
 
 static STATE: Mutex<State> = Mutex::new(State::new());
 
@@ -29,11 +27,27 @@ pub fn get_mods() -> Vec<Mod> {
     mods
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub fn add_current_mod() {
+    let mut state = State::get();
+
+    let (path, meta) = match state.selected_new_mod_meta.take() {
+        Some(meta) => meta,
+        None => {
+            error!("No mod meta cached");
+            return; // TODO return and handle error
+        }
+    };
+
+    state.mods.push((meta, path.to_string_lossy().to_string()));
+}
+
 const STEAM_APPS: &'static str = "/home/ryan/.steam/steam/steamapps";
 // compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct State {
+    selected_new_mod_meta: Option<(PathBuf, ModMeta)>,
     mods: Vec<(ModMeta, String)>,
     gustav_dev_mod_meta: Option<ModMeta>,
 }
@@ -45,11 +59,12 @@ impl State {
 
     const fn new() -> State {
         State {
+            selected_new_mod_meta: None,
             mods: Vec::new(),
             gustav_dev_mod_meta: None,
         }
     }
-
+/*
     fn add_mod(&mut self, path: &str) -> Result<Vec<Mod>, AddModError> {
         let package_file = File::open(path)
             .map_err(|_| AddModError::CouldNotOpenModFile)?;
@@ -138,7 +153,7 @@ impl State {
         state_file.flush().map_err(|_| SaveStateError::CouldNotSaveToFile)?;
         info!("State saved successfully");
         Ok(())
-    }
+    }*/
 
     pub fn load() {
         info!("Attempting to load state");
@@ -186,6 +201,64 @@ impl State {
 }
 
 #[tauri::command(rename_all = "snake_case")]
+pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
+    info!("Fetching mod details");
+
+    if !file_path.has_extension("pak") {
+        error!("File {file_path:?} is not a pak file");
+        return MMResult::Err(ModDetailsError::FilePathDoesNotLeadToValidFile)
+    }
+
+    trace!("Checking cache for the meta data for this package");
+    let mut state = State::get();
+    if let Some((path, meta)) = state.selected_new_mod_meta.as_ref() {
+        if *path == file_path {
+            debug!("Retrieved meta from cache");
+            let details = Mod {
+                name: meta.name.value.clone(),
+                description: meta.description.value.clone(),
+            };
+            info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
+            return MMResult::Ok(details)
+        }
+    }
+
+    let meta = match get_mod_meta(&file_path) {
+        Ok(meta) => meta,
+        Err(error) => return MMResult::Err(error)
+    };
+
+    let details = Mod {
+        name: meta.name.value.clone(),
+        description: meta.description.value.clone(),
+    };
+
+    state.selected_new_mod_meta = Some((file_path, meta));
+
+    info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
+    MMResult::Ok(details)
+}
+
+fn get_mod_meta(file_path: &Path) -> Result<ModMeta, ModDetailsError> {
+    trace!("Attempting to retrieve meta data from path: {file_path:?}");
+    let file = File::open(file_path).map_err(|error| {
+        error!("Not a file: {error:?}");
+        ModDetailsError::FilePathDoesNotLeadToValidFile
+    })?;
+    trace!("Successfully opened file: {file_path:?}");
+
+    ModPackage::new(file).map_err(|error| {
+        error!("Cannot unpack file: {:?}", error);
+        ModDetailsError::CannotUnpackPackageFile
+    })?.read_package_meta().map_err(|error| {
+        error!("Cannot read package meta: {:?}", error);
+        ModDetailsError::CannotReadPackageMeta
+    })
+}
+
+
+/*
+#[tauri::command(rename_all = "snake_case")]
 pub(crate) fn add_mod(path: &str) -> Result<Vec<Mod>, AddModError> {
     info!("Adding mod '{path}'");
     State::get().add_mod(path).map(|mods| {
@@ -222,4 +295,4 @@ fn move_mod_file(path: &str) -> Result<String, AddModError> {
             description: e.to_string()
         })?;
     Ok(file_name.to_str().expect("Mod filename OS string is not utf-8 somehow?").to_string())
-}
+}*/
