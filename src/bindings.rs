@@ -50,11 +50,23 @@ struct GetModDetailsArgs {
 }
 
 impl ModManager {
+    pub fn remove_mod(index: usize, mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
+        #[derive(Serialize)]
+        struct Args {
+            index: usize,
+        }
+        spawn_local(async move {
+            invoke("remove_mod", serde_wasm_bindgen::to_value(&Args { index }).unwrap()).await;
+            ModManager::get_mods(mods);
+        });
+    }
+
     pub fn add_mod() {
         spawn_local(async {
             invoke("add_current_mod", JsValue::null()).await;
         });
     }
+
     pub fn get_mods(mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
         spawn_local(async move {
             let fetched_mods = invoke("get_mods", JsValue::null()).await;
@@ -64,6 +76,7 @@ impl ModManager {
             mods.set(Some(fetched_mods));
         });
     }
+
     pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Option<Rc<Mod>>>, mod_details_error: UseStateHandle<Option<ModDetailsError>>) {
         let args = GetModDetailsArgs {
             file_path: current_file

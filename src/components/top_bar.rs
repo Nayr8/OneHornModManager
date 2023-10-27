@@ -1,10 +1,14 @@
+use std::rc::Rc;
 use yew::prelude::*;
+use models::Mod;
+use crate::bindings::ModManager;
 use crate::components::Button;
 
 #[derive(Properties, PartialEq)]
 pub struct TopBarProps {
     pub file_explorer_open: UseStateHandle<bool>,
     pub selected_mod: UseStateHandle<Option<usize>>,
+    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
 }
 
 #[function_component(TopBar)]
@@ -18,6 +22,13 @@ pub fn top_bar(props: &TopBarProps) -> Html {
         }
     };
 
+    let remove_mod = props.selected_mod.map(|mod_index| {
+        let mods = props.mods.clone();
+        move |_| {
+            ModManager::remove_mod(mod_index, mods.clone());
+        }
+    });
+
     html! {
         <div class="top-bar">
             if *props.file_explorer_open {
@@ -29,15 +40,9 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                     {"Add Mod"}
                 </Button>
 
-                if let Some(_mod_index) = *props.selected_mod {
-                    <Button>
-                        {"Remove Mod"}
-                    </Button>
-                } else {
-                    <Button disabled=true>
-                        {"Remove Mod"}
-                    </Button>
-                }
+                <Button disabled={remove_mod.is_none()} onclick={remove_mod}>
+                    {"Remove Mod"}
+                </Button>
             }
         </div>
     }

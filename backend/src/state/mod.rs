@@ -42,6 +42,12 @@ pub fn add_current_mod() {
     state.mods.push((meta, path.to_string_lossy().to_string()));
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub fn remove_mod(index: usize) {
+    let mut state = State::get();
+    state.mods.remove(index);
+}
+
 const STEAM_APPS: &'static str = "/home/ryan/.steam/steam/steamapps";
 // compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3
 
