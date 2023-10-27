@@ -30,13 +30,9 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
     };
 
     let add_mod = {
-        let current_file = props.current_file.clone();
-        let add_mod_menu = props.add_mod_menu.clone();
         let file_explorer_open = props.file_explorer_open.clone();
         move |_: MouseEvent| {
             ModManager::add_mod();
-            current_file.set(None);
-            add_mod_menu.set(false);
             file_explorer_open.set(false);
         }
     };
