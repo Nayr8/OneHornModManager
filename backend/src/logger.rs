@@ -10,12 +10,12 @@ static LOGGER: Mutex<Logger> = Mutex::new(Logger::new());
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! trace {
-    ($($arg:tt)*) => {crate::logger::Logger::log_info(format_args!($($arg)*))};
+    ($($arg:tt)*) => {crate::logger::Logger::log_trace(format_args!($($arg)*))};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! debug {
-    ($($arg:tt)*) => {crate::logger::Logger::log_info(format_args!($($arg)*))};
+    ($($arg:tt)*) => {crate::logger::Logger::log_debug(format_args!($($arg)*))};
 }
 #[allow(unused_macros)]
 #[macro_export]

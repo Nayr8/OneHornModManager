@@ -35,7 +35,7 @@ pub fn file_explorer(_props: &FileExplorerProps) -> Html {
 
     if *add_mod_menu {
         html! {
-            <AddNewModMenu current_file={current_file.clone()} />
+            <AddNewModMenu current_file={current_file.clone()} add_mod_menu={add_mod_menu.clone()} />
         }
     } else {
         html! {

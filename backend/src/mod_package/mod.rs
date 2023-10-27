@@ -222,7 +222,7 @@ impl ModPackage {
 
         let module_info = meta_xml.descendants().find(|n| {
             n.attribute("id") == Some("ModuleInfo")
-        }).ok_or({
+        }).ok_or_else(|| {
             error!("Metadata missing ModuleInfo");
             MetaDataMissingModuleInfo
         })?;

@@ -14,8 +14,8 @@ pub fn console(_props: &ConsoleProps) -> Html {
 
     let log_lines: Html = log_lines.iter().rev().map(|log_line| {
         let class = match log_line.severity {
-            LogSeverity::Trace => "console-info",
-            LogSeverity::Debug => "console-info",
+            LogSeverity::Trace => "console-debug",
+            LogSeverity::Debug => "console-debug",
             LogSeverity::Info => "console-info",
             LogSeverity::Warn => "console-warning",
             LogSeverity::Error => "console-error",

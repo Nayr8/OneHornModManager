@@ -1,7 +1,6 @@
 use std::ops::Deref;
-use std::rc::Rc;
 use yew::prelude::*;
-use models::{FileEntry, Mod};
+use models::FileEntry;
 use crate::bindings::ModManager;
 use crate::components::Spinner;
 use crate::components::Button;
@@ -9,6 +8,7 @@ use crate::components::Button;
 #[derive(Properties, PartialEq)]
 pub struct AddNewModMenuProps {
     pub current_file: UseStateHandle<Option<FileEntry>>,
+    pub add_mod_menu: UseStateHandle<bool>,
 }
 #[function_component(AddNewModMenu)]
 pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
@@ -19,20 +19,30 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
         ModManager::get_mod_details(current_file.path.clone(), details.clone(), details_error.clone())
     }, (props.current_file.deref().clone().unwrap(), details.clone(), details_error.clone()));
 
+    let close_mod_menu = {
+        let add_mod_menu = props.add_mod_menu.clone();
+        move |_: MouseEvent| {
+            add_mod_menu.set(false);
+        }
+    };
+
     match details_error.as_ref() {
         Some(error) => html! {
             <div style="margin: auto;text-align: center">
                 <div style="font-size: 2.5em">{"Error"}</div>
                 <div style="margin-bottom: 2em">{format!("{error:?}")}</div>
-                <div style="margin: auto;width: min-content;font-size: 1.5em"><Button>{"Back"}</Button></div>
+                <Button onclick={close_mod_menu} style="margin: auto;width: min-content;font-size: 1.5em">{"Back"}</Button>
             </div>
         },
         None => match details.as_ref() {
             Some(details) => html! {
             <div style="margin: auto;text-align: center">
                 <div style="font-size: 2.5em">{format!("{}", details.name)}</div>
-                <div style="margin-bottom: 2em">{format!("{}", details.description)}</div>
-                <div style="margin: auto;width: min-content;font-size: 1.5em"><Button>{"Add mod"}</Button></div>
+                <div>{format!("{}", details.description)}</div>
+                <div style="font-size: 1.5em;margin-top: 2em;display: flex;justify-content: center">
+                    <Button onclick={close_mod_menu}  style="width: min-content">{"Back"}</Button>
+                    <Button style="width: min-content">{"Add mod"}</Button>
+                </div>
             </div>
             },
             None => html! {
@@ -42,16 +52,5 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
                 </div>
             }
         }
-    }
-}
-
-#[derive(Properties, PartialEq)]
-pub struct AddNewModMenuLoadedProps {
-    pub mod_details: Rc<Mod>,
-}
-#[function_component(AddNewModMenuLoaded)]
-fn add_new_mod_menu_loaded(props: &AddNewModMenuLoadedProps) -> Html {
-    html! {
-        <div>{format!("{} -- {}", props.mod_details.name, props.mod_details.description)}</div>
     }
 }

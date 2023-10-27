@@ -9,6 +9,8 @@ pub struct ButtonProps {
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
+    pub style: String,
+    #[prop_or_default]
     pub disabled: bool,
     #[prop_or_default]
     pub thin: bool,
@@ -42,7 +44,7 @@ pub fn button(props: &ButtonProps) -> Html {
     }
 
     html! {
-        <div class={classes!(class, props.class.clone())}>
+        <div class={classes!(class, props.class.clone())} style={props.style.clone()}>
             {props.children.clone()}
         </div>
     }
