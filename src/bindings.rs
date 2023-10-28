@@ -50,6 +50,11 @@ struct GetModDetailsArgs {
 }
 
 impl ModManager {
+    pub fn save() {
+        spawn_local(async {
+            invoke("save", JsValue::null()).await;
+        });
+    }
     pub fn remove_mod(index: usize, mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
         #[derive(Serialize)]
         struct Args {

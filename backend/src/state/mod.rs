@@ -1,5 +1,5 @@
-use std::fs::File;
-use std::io::{ErrorKind, Read};
+use std::fs::{File, OpenOptions};
+use std::io::{ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
@@ -48,11 +48,38 @@ pub fn remove_mod(index: usize) {
     state.mods.remove(index);
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub fn save() {
+    let state = State::get();
+
+    let state_string = match serde_json::to_string::<State>(&state) {
+        Ok(state_string) => state_string,
+        Err(error) => {
+            error!("Could not serialize state: {error:?}");
+            return; // TODO return and handle error
+        }
+    };
+
+    let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open("state.json") {
+        Ok(file) => file,
+        Err(error) => {
+            error!("Could not save file: {error:?}");
+            return; // TODO return and handle error
+        }
+    };
+
+    if let Err(error) = file.write_all(state_string.as_bytes()) {
+        error!("Could not save file: {error:?}");
+        return; // TODO return and handle error
+    }
+}
+
 const STEAM_APPS: &'static str = "/home/ryan/.steam/steam/steamapps";
 // compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct State {
+    #[serde(skip_serializing)]
     selected_new_mod_meta: Option<(PathBuf, ModMeta)>,
     mods: Vec<(ModMeta, String)>,
     gustav_dev_mod_meta: Option<ModMeta>,

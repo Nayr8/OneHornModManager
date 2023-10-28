@@ -29,6 +29,10 @@ pub fn top_bar(props: &TopBarProps) -> Html {
         }
     });
 
+    let save = |_: MouseEvent| {
+        ModManager::save();
+    };
+
     html! {
         <div class="top-bar">
             if *props.file_explorer_open {
@@ -42,6 +46,10 @@ pub fn top_bar(props: &TopBarProps) -> Html {
 
                 <Button disabled={remove_mod.is_none()} onclick={remove_mod}>
                     {"Remove Mod"}
+                </Button>
+
+                <Button onclick={save}>
+                    {"Save"}
                 </Button>
             }
         </div>

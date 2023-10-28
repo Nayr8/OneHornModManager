@@ -31,6 +31,7 @@ fn main() {
             state::get_mods,
             state::add_current_mod,
             state::remove_mod,
+            state::save,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
