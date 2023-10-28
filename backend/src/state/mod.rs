@@ -65,7 +65,8 @@ pub fn save() {
         }
     };
 
-    let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open("state.json") {
+    let data_dir = State::get_data_dir();
+    let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open(data_dir.join("state.json")) {
         Ok(file) => file,
         Err(error) => {
             error!("Could not save file: {error:?}");
@@ -210,9 +211,20 @@ impl State {
         String::from_utf8(a).unwrap()
     }
 
+    fn get_data_dir() -> PathBuf {
+        match dirs::data_local_dir() {
+            Some(dir) => dir.join("Nayr8'sBG3ModManager"),
+            None => {
+                panic!("Could not get local data directory")
+            }
+        }
+    }
+
     pub fn load() {
         info!("Attempting to load state");
-        let mut state_file = match File::open("state.json") {
+        let data_directory = Self::get_data_dir();
+        std::fs::create_dir_all(&data_directory).expect("Could not create data directory");
+        let mut state_file = match File::open(data_directory.join("state.json")) {
             Ok(state_file) => state_file,
             Err(e) => match e.kind(){
                 ErrorKind::NotFound => {
