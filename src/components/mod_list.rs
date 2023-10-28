@@ -3,6 +3,7 @@ use yew::prelude::*;
 use models::Mod;
 use crate::bindings::ModManager;
 use crate::components::Button;
+use crate::components::button::ButtonSize;
 use crate::components::Spinner;
 
 #[derive(Properties, PartialEq)]
@@ -32,7 +33,7 @@ pub fn mod_list(props: &ModListProps) -> Html {
             html! {
                 <div style="margin: auto;text-align: center">
                     <div style="font-size: 2.5em">{"No Mods Found"}</div>
-                    <Button onclick={toggle_file_explorer.clone()} style="font-size: 1.5em;margin: auto;margin-top: 1em;width: min-content">{"Add Mod"}</Button>
+                    <Button onclick={toggle_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;margin-top: 1em;width: min-content">{"Add Mod"}</Button>
                 </div>
             }
         } else {

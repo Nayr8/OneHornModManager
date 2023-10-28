@@ -1,5 +1,15 @@
 use yew::prelude::*;
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum ButtonSize {
+    Thin, Standard, Big
+}
+
+impl Default for ButtonSize {
+    fn default() -> Self {
+        ButtonSize::Standard
+    }
+}
 
 #[derive(Properties, PartialEq)]
 pub struct ButtonProps {
@@ -13,7 +23,7 @@ pub struct ButtonProps {
     #[prop_or_default]
     pub disabled: bool,
     #[prop_or_default]
-    pub thin: bool,
+    pub size: ButtonSize,
     #[prop_or_default]
     pub selected: bool,
     #[prop_or_default]
@@ -22,21 +32,23 @@ pub struct ButtonProps {
 
 #[function_component(Button)]
 pub fn button(props: &ButtonProps) -> Html {
-    let class = match (props.selected, props.disabled, props.thin) {
-        (false, false, false) => "element-button",
-        (false, false, true) => "element-button-thin",
-        (false, true, false) => "element-disabled",
-        (false, true, true) => "element-disabled-thin",
-        (true, false, false) => "element-button-selected",
-        (true, false, true) => "element-button-thin-selected",
-        (true, true, false) => "element-disabled",
-        (true, true, true) => "element-disabled-thin-selected",
-    };
+    let classes = classes!(
+        "element",
+        "make-element-button",
+        match props.size {
+            ButtonSize::Thin => Some("make_element-thin"),
+            ButtonSize::Standard => None,
+            ButtonSize::Big => Some("make_element-big"),
+        },
+        if props.disabled { Some("make-element-disabled") } else { None },
+        if props.selected { Some("make-element-selected") } else { None },
+        props.class.clone()
+    );
 
     if let Some(onclick) = &props.onclick {
         if !props.disabled {
             return html! {
-                <div class={classes!(class, props.class.clone())} style={props.style.clone()} onclick={onclick}>
+                <div class={classes} style={props.style.clone()} onclick={onclick}>
                     {props.children.clone()}
                 </div>
             };
@@ -44,7 +56,7 @@ pub fn button(props: &ButtonProps) -> Html {
     }
 
     html! {
-        <div class={classes!(class, props.class.clone())} style={props.style.clone()}>
+        <div class={classes} style={props.style.clone()}>
             {props.children.clone()}
         </div>
     }

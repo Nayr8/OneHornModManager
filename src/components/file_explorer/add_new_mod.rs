@@ -4,6 +4,7 @@ use models::FileEntry;
 use crate::bindings::ModManager;
 use crate::components::Spinner;
 use crate::components::Button;
+use crate::components::button::ButtonSize;
 
 #[derive(Properties, PartialEq)]
 pub struct AddNewModMenuProps {
@@ -42,17 +43,17 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
             <div style="margin: auto;text-align: center">
                 <div style="font-size: 2.5em">{"Error"}</div>
                 <div style="margin-bottom: 2em">{format!("{error:?}")}</div>
-                <Button onclick={close_mod_menu} style="margin: auto;width: min-content;font-size: 1.5em">{"Back"}</Button>
+                <Button onclick={close_mod_menu} size={ButtonSize::Big} style="margin: auto;width: min-content">{"Back"}</Button>
             </div>
         },
         None => match details.as_ref() {
             Some(details) => html! {
             <div style="margin: auto;text-align: center">
-                <div style="font-size: 2.5em">{format!("{}", details.name)}</div>
-                <div>{format!("{}", details.description)}</div>
-                <div style="font-size: 1.5em;margin-top: 2em;display: flex;justify-content: center">
-                    <Button onclick={close_mod_menu} style="width: min-content">{"Back"}</Button>
-                    <Button onclick={add_mod} style="width: min-content">{"Add mod"}</Button>
+                <div style="font-size: 2.5em">{&details.name}</div>
+                <div>{&details.description}</div>
+                <div style="margin-top: 2em;display: flex;justify-content: center">
+                    <Button onclick={close_mod_menu} size={ButtonSize::Big} style="width: min-content">{"Back"}</Button>
+                    <Button onclick={add_mod} size={ButtonSize::Big} style="width: min-content">{"Add mod"}</Button>
                 </div>
             </div>
             },

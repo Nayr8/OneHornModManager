@@ -17,36 +17,22 @@
   background: var(--unselected-option);
 }
 
-.element-thin {
-  @extend .element;
+.make_element-thin {
   height: 1.2em;
 }
 
-.element-disabled-thin {
-  @extend .element-thin;
-  @extend .element-disabled;
+.make_element-big {
+  font-size: 1.5em;
 }
 
-.element-button-thin {
-  @extend .element-button;
-  @extend .element-thin;
-}
-
-.element-button-thin-selected {
-  @extend .element-button-thin;
-  @extend .element-selected;
-}
-
-.element-button {
-  @extend .element;
+.make-element-button {
   &:hover {
     background: var(--hovered-option);
     cursor: pointer;
   }
 }
 
-.element-disabled {
-  @extend .element;
+.make-element-disabled {
   background: var(--top-bar);
   color: var(--text-disabled);
   &:hover {
@@ -54,12 +40,6 @@
   }
 }
 
-.element-button-selected {
-  @extend .element-button;
-  background: var(--selected-option);
-}
-
-.element-selected {
-  @extend .element;
+.make-element-selected {
   background: var(--selected-option);
 }

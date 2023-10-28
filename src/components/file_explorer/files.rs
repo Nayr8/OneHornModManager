@@ -4,6 +4,7 @@ use yew::prelude::*;
 use models::{EntryType, FileEntry};
 use crate::bindings::FileBrowser;
 use crate::components::Button;
+use crate::components::button::ButtonSize;
 
 
 #[derive(Properties, PartialEq)]
@@ -107,7 +108,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
     };
 
     html! {
-        <Button class={classes!(class)} thin=true selected={is_selected} onclick={onclick}>
+        <Button class={classes!(class)} size={ButtonSize::Thin} selected={is_selected} onclick={onclick}>
             <div>{type_name}</div>
             <div>
                 { &props.entry.file_name }
