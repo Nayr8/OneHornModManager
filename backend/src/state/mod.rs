@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
 use models::{Mod, MMResult, ModDetailsError};
 use crate::{error, info, debug, trace};
-use crate::mod_package::{ModMeta, ModPackage};
+use crate::mod_package::{ModInfoNode, ModMeta, ModPackage};
 use crate::extensions::HasExtension;
+use crate::mod_settings_builder::ModSettingsBuilder;
 
 static STATE: Mutex<State> = Mutex::new(State::new());
 
@@ -17,10 +18,10 @@ pub fn get_mods() -> Vec<Mod> {
 
     let mut mods = Vec::with_capacity(state.mods.len());
 
-    for (meta, _file_name) in &state.mods {
+    for mod_state in &state.mods {
         mods.push(Mod {
-            name: meta.name.value.clone(),
-            description: meta.description.value.clone(),
+            name: mod_state.meta.name.value.clone(),
+            description: mod_state.meta.description.value.clone(),
         });
     }
 
@@ -39,7 +40,11 @@ pub fn add_current_mod() {
         }
     };
 
-    state.mods.push((meta, path.to_string_lossy().to_string()));
+    state.mods.push(ModState {
+        meta,
+        path: path.to_string_lossy().to_string(),
+        enabled: true,
+    });
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -74,15 +79,79 @@ pub fn save() {
     }
 }
 
-const STEAM_APPS: &'static str = "/home/ryan/.steam/steam/steamapps";
-// compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3
+#[tauri::command(rename_all = "snake_case")]
+pub fn apply() {
+    let mut state = State::get();
+
+    info!("Creating symlinks to mod pak files");
+    let mut mods_folder_path = PathBuf::from(&state.bg3_appdata);
+    mods_folder_path.push("Mods/");
+
+    debug!("mods_folder_path: {:?}", mods_folder_path);
+
+    for entry in std::fs::read_dir(&mods_folder_path).unwrap() {
+        if entry.is_err() { continue }
+        let entry = entry.unwrap();
+
+        if let Ok(file_type) = entry.file_type() {
+            if file_type.is_symlink() {
+                symlink::remove_symlink_auto(entry.path()).unwrap();
+            }
+        }
+    }
+
+    for mod_state in &state.mods {
+        if !mod_state.enabled { continue }
+
+        let mut path = mods_folder_path.clone();
+        let src_path = PathBuf::from(&mod_state.path);
+        path.push(src_path.file_name().expect("Mod file not a file"));
+
+        if let Err(error) = symlink::symlink_file(&mod_state.path, path) {
+            error!("Could not apply mod '{}': {error}", mod_state.path);
+            return;
+        }
+    }
+
+    info!("Writing mod settings");
+    let mut mod_settings_path = PathBuf::from(&state.bg3_appdata);
+    mod_settings_path.push("PlayerProfiles/Public/modsettings.lsx");
+    debug!("mod_settings_path: {}", mod_settings_path.to_string_lossy());
+
+    let mod_settings = state.build_mod_settings();
+
+    info!("Mod settings: {mod_settings}");
+
+    let mut mod_settings_file = match OpenOptions::new()
+        .write(true).create(true).truncate(true)
+        .open(&mod_settings_path) {
+        Ok(file) => file,
+        Err(error) => {
+            error!("Could not apply mod_settings: {error:?}");
+            return; // TODO return and handle error
+        }
+    };
+    if let Err(error) = mod_settings_file.write_all(mod_settings.as_bytes()) {
+        error!("Could not write mod_settings: {error:?}");
+        return; // TODO return and handle error
+    }
+    info!("modsetting.lsx written")
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ModState {
+    pub meta: ModMeta,
+    pub path: String,
+    pub enabled: bool,
+}
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct State {
     #[serde(skip_serializing)]
     selected_new_mod_meta: Option<(PathBuf, ModMeta)>,
-    mods: Vec<(ModMeta, String)>,
+    mods: Vec<ModState>,
     gustav_dev_mod_meta: Option<ModMeta>,
+    pub(crate) bg3_appdata: String,
 }
 
 impl State {
@@ -95,47 +164,40 @@ impl State {
             selected_new_mod_meta: None,
             mods: Vec::new(),
             gustav_dev_mod_meta: None,
+            bg3_appdata: String::new(),
         }
     }
-/*
-    fn add_mod(&mut self, path: &str) -> Result<Vec<Mod>, AddModError> {
-        let package_file = File::open(path)
-            .map_err(|_| AddModError::CouldNotOpenModFile)?;
 
-        let package = ModPackage::new(package_file)
-            .map_err(|e| AddModError::ErrorUnpackingFile(e))?;
-
-        let meta = package.read_package_meta()
-            .map_err(|e| AddModError::ErrorUnpackingFile(e))?;
-
-        drop(package);
-
-        let file_name = move_mod_file(path)?;
-
-        self.mods.push((meta, file_name));
-
-        Ok(self.get_mods())
-    }
-
-    pub fn remove_mod(&mut self, index: usize) -> Result<String, RemoveModError> {
-        if index >= self.mods.len() { return Err(RemoveModError::ModWithIndexDoesNotExist(index)) }
-        Ok(self.mods.remove(index).1)
-    }
-
-    pub fn get_mods(&self) -> Vec<Mod> {
-        self.mods.iter().map(|(mod_meta, _file_name)| {
-            Mod {
-                name: mod_meta.name.value.clone(),
-                description: mod_meta.description.value.clone(),
-            }
-        }).collect()
-    }
-
-    pub fn build_mod_settings(&mut self) -> String {
+    fn build_mod_settings(&mut self) -> String {
         let gustav_dev_meta = match self.gustav_dev_mod_meta.as_ref() {
             Some(gustav_dev_meta) => gustav_dev_meta,
             None => {
-                self.load_gustav_dev_meta().expect("TODO: panic message"); // TODO handle error
+                self.gustav_dev_mod_meta = Some(ModMeta {
+                    name: ModInfoNode {
+                        value_type: "LSString".to_string(),
+                        value: "GustavDev".to_string(),
+                    },
+                    description: ModInfoNode {
+                        value_type: "".to_string(),
+                        value: "".to_string(),
+                    },
+                    folder: ModInfoNode {
+                        value_type: "LSString".to_string(),
+                        value: "GustavDev".to_string(),
+                    },
+                    uuid: ModInfoNode {
+                        value_type: "FixedString".to_string(),
+                        value: "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8".to_string(),
+                    },
+                    md5: ModInfoNode {
+                        value_type: "LSString".to_string(),
+                        value: "".to_string(),
+                    },
+                    version64: ModInfoNode {
+                        value_type: "int64".to_string(),
+                        value: "36028797018963968".to_string(),
+                    },
+                });
                 self.gustav_dev_mod_meta.as_ref().unwrap()
             },
         };
@@ -147,46 +209,6 @@ impl State {
 
         String::from_utf8(a).unwrap()
     }
-
-    fn load_gustav_dev_meta(&mut self) -> Result<(), AddModError> {
-        const GUSTAV_PAK: &str = "common/Baldurs Gate 3/Data/Gustav.pak";
-        let mut gustav_path = PathBuf::from(STEAM_APPS);
-        gustav_path.push(GUSTAV_PAK);
-
-        let package_file = File::open(gustav_path)
-            .map_err(|_| AddModError::CouldNotOpenModFile)?;
-
-        let package = ModPackage::new(package_file)
-            .map_err(|e| AddModError::ErrorUnpackingFile(e))?;
-
-        let meta = package.read_package_meta()
-            .map_err(|e| AddModError::ErrorUnpackingFile(e))?;
-
-        self.gustav_dev_mod_meta = Some(meta);
-        Ok(())
-    }
-
-    fn save(&mut self) -> Result<(), SaveStateError> {
-        info!("Saving state");
-        let state_json = serde_json::to_string(State::get().deref()).expect("TODO");
-
-        let mut state_file = match OpenOptions::new().create(true).write(true).truncate(true).open("state.json") {
-            Ok(state_file) => state_file,
-            Err(e) => {
-                error!("Could not create save file: {e}");
-                return Err(SaveStateError::CouldNotCreateOrOpenFile);
-            }
-        };
-
-        if let Err(e) = state_file.write_all(state_json.as_bytes()) {
-            error!("Could not save state: {e}");
-            return Err(SaveStateError::CouldNotSaveToFile);
-        }
-
-        state_file.flush().map_err(|_| SaveStateError::CouldNotSaveToFile)?;
-        info!("State saved successfully");
-        Ok(())
-    }*/
 
     pub fn load() {
         info!("Attempting to load state");
@@ -219,8 +241,11 @@ impl State {
             Ok(state) => state,
             Err(e) => {
                 error!("'state.json' is not valid JSON attempting to remove corrupted file: {e}");
+                error!("{state_string}");
                 if let Err(e) = std::fs::remove_file("state.json") {
                     error!("Could not delete 'state.json' saving state may not be possible: {e}");
+                } else {
+                    info!("Removed currupted 'state.json' successfully");
                 }
                 return;
             },
@@ -288,44 +313,3 @@ fn get_mod_meta(file_path: &Path) -> Result<ModMeta, ModDetailsError> {
         ModDetailsError::CannotReadPackageMeta
     })
 }
-
-
-/*
-#[tauri::command(rename_all = "snake_case")]
-pub(crate) fn add_mod(path: &str) -> Result<Vec<Mod>, AddModError> {
-    info!("Adding mod '{path}'");
-    State::get().add_mod(path).map(|mods| {
-        info!("Added mod '{path}'"); mods
-    }).map_err(|e| {
-        error!("Failed to add mod: '{path}': {e:?}"); e
-    })
-}
-
-
-#[tauri::command(rename_all = "snake_case")]
-pub(crate) fn remove_mod(index: usize) -> Result<Vec<Mod>, RemoveModError> {
-    let filename = STATE.lock().remove_mod(index)?;
-
-    let mut package_location = PathBuf::from("Mods");
-    package_location.push(filename);
-
-    std::fs::remove_file(package_location)
-        .map_err(|_| RemoveModError::ErrorRemovingModFile)?;
-
-    Ok(State::get().get_mods())
-}
-
-
-fn move_mod_file(path: &str) -> Result<String, AddModError> {
-    let file_name = Path::new(path).file_name()
-        .ok_or(InvalidFilePath(String::from(path)))?;
-
-    let mut destination = PathBuf::from("Mods");
-    destination.push(file_name);
-
-    std::fs::copy(path, destination)
-        .map_err(|e| AddModError::CouldNotReadFile {
-            description: e.to_string()
-        })?;
-    Ok(file_name.to_str().expect("Mod filename OS string is not utf-8 somehow?").to_string())
-}*/

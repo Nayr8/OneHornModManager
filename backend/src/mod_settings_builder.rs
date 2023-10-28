@@ -1,17 +1,18 @@
 use xml_builder::{XML, XMLBuilder, XMLElement, XMLVersion};
 use crate::mod_package::{ModInfoNode, ModMeta};
+use crate::state::ModState;
 
 pub(crate) struct ModSettingsBuilder;
 
 impl ModSettingsBuilder {
-    pub fn build(mod_metas: &[(ModMeta, String)], gustav_dev_meta: &ModMeta) -> XML {
+    pub fn build(mod_metas: &[ModState], gustav_dev_meta: &ModMeta) -> XML {
         let mut save = XMLElement::new("save");
 
         let mut version = XMLElement::new("version");
         version.add_attribute("major", "4");
-        version.add_attribute("minor", "2");
+        version.add_attribute("minor", "3");
         version.add_attribute("revision", "0");
-        version.add_attribute("build", "100");
+        version.add_attribute("build", "300");
         save.add_child(version).unwrap();
 
         let mods_node = Self::build_mods_node(mod_metas, gustav_dev_meta);
@@ -38,14 +39,15 @@ impl ModSettingsBuilder {
         xml
     }
 
-    fn build_mods_node(mod_metas: &[(ModMeta, String)], gustav_dev_meta: &ModMeta) -> XMLElement {
+    fn build_mods_node(mod_metas: &[ModState], gustav_dev_meta: &ModMeta) -> XMLElement {
         let mut children = XMLElement::new("children");
 
         let gustav_dev = Self::build_mod_desc(gustav_dev_meta);
         children.add_child(gustav_dev).unwrap();
 
-        for (mod_meta, _) in mod_metas.iter() {
-            let mod_desc = Self::build_mod_desc(mod_meta);
+        for mod_state in mod_metas.iter() {
+            if !mod_state.enabled { continue }
+            let mod_desc = Self::build_mod_desc(&mod_state.meta);
             children.add_child(mod_desc).unwrap();
         }
 
@@ -58,10 +60,10 @@ impl ModSettingsBuilder {
 
     fn build_mod_desc(mod_meta: &ModMeta) -> XMLElement {
         let folder = Self::build_mod_meta_attribute("Folder", &mod_meta.folder);
-        let md5 = Self::build_mod_meta_attribute("MD5", &mod_meta.folder);
-        let name = Self::build_mod_meta_attribute("Name", &mod_meta.folder);
-        let uuid = Self::build_mod_meta_attribute("UUID", &mod_meta.folder);
-        let version64 = Self::build_mod_meta_attribute("Version64", &mod_meta.folder);
+        let md5 = Self::build_mod_meta_attribute("MD5", &mod_meta.md5);
+        let name = Self::build_mod_meta_attribute("Name", &mod_meta.name);
+        let uuid = Self::build_mod_meta_attribute("UUID", &mod_meta.uuid);
+        let version64 = Self::build_mod_meta_attribute("Version64", &mod_meta.version64);
 
         let mut desc = XMLElement::new("node");
         desc.add_attribute("id", "ModuleShortDesc");

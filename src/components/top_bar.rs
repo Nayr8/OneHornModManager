@@ -33,6 +33,10 @@ pub fn top_bar(props: &TopBarProps) -> Html {
         ModManager::save();
     };
 
+    let apply = |_: MouseEvent| {
+        ModManager::apply();
+    };
+
     html! {
         <div class="top-bar">
             if *props.file_explorer_open {
@@ -50,6 +54,10 @@ pub fn top_bar(props: &TopBarProps) -> Html {
 
                 <Button onclick={save}>
                     {"Save"}
+                </Button>
+
+                <Button onclick={apply}>
+                    {"Apply"}
                 </Button>
             }
         </div>
