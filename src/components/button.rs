@@ -34,13 +34,12 @@ pub struct ButtonProps {
 pub fn button(props: &ButtonProps) -> Html {
     let classes = classes!(
         "element",
-        "make-element-button",
+        if props.disabled { "make-element-disabled" } else { "make-element-button" },
         match props.size {
             ButtonSize::Thin => Some("make_element-thin"),
             ButtonSize::Standard => None,
             ButtonSize::Big => Some("make_element-big"),
         },
-        if props.disabled { Some("make-element-disabled") } else { None },
         if props.selected { Some("make-element-selected") } else { None },
         props.class.clone()
     );

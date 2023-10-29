@@ -27,6 +27,27 @@ pub fn read_current_dir() -> (PathBuf, Vec<FileEntry>) {
     FileBrowser::read_current_dir()
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub fn get_common_paths() -> Vec<(String, PathBuf)> {
+    let mut paths = Vec::new();
+    let file_browser = FileBrowser::get();
+
+    if let Some(home_directory) = file_browser.home_directory.as_ref() {
+        paths.push(("Home".into(), home_directory.clone()))
+    }
+    if let Some(documents_directory) = file_browser.documents_directory.as_ref() {
+        paths.push(("Documents".into(), documents_directory.clone()))
+    }
+    if let Some(downloads_directory) = file_browser.downloads_directory.as_ref() {
+        paths.push(("Downloads".into(), downloads_directory.clone()))
+    }
+    if let Some(desktop_directory) = file_browser.desktop_directory.as_ref() {
+        paths.push(("Desktop".into(), desktop_directory.clone()))
+    }
+
+    paths
+}
+
 pub struct FileBrowser {
     current_directory: Option<PathBuf>,
     home_directory: Option<PathBuf>,

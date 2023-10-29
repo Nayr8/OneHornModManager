@@ -19,8 +19,22 @@
     grid-row: file-nav-start / file-nav-end;
     grid-column: file-nav-start / file-nav-end;
 
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-top: 3em;
 
     overflow: scroll;
+}
+
+.file-nav-common-paths {
+    background: var(--background);
+
+    margin: 0.1em;
+    padding: 0.6em;
+
+    border-style: solid;
+    border-radius: 0.3em;
+    border-color: var(--border);
 }
 
 .files {

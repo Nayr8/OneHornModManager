@@ -16,6 +16,15 @@ struct RedirectBrowserArgs {
 }
 
 impl FileBrowser {
+    pub fn get_common_paths(common_paths: UseStateHandle<Option<Vec<(String, Rc<PathBuf>)>>>) {
+        spawn_local(async move {
+            let fetched_common_paths = invoke("get_common_paths", JsValue::null()).await;
+            let fetched_common_paths = serde_wasm_bindgen::from_value::<Vec<(String, Rc<PathBuf>)>>(fetched_common_paths).unwrap();
+
+            common_paths.set(Some(fetched_common_paths));
+        });
+    }
+
     pub fn redirect_browser(path: Rc<PathBuf>) {
         let args = RedirectBrowserArgs {
             path

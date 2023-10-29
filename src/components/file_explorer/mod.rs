@@ -40,7 +40,9 @@ pub fn file_explorer(props: &FileExplorerProps) -> Html {
     } else {
         html! {
         <div class="file-explorer">
-            <FileNav />
+            <FileNav
+                current_path={current_path.clone()}
+                current_entries={current_entries.clone()} />
             <FileExplorerLocation current_directory={current_directory_str} />
             <Files
                 current_path={current_path.clone()}

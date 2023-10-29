@@ -27,6 +27,7 @@ fn main() {
             logger::get_log_messages,
             file_browser::read_current_dir,
             file_browser::redirect_browser,
+            file_browser::get_common_paths,
             state::get_mod_details,
             state::get_mods,
             state::add_current_mod,

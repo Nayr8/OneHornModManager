@@ -1,8 +1,8 @@
 
 
 .spinner {
-  border: 0.5em solid var(--spinner-backround);
-  border-top: 0.5em solid var(--spinner-main);
+  border: 0.5em solid var(--spinner-main);
+  border-top: 0.5em solid rgba(0, 0, 0, 0);
   border-radius: 50%;
   width: 2.5em;
   height: 2.5em;
