@@ -88,8 +88,6 @@ pub fn apply() {
     let mut mods_folder_path = PathBuf::from(&state.bg3_appdata);
     mods_folder_path.push("Mods/");
 
-    debug!("mods_folder_path: {:?}", mods_folder_path);
-
     for entry in std::fs::read_dir(&mods_folder_path).unwrap() {
         if entry.is_err() { continue }
         let entry = entry.unwrap();
@@ -117,11 +115,8 @@ pub fn apply() {
     info!("Writing mod settings");
     let mut mod_settings_path = PathBuf::from(&state.bg3_appdata);
     mod_settings_path.push("PlayerProfiles/Public/modsettings.lsx");
-    debug!("mod_settings_path: {}", mod_settings_path.to_string_lossy());
 
     let mod_settings = state.build_mod_settings();
-
-    info!("Mod settings: {mod_settings}");
 
     let mut mod_settings_file = match OpenOptions::new()
         .write(true).create(true).truncate(true)
@@ -136,7 +131,7 @@ pub fn apply() {
         error!("Could not write mod_settings: {error:?}");
         return; // TODO return and handle error
     }
-    info!("modsetting.lsx written")
+    info!("Mod settings applied")
 }
 
 #[derive(Serialize, Deserialize)]
@@ -257,7 +252,7 @@ impl State {
                 if let Err(e) = std::fs::remove_file("state.json") {
                     error!("Could not delete 'state.json' saving state may not be possible: {e}");
                 } else {
-                    info!("Removed currupted 'state.json' successfully");
+                    info!("Removed corrupted 'state.json' successfully");
                 }
                 return;
             },
@@ -267,6 +262,26 @@ impl State {
         state.mods = state_data.mods;
         state.gustav_dev_mod_meta = state_data.gustav_dev_mod_meta;
         info!("State loaded successfully")
+    }
+
+    #[cfg(target_os = "linux")]
+    pub fn find_bg3_app_data(&mut self) {
+        let mut steam_dir = steamlocate::SteamDir::locate().unwrap();
+        let bg3_steam_app = steam_dir.app(&1086940).unwrap();
+        self.bg3_appdata = bg3_steam_app.path
+            .join("../../compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/").to_string_lossy().to_string();
+    }
+
+    #[cfg(target_os = "windows")]
+    pub fn find_bg3_app_data(&mut self) {
+        let appdata_local = dirs::config_local_dir().unwrap();
+        self.bg3_appdata = appdata_local.join("Larian Studios/Baldur's Gate 3/")
+    }
+
+    #[cfg(target_os = "macos")]
+    pub fn find_bg3_app_data(&mut self) {
+        let documents = dirs::document_dir();
+        self.bg3_appdata = documents.join("Larian Studios/Baldur's Gate 3/")
     }
 }
 

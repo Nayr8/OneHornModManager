@@ -11,6 +11,9 @@ use crate::warn;
 static FILE_BROWSER: Mutex<FileBrowser> = Mutex::new(FileBrowser {
     current_directory: None,
     home_directory: None,
+    documents_directory: None,
+    downloads_directory: None,
+    desktop_directory: None,
     history: CircularBuffer::new(),
 });
 
@@ -27,6 +30,9 @@ pub fn read_current_dir() -> (PathBuf, Vec<FileEntry>) {
 pub struct FileBrowser {
     current_directory: Option<PathBuf>,
     home_directory: Option<PathBuf>,
+    documents_directory: Option<PathBuf>,
+    downloads_directory: Option<PathBuf>,
+    desktop_directory: Option<PathBuf>,
     history: CircularBuffer<10, PathBuf>,
 }
 
@@ -38,7 +44,10 @@ impl FileBrowser {
     pub fn init() {
         let mut file_browser = FileBrowser::get();
 
-        file_browser.home_directory = home::home_dir();
+        file_browser.home_directory = dirs::home_dir();
+        file_browser.documents_directory = dirs::document_dir();
+        file_browser.downloads_directory = dirs::download_dir();
+        file_browser.desktop_directory = dirs::desktop_dir();
         file_browser.current_directory = Some(file_browser.home_directory.clone().unwrap_or(PathBuf::from("/")));
     }
 
