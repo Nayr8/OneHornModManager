@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{Cursor, Read, Seek, SeekFrom};
+use std::ops::Deref;
 use roxmltree::Node;
 use models::UnpackingFileError;
 use byteorder::{ReadBytesExt, LE};
@@ -9,6 +10,13 @@ use spin::Mutex;
 use models::UnpackingFileError::*;
 use crate::{debug, error, trace};
 
+#[derive(Debug)]
+pub enum CompressionMethod {
+    None,
+    ZLib,
+    LZ4,
+    Invalid(u32),
+}
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -37,6 +45,16 @@ impl PackagedFileInfo {
 
     pub fn uncompressed_size(&self) -> usize {
         self.uncompressed_size
+    }
+
+    fn get_compression_method(&self) -> CompressionMethod {
+        let compression_method = self.flags & 0xF;
+        match compression_method {
+            0 => CompressionMethod::None,
+            1 => CompressionMethod::ZLib,
+            2 => CompressionMethod::LZ4,
+            _ => CompressionMethod::Invalid(compression_method),
+        }
     }
 
     fn create_string_from_entry(entry: &FileEntry) -> Result<String, UnpackingFileError> {
@@ -184,13 +202,35 @@ impl ModPackage {
 
     fn read_file(&self, file_info: &PackagedFileInfo) -> Result<Vec<u8>, UnpackingFileError> {
         self.file.lock().seek(SeekFrom::Start(file_info.offset_in_file() as u64))
-            .map_err(|_| CouldNotReadPackagedFile)?;
+            .map_err(|error| {
+                error!("File location overran end of package: {error}");
+                CouldNotReadPackagedFile
+            })?;
 
         let mut compressed_file = vec!(0_u8; file_info.size_on_disk());
         self.file.lock().read_exact(&mut compressed_file).map_err(|_| CouldNotReadPackagedFile)?;
 
-        let uncompressed_file = lz4_flex::decompress(compressed_file.as_slice(), file_info.uncompressed_size())
-            .map_err(|_| CouldNotReadPackagedFile)?;
+        let uncompressed_file = match file_info.get_compression_method() {
+            CompressionMethod::None => compressed_file,
+            CompressionMethod::ZLib => {
+                let mut decoder = flate2::read::ZlibDecoder::new(compressed_file.deref());
+                let mut uncompressed_file = Vec::new();
+                if let Err(error) = decoder.read_to_end(&mut uncompressed_file) {
+                    error!("Could not decompress file with zlib: {error}");
+                    return Err(CouldNotReadPackagedFile);
+                }
+                uncompressed_file
+            }
+            CompressionMethod::LZ4 => lz4_flex::decompress(compressed_file.as_slice(), file_info.uncompressed_size())
+                .map_err(|error| {
+                    error!("Could not decompress file with lz4: {error}");
+                    CouldNotReadPackagedFile
+                })?,
+            CompressionMethod::Invalid(compression_method) => {
+                error!("Invalid compression method: {compression_method}");
+                return Err(CouldNotReadPackagedFile);
+            }
+        };
 
         Ok(uncompressed_file)
     }
