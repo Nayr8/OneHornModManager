@@ -366,6 +366,7 @@ impl FileEntry {
         let mut name = [0_u8; 256];
         cursor.read_exact(&mut name).map_err(|_| InvalidFileList)?;
         if &name[0..4] != b"Mods" {
+            cursor.set_position(cursor.position() + 16);
             return Ok(None);
         }
 
