@@ -1,6 +1,8 @@
 use yew::prelude::*;
 use crate::bindings::ModManager;
 use crate::components::Button;
+use crate::components::Spinner;
+use crate::components::spinner::SpinnerSize;
 
 #[derive(Properties, PartialEq)]
 pub struct TopBarProps {
@@ -19,12 +21,20 @@ pub fn top_bar(props: &TopBarProps) -> Html {
         }
     };
 
-    let save = |_: MouseEvent| {
-        ModManager::save();
+    let saving = use_state(|| false);
+    let applying = use_state(|| false);
+    let save = {
+        let saving = saving.clone();
+        move |_: MouseEvent| {
+            ModManager::save(saving.clone());
+        }
     };
 
-    let apply = |_: MouseEvent| {
-        ModManager::apply();
+    let apply = {
+        let applying = applying.clone();
+        move |_: MouseEvent| {
+            ModManager::apply(applying.clone());
+        }
     };
 
     html! {
@@ -38,12 +48,20 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                     {"Add Mod"}
                 </Button>
 
-                <Button onclick={save}>
-                    {"Save"}
+                <Button onclick={save} disabled={*saving || *applying}>
+                    if !*saving {
+                        {"Save"}
+                    } else {
+                        <Spinner size={SpinnerSize::Small} />
+                    }
                 </Button>
 
-                <Button onclick={apply}>
-                    {"Apply"}
+                <Button onclick={apply} disabled={*saving || *applying}>
+                    if !*applying {
+                        {"Apply"}
+                    } else {
+                        <Spinner size={SpinnerSize::Small} />
+                    }
                 </Button>
             }
         </div>

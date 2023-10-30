@@ -59,15 +59,19 @@ struct GetModDetailsArgs {
 }
 
 impl ModManager {
-    pub fn apply() {
-        spawn_local(async {
+    pub fn apply(applying: UseStateHandle<bool>) {
+        applying.set(true);
+        spawn_local(async move {
             invoke("apply", JsValue::null()).await;
+            applying.set(false);
         });
     }
 
-    pub fn save() {
-        spawn_local(async {
+    pub fn save(saving: UseStateHandle<bool>) {
+        saving.set(true);
+        spawn_local(async move {
             invoke("save", JsValue::null()).await;
+            saving.set(false);
         });
     }
 
