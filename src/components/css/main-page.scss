@@ -1,0 +1,7 @@
+.main-page {
+  grid-row: main-start / main-end;
+  grid-column: main-start / main-end;
+  display: grid;
+  grid-template-columns: 1fr 30em;
+  grid-template-areas: "mod-list selected-mod";
+}

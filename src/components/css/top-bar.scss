@@ -1,14 +1,14 @@
 
 .top-bar {
-    grid-row: top-start / top-end;
-    grid-column: top-start / top-end;
+  grid-row: top-start / top-end;
+  grid-column: top-start / top-end;
 
-    display: grid;
-    grid-gap: 0.5em;
-    grid-auto-flow: column;
-    grid-template-columns: repeat(5, max-content);
-    padding-left: 0.5em;
+  display: grid;
+  grid-gap: 0.5em;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(5, max-content);
+  padding-left: 0.5em;
 
-    background: var(--top-bar);
-    border-bottom: solid var(--border);
+  background: var(--top-bar);
+  border-bottom: solid var(--border);
 }

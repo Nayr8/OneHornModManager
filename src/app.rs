@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use yew::prelude::*;
-use crate::components::mod_list::ModList;
+use crate::components::main_page::MainPage;
 use crate::components::file_explorer::FileExplorer;
 use crate::components::top_bar::TopBar;
 use crate::components::bottom_bar::BottomBar;
@@ -20,13 +20,12 @@ pub fn app() -> Html {
         <div class="app">
             <TopBar
                 file_explorer_open={file_explorer_open.clone()}
-                selected_mod={selected_mod.clone()}
-                mods={mods.clone()} />
+                selected_mod={selected_mod.clone()} />
             if *file_explorer_open {
                 <FileExplorer
                     file_explorer_open={file_explorer_open.clone()} />
             } else {
-                <ModList
+                <MainPage
                     mods={mods.clone()}
                     selected_mod={selected_mod.clone()}
                     file_explorer_open={file_explorer_open.clone()} />

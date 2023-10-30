@@ -1,20 +1,20 @@
 html, body {
-    background: var(--background);
-    color: var(--text);
-    width: 100%;
-    height: 100%;
-    margin: 0;
+  background: var(--background);
+  color: var(--text);
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 .app {
-    display: grid;
-    grid-template-areas: "top    "
-                         "main   "
-                         "bottom "
-                         "console";
-    grid-template-columns: auto;
-    grid-template-rows: 3em 1fr 3em auto;
-    height: 100%;
+  display: grid;
+  grid-template-areas: "top    "
+                       "main   "
+                       "bottom "
+                       "console";
+  grid-template-columns: auto;
+  grid-template-rows: 3em 1fr 3em auto;
+  height: 100%;
 
-    overflow: hidden;
+  overflow: hidden;
 }
