@@ -47,7 +47,6 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                 <Button onclick={toggle_file_explorer.clone()}>
                     {"Add Mod"}
                 </Button>
-
                 <Button onclick={save} disabled={*saving || *applying}>
                     if !*saving {
                         {"Save"}
@@ -55,7 +54,6 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                         <Spinner size={SpinnerSize::Small} />
                     }
                 </Button>
-
                 <Button onclick={apply} disabled={*saving || *applying}>
                     if !*applying {
                         {"Apply"}
