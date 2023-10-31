@@ -17,14 +17,11 @@ pub fn get_mods() -> Vec<Mod> {
     let state = State::get();
 
     let mut mods = Vec::with_capacity(state.mods.len());
-
     for mod_state in &state.mods {
-        mods.push(Mod {
-            name: mod_state.meta.name.value.clone(),
-            description: mod_state.meta.description.value.clone(),
-        });
+        mods.push(
+            ModMeta::get_mod_details(&mod_state.meta, &PathBuf::from(&mod_state.path))
+        );
     }
-
     mods
 }
 
@@ -136,7 +133,7 @@ pub fn apply() {
 
 #[derive(Serialize, Deserialize)]
 pub struct ModState {
-    pub meta: ModMeta,
+    pub meta: Option<ModMeta>,
     pub path: String,
     pub enabled: bool,
 }
@@ -144,7 +141,7 @@ pub struct ModState {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct State {
     #[serde(skip_serializing)]
-    selected_new_mod_meta: Option<(PathBuf, ModMeta)>,
+    selected_new_mod_meta: Option<(PathBuf, Option<ModMeta>)>,
     mods: Vec<ModState>,
     gustav_dev_mod_meta: Option<ModMeta>,
     pub(crate) bg3_appdata: String,
@@ -299,10 +296,8 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
     if let Some((path, meta)) = state.selected_new_mod_meta.as_ref() {
         if *path == file_path {
             debug!("Retrieved meta from cache");
-            let details = Mod {
-                name: meta.name.value.clone(),
-                description: meta.description.value.clone(),
-            };
+            let details = ModMeta::get_mod_details(&meta, &file_path);
+
             info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
             return MMResult::Ok(details)
         }
@@ -313,10 +308,7 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
         Err(error) => return MMResult::Err(error)
     };
 
-    let details = Mod {
-        name: meta.name.value.clone(),
-        description: meta.description.value.clone(),
-    };
+    let details = ModMeta::get_mod_details(&meta, &file_path);
 
     state.selected_new_mod_meta = Some((file_path, meta));
 
@@ -324,7 +316,7 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
     MMResult::Ok(details)
 }
 
-fn get_mod_meta(file_path: &Path) -> Result<ModMeta, ModDetailsError> {
+fn get_mod_meta(file_path: &Path) -> Result<Option<ModMeta>, ModDetailsError> {
     trace!("Attempting to retrieve meta data from path: {file_path:?}");
     let file = File::open(file_path).map_err(|error| {
         error!("Not a file: {error:?}");

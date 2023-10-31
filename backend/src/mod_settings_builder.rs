@@ -47,8 +47,10 @@ impl ModSettingsBuilder {
 
         for mod_state in mod_metas.iter() {
             if !mod_state.enabled { continue }
-            let mod_desc = Self::build_mod_desc(&mod_state.meta);
-            children.add_child(mod_desc).unwrap();
+            if let Some(meta) = mod_state.meta.as_ref() {
+                let mod_desc = Self::build_mod_desc(meta);
+                children.add_child(mod_desc).unwrap();
+            }
         }
 
         let mut mods_node = XMLElement::new("node");

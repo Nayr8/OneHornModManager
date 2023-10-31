@@ -20,7 +20,6 @@ pub enum UnpackingFileError {
     InvalidFileList,
     CouldNotReadPackagedFile,
 
-    MissingMetaData,
     MetaDataInvalidUtf8,
     MetaDataNotXml,
     MetaDataMissingModuleInfo,
