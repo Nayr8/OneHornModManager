@@ -1,11 +1,12 @@
 use xml_builder::{XML, XMLBuilder, XMLElement, XMLVersion};
-use crate::mod_package::{ModInfoNode, ModMeta};
+use package_helper::{Meta, MetaProperty};
+//use crate::mod_package::{ModInfoNode, ModMeta};
 use crate::state::ModState;
 
 pub(crate) struct ModSettingsBuilder;
 
 impl ModSettingsBuilder {
-    pub fn build(mod_metas: &[ModState], gustav_dev_meta: &ModMeta) -> XML {
+    pub fn build(mod_metas: &[ModState], gustav_dev_meta: &Meta) -> XML {
         let mut save = XMLElement::new("save");
 
         let mut version = XMLElement::new("version");
@@ -39,7 +40,7 @@ impl ModSettingsBuilder {
         xml
     }
 
-    fn build_mods_node(mod_metas: &[ModState], gustav_dev_meta: &ModMeta) -> XMLElement {
+    fn build_mods_node(mod_metas: &[ModState], gustav_dev_meta: &Meta) -> XMLElement {
         let mut children = XMLElement::new("children");
 
         let gustav_dev = Self::build_mod_desc(gustav_dev_meta);
@@ -60,12 +61,12 @@ impl ModSettingsBuilder {
         mods_node
     }
 
-    fn build_mod_desc(mod_meta: &ModMeta) -> XMLElement {
-        let folder = Self::build_mod_meta_attribute("Folder", &mod_meta.folder);
-        let md5 = Self::build_mod_meta_attribute("MD5", &mod_meta.md5);
-        let name = Self::build_mod_meta_attribute("Name", &mod_meta.name);
-        let uuid = Self::build_mod_meta_attribute("UUID", &mod_meta.uuid);
-        let version64 = Self::build_mod_meta_attribute("Version64", &mod_meta.version64);
+    fn build_mod_desc(mod_meta: &Meta) -> XMLElement {
+        let folder = Self::build_mod_meta_attribute("Folder", &mod_meta.folder());
+        let md5 = Self::build_mod_meta_attribute("MD5", &mod_meta.md5());
+        let name = Self::build_mod_meta_attribute("Name", &mod_meta.name());
+        let uuid = Self::build_mod_meta_attribute("UUID", &mod_meta.uuid());
+        let version64 = Self::build_mod_meta_attribute("Version64", &mod_meta.version64());
 
         let mut desc = XMLElement::new("node");
         desc.add_attribute("id", "ModuleShortDesc");
@@ -77,11 +78,11 @@ impl ModSettingsBuilder {
         desc
     }
 
-    fn build_mod_meta_attribute(name: &str, attribute_info: &ModInfoNode) -> XMLElement {
+    fn build_mod_meta_attribute(name: &str, attribute_info: &MetaProperty) -> XMLElement {
         let mut attribute = XMLElement::new("attribute");
         attribute.add_attribute("id", name);
-        attribute.add_attribute("type", &attribute_info.value_type);
-        attribute.add_attribute("value", &attribute_info.value);
+        attribute.add_attribute("type", &attribute_info.value_type());
+        attribute.add_attribute("value", &attribute_info.value());
         attribute
     }
 }

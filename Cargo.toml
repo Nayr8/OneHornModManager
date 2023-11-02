@@ -23,4 +23,4 @@ models = { path = "models" }
 log = "0.4.20"
 
 [workspace]
-members = ["backend"]
+members = ["backend", "package-helper"]

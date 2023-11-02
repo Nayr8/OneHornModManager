@@ -5,7 +5,7 @@ use crate::file_browser::FileBrowser;
 use crate::logger::Logger;
 use crate::state::State;
 
-mod mod_package;
+//mod mod_package;
 mod state;
 mod mod_settings_builder;
 mod logger;

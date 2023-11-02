@@ -4,8 +4,9 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
 use models::{Mod, MMResult, ModDetailsError};
+use package_helper::{Meta, PackageReader};
 use crate::{error, info, debug, trace};
-use crate::mod_package::{ModInfoNode, ModMeta, ModPackage};
+//use crate::mod_package::{ModInfoNode, ModMeta, ModPackage};
 use crate::extensions::HasExtension;
 use crate::mod_settings_builder::ModSettingsBuilder;
 
@@ -19,7 +20,7 @@ pub fn get_mods() -> Vec<Mod> {
     let mut mods = Vec::with_capacity(state.mods.len());
     for mod_state in &state.mods {
         mods.push(
-            ModMeta::get_mod_details(&mod_state.meta, &PathBuf::from(&mod_state.path))
+            State::get_mod_details(&mod_state.meta, &PathBuf::from(&mod_state.path))
         );
     }
     mods
@@ -133,7 +134,7 @@ pub fn apply() {
 
 #[derive(Serialize, Deserialize)]
 pub struct ModState {
-    pub meta: Option<ModMeta>,
+    pub meta: Option<Meta>,
     pub path: String,
     pub enabled: bool,
 }
@@ -141,9 +142,9 @@ pub struct ModState {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct State {
     #[serde(skip_serializing)]
-    selected_new_mod_meta: Option<(PathBuf, Option<ModMeta>)>,
+    selected_new_mod_meta: Option<(PathBuf, Option<Meta>)>,
     mods: Vec<ModState>,
-    gustav_dev_mod_meta: Option<ModMeta>,
+    gustav_dev_mod_meta: Option<Meta>,
     pub(crate) bg3_appdata: String,
 }
 
@@ -165,32 +166,7 @@ impl State {
         let gustav_dev_meta = match self.gustav_dev_mod_meta.as_ref() {
             Some(gustav_dev_meta) => gustav_dev_meta,
             None => {
-                self.gustav_dev_mod_meta = Some(ModMeta {
-                    name: ModInfoNode {
-                        value_type: "LSString".to_string(),
-                        value: "GustavDev".to_string(),
-                    },
-                    description: ModInfoNode {
-                        value_type: "".to_string(),
-                        value: "".to_string(),
-                    },
-                    folder: ModInfoNode {
-                        value_type: "LSString".to_string(),
-                        value: "GustavDev".to_string(),
-                    },
-                    uuid: ModInfoNode {
-                        value_type: "FixedString".to_string(),
-                        value: "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8".to_string(),
-                    },
-                    md5: ModInfoNode {
-                        value_type: "LSString".to_string(),
-                        value: "".to_string(),
-                    },
-                    version64: ModInfoNode {
-                        value_type: "int64".to_string(),
-                        value: "36028797018963968".to_string(),
-                    },
-                });
+                self.gustav_dev_mod_meta = Some(Meta::gustav_dev());
                 self.gustav_dev_mod_meta.as_ref().unwrap()
             },
         };
@@ -280,6 +256,26 @@ impl State {
         let documents = dirs::document_dir();
         self.bg3_appdata = documents.join("Larian Studios/Baldur's Gate 3/")
     }
+
+
+    pub fn get_mod_details(meta: &Option<Meta>, file_path: &Path) -> Mod {
+        match meta.as_ref() {
+            Some(meta) => Mod {
+                name: meta.name().value().to_string(),
+                description: meta.description().to_string(),
+            },
+            None => {
+                let name = file_path.file_name().unwrap()
+                    .to_string_lossy()
+                    .trim_end_matches(".pak")
+                    .to_string();
+                Mod {
+                    name,
+                    description: String::new()
+                }
+            }
+        }
+    }
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -296,7 +292,7 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
     if let Some((path, meta)) = state.selected_new_mod_meta.as_ref() {
         if *path == file_path {
             debug!("Retrieved meta from cache");
-            let details = ModMeta::get_mod_details(&meta, &file_path);
+            let details = State::get_mod_details(&meta, &file_path);
 
             info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
             return MMResult::Ok(details)
@@ -304,11 +300,14 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
     }
 
     let meta = match get_mod_meta(&file_path) {
-        Ok(meta) => meta,
+        Ok(mut meta) => {
+            // FIXME: Find a way to use multiple metas
+            meta.drain(..).next()
+        },
         Err(error) => return MMResult::Err(error)
     };
 
-    let details = ModMeta::get_mod_details(&meta, &file_path);
+    let details = State::get_mod_details(&meta, &file_path);
 
     state.selected_new_mod_meta = Some((file_path, meta));
 
@@ -316,19 +315,14 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
     MMResult::Ok(details)
 }
 
-fn get_mod_meta(file_path: &Path) -> Result<Option<ModMeta>, ModDetailsError> {
-    trace!("Attempting to retrieve meta data from path: {file_path:?}");
-    let file = File::open(file_path).map_err(|error| {
-        error!("Not a file: {error:?}");
-        ModDetailsError::FilePathDoesNotLeadToValidFile
-    })?;
-    trace!("Successfully opened file: {file_path:?}");
-
-    ModPackage::new(file).map_err(|error| {
-        error!("Cannot unpack file: {:?}", error);
+fn get_mod_meta(file_path: &Path) -> Result<Vec<Meta>, ModDetailsError> {
+    let package = PackageReader::read_package(file_path).map_err(|error| {
+        error!("Cannot reading package: {error:?}");
         ModDetailsError::CannotUnpackPackageFile
-    })?.read_package_meta().map_err(|error| {
-        error!("Cannot read package meta: {:?}", error);
+    })?;
+
+    package.get_meta().map_err(|error| {
+        error!("Cannot read package meta: {error:?}");
         ModDetailsError::CannotReadPackageMeta
     })
 }

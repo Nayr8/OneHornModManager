@@ -30,6 +30,7 @@ steamlocate = "1.2.1"
 flate2 = "1.0.28"
 
 models = { path = "../models" }
+package-helper = { path = "../package-helper" }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

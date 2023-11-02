@@ -1,0 +1,13 @@
+[package]
+name = "package-helper"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+byteorder = "1.5.0"
+lz4_flex = "0.11.1"
+flate2 = "1.0.28"
+roxmltree = "0.18.0"
+serde = { version = "1.0.190", features = ["derive"] }
