@@ -86,7 +86,8 @@ fn mod_component(props: &ModElementProps) -> Html {
     html! {
         <Button class="mod-element" size={ButtonSize::Thin} onclick={onclick} selected={selected}>
             <div style="font-size: 0.9em">{props.mod_info.name.clone()}</div>
-            <div style="font-size: 0.7em;transform: translate(0, 0.2em);overflow-x: scroll">{props.mod_info.description.clone()}</div>
+            <div style="font-size: 0.7em;transform: translate(0, 0.2em);overflow-x: hidden">{props.mod_info.description.clone()}</div>
+            <div style="font-size: 0.9em">{props.mod_info.version.clone()}</div>
         </Button>
     }
 }

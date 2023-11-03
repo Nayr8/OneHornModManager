@@ -58,6 +58,7 @@ pub fn selected_mod(props: &SelectedModProps) -> Html {
             <div class="selected-mod">
                 <div style="font-size: 1.3em;text-align: center">{&selected_mod.name}</div>
                 <div style="font-size: 0.8em;text-align: center">{&selected_mod.description}</div>
+                <div style="font-size: 1em;text-align: center">{&selected_mod.version}</div>
                 <div class="selected-mod-options">
                     <Button onclick={remove_mod} size={ButtonSize::Big} style="width: min-content">{"Remove Mod"}</Button>
                     <Button size={ButtonSize::Big} style="width: min-content">{"Disable Mod"}</Button>

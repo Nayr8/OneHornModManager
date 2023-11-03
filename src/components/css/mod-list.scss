@@ -8,8 +8,8 @@
 
 .mod-element {
   display: grid;
-  grid-template-areas: "name description";
-  grid-template-columns: max-content auto;
+  grid-template-areas: "name description version";
+  grid-template-columns: max-content auto max-content;
   grid-column-gap: 0.7em;
   overflow-x: scroll;
 }

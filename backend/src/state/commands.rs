@@ -141,7 +141,7 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
             debug!("Retrieved meta from cache");
             let details = State::get_mod_details(&meta, &file_path);
 
-            info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
+            info!("Returning mod details {{name: {}, description: {}, version: {}}}", details.name, details.description, details.version);
             return MMResult::Ok(details)
         }
     }
@@ -158,6 +158,6 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
 
     state.selected_new_mod_meta = Some((file_path, meta));
 
-    info!("Returning mod details {{name: {}, description: {}}}", details.name, details.description);
+    info!("Returning mod details {{name: {}, description: {}, version: {}}}", details.name, details.description, details.version);
     MMResult::Ok(details)
 }
