@@ -44,6 +44,16 @@ pub fn selected_mod(props: &SelectedModProps) -> Html {
 
 
     if let Some(selected_mod) = selected_mod {
+        let toggle_enabled = {
+            let enabled = selected_mod.enabled;
+            let mod_index = props.selected_mod.unwrap();
+            let mods = props.mods.clone();
+            move |_: MouseEvent| {
+                ModManager::set_mod_enabled_state(mod_index, !enabled);
+                ModManager::get_mods(mods.clone());
+            }
+        };
+
         let remove_mod = {
             let mods = props.mods.clone();
             let selected_mod = props.selected_mod.clone();
@@ -61,7 +71,13 @@ pub fn selected_mod(props: &SelectedModProps) -> Html {
                 <div style="font-size: 1em;text-align: center">{&selected_mod.version}</div>
                 <div class="selected-mod-options">
                     <Button onclick={remove_mod} size={ButtonSize::Big} style="width: min-content">{"Remove Mod"}</Button>
-                    <Button size={ButtonSize::Big} style="width: min-content">{"Disable Mod"}</Button>
+                    <Button onclick={toggle_enabled} size={ButtonSize::Big} style="width: min-content">
+                        if selected_mod.enabled {
+                            {"Disable Mod"}
+                        } else {
+                            {"Enable Mod"}
+                        }
+                    </Button>
                 </div>
             </div>
         }

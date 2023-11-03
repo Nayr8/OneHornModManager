@@ -17,6 +17,11 @@
   background: var(--unselected-option);
 }
 
+.make-element-disabled-lite {
+  background: var(--top-bar);
+  color: var(--text-disabled);
+}
+
 .make_element-thin {
   height: 1.3em;
 }

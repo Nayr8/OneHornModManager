@@ -64,6 +64,11 @@ pub fn log_error(message: String) {
 }
 
 #[tauri::command(rename_all = "snake_case")]
+pub fn log_critical(message: String) {
+    Logger::log_critical(message)
+}
+
+#[tauri::command(rename_all = "snake_case")]
 pub fn get_log_messages() -> Vec<LogLine> {
     LOGGER.lock().log_lines.clone()
 }

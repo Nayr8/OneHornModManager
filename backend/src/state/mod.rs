@@ -13,7 +13,7 @@ pub mod commands;
 static STATE: Mutex<State> = Mutex::new(State::new());
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ModState {
     pub meta: Option<Meta>,
     pub path: String,
@@ -138,12 +138,13 @@ impl State {
         self.bg3_appdata = documents.join("Larian Studios/Baldur's Gate 3/")
     }
 
-    pub fn get_mod_details(meta: &Option<Meta>, file_path: &Path) -> Mod {
+    pub fn get_mod_details(meta: &Option<Meta>, file_path: &Path, enabled: bool) -> Mod {
         match meta.as_ref() {
             Some(meta) => Mod {
                 name: meta.name().value().to_string(),
                 description: meta.description().to_string(),
                 version: meta.version().to_string(),
+                enabled,
             },
             None => {
                 let name = file_path.file_name().unwrap()
@@ -154,6 +155,7 @@ impl State {
                     name,
                     description: String::new(),
                     version: String::new(),
+                    enabled,
                 }
             }
         }

@@ -24,6 +24,7 @@ fn main() {
             logger::log_info,
             logger::log_warn,
             logger::log_error,
+            logger::log_critical,
             logger::get_log_messages,
             file_browser::read_current_dir,
             file_browser::redirect_browser,
@@ -34,6 +35,7 @@ fn main() {
             state::commands::remove_mod,
             state::commands::save,
             state::commands::apply,
+            state::commands::set_mod_enabled_state,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

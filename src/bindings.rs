@@ -119,4 +119,18 @@ impl ModManager {
             }
         });
     }
+
+    pub fn set_mod_enabled_state(index: usize, enabled: bool) {
+        #[derive(Serialize)]
+        struct Args {
+            index: usize,
+            enabled: bool
+        }
+        spawn_local(async move {
+            invoke("set_mod_enabled_state", serde_wasm_bindgen::to_value(&Args {
+                index,
+                enabled,
+            }).unwrap()).await;
+        })
+    }
 }

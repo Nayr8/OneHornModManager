@@ -5,6 +5,7 @@ mod bindings;
 
 use wasm_bindgen::prelude::*;
 use app::App;
+use crate::logger::Logger;
 
 #[wasm_bindgen]
 extern "C" {
@@ -13,5 +14,6 @@ extern "C" {
 }
 
 fn main() {
+    Logger::init();
     yew::Renderer::<App>::new().render();
 }

@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use crate::error::MetaReadError;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct MetaProperty {
     value_type: String,
     value: String,
@@ -17,7 +17,7 @@ impl MetaProperty {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Version {
     major: u64,
     minor: u64,
@@ -37,7 +37,7 @@ impl Version {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Meta {
     name: MetaProperty,
     description: String,

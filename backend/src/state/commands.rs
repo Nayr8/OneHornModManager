@@ -13,7 +13,7 @@ pub fn get_mods() -> Vec<Mod> {
     let mut mods = Vec::with_capacity(state.mods.len());
     for mod_state in &state.mods {
         mods.push(
-            State::get_mod_details(&mod_state.meta, &PathBuf::from(&mod_state.path))
+            State::get_mod_details(&mod_state.meta, &PathBuf::from(&mod_state.path), mod_state.enabled)
         );
     }
     mods
@@ -139,7 +139,7 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
     if let Some((path, meta)) = state.selected_new_mod_meta.as_ref() {
         if *path == file_path {
             debug!("Retrieved meta from cache");
-            let details = State::get_mod_details(&meta, &file_path);
+            let details = State::get_mod_details(&meta, &file_path, true);
 
             info!("Returning mod details {{name: {}, description: {}, version: {}}}", details.name, details.description, details.version);
             return MMResult::Ok(details)
@@ -154,10 +154,24 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
         Err(error) => return MMResult::Err(error)
     };
 
-    let details = State::get_mod_details(&meta, &file_path);
+    let details = State::get_mod_details(&meta, &file_path, true);
 
     state.selected_new_mod_meta = Some((file_path, meta));
 
     info!("Returning mod details {{name: {}, description: {}, version: {}}}", details.name, details.description, details.version);
     MMResult::Ok(details)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn set_mod_enabled_state(index: usize, enabled: bool) {
+    let mut state = State::get();
+    let mod_state = match state.mods.get_mut(index) {
+        Some(mod_state) => mod_state,
+        None => {
+            error!("Could not find mod to disable at position {index}");
+            return;
+        }
+    };
+
+    mod_state.enabled = enabled;
 }
