@@ -24,6 +24,8 @@ pub enum MetaReadError {
     MetaNotValidUtf8,
     MetaNotValidXml,
     MetaDataMissingModuleInfo,
+    MetaDataMissingVersion,
+    MetaDataInvalidVersion,
     PackageFileReadError(PackageFileReadError),
 }
 

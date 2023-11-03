@@ -18,13 +18,33 @@ impl MetaProperty {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct Version {
+    major: u64,
+    minor: u64,
+    revision: u64,
+    build: u64,
+}
+
+impl ToString for Version {
+    fn to_string(&self) -> String {
+        format!("{}.{}.{}.{}", self.major, self.minor, self.revision, self.build)
+    }
+}
+
+impl Version {
+    pub fn version64(&self) -> u64 {
+        (self.major << 55) | (self.minor << 47) | (self.revision << 31) | self.build
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct Meta {
     name: MetaProperty,
     description: String,
     folder: MetaProperty,
     uuid: MetaProperty,
     md5: MetaProperty,
-    version64: MetaProperty,
+    version: Version,
 }
 
 impl TryFrom<roxmltree::Document<'_>> for Meta {
@@ -37,7 +57,9 @@ impl TryFrom<roxmltree::Document<'_>> for Meta {
             MetaReadError::MetaDataMissingModuleInfo
         })?;
 
-        Meta::from_module_info_node(module_info)
+        let version = Meta::read_version(&xml)?;
+
+        Meta::from_module_info_node(module_info, version)
     }
 }
 
@@ -61,11 +83,17 @@ impl Meta {
                 value_type: String::from("LSString"),
                 value: String::new(),
             },
-            version64: MetaProperty {
-                value_type: String::from("int64"),
-                value: String::from("36028797018963968"),
+            version: Version {
+                major: 1,
+                minor: 0,
+                revision: 0,
+                build: 0,
             },
         }
+    }
+
+    pub fn version(&self) -> &Version {
+        &self.version
     }
 
     pub fn name(&self) -> &MetaProperty {
@@ -88,11 +116,7 @@ impl Meta {
         &self.md5
     }
 
-    pub fn version64(&self) -> &MetaProperty {
-        &self.version64
-    }
-
-    fn from_module_info_node(module_info: roxmltree::Node) -> Result<Meta, MetaReadError> {
+    fn from_module_info_node(module_info: roxmltree::Node, version: Version) -> Result<Meta, MetaReadError> {
         let name = Self::read_property(&module_info, "Name")?;
         let folder = Self::read_property(&module_info, "Folder")?;
         let uuid = Self::read_property(&module_info, "UUID")?;
@@ -100,11 +124,6 @@ impl Meta {
             .unwrap_or(MetaProperty {
                 value_type: String::from("LSString"),
                 value: String::new(),
-            });
-        let version64 = Self::read_property(&module_info, "Version64")
-            .unwrap_or(MetaProperty {
-                value_type: String::from("int64"),
-                value: String::from("36028797018963968"),
             });
         let description = Self::read_property(&module_info, "Description")
             .map(|description| description.value).unwrap_or(String::new());
@@ -115,7 +134,30 @@ impl Meta {
             folder,
             uuid,
             md5,
-            version64,
+            version,
+        })
+    }
+
+    fn read_version(xml: &roxmltree::Document) -> Result<Version, MetaReadError> {
+        let module_info = xml.descendants().find(|n| {
+            n.has_tag_name("version")
+        }).ok_or_else(|| {
+            MetaReadError::MetaDataMissingVersion
+        })?;
+
+        Ok(Version {
+            major: module_info.attribute("major")
+                .ok_or_else(|| MetaReadError::MetaDataInvalidVersion)?
+                .parse::<u64>().map_err(|_| MetaReadError::MetaDataInvalidVersion)?,
+            minor: module_info.attribute("minor")
+                .ok_or_else(|| MetaReadError::MetaDataInvalidVersion)?
+                .parse::<u64>().map_err(|_| MetaReadError::MetaDataInvalidVersion)?,
+            revision: module_info.attribute("revision")
+                .ok_or_else(|| MetaReadError::MetaDataInvalidVersion)?
+                .parse::<u64>().map_err(|_| MetaReadError::MetaDataInvalidVersion)?,
+            build: module_info.attribute("build")
+                .ok_or_else(|| MetaReadError::MetaDataInvalidVersion)?
+                .parse::<u64>().map_err(|_| MetaReadError::MetaDataInvalidVersion)?,
         })
     }
 

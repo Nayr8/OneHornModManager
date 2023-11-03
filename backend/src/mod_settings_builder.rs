@@ -1,6 +1,5 @@
 use xml_builder::{XML, XMLBuilder, XMLElement, XMLVersion};
-use package_helper::{Meta, MetaProperty};
-//use crate::mod_package::{ModInfoNode, ModMeta};
+use package_helper::{Meta, MetaProperty, Version};
 use crate::state::ModState;
 
 pub(crate) struct ModSettingsBuilder;
@@ -66,7 +65,7 @@ impl ModSettingsBuilder {
         let md5 = Self::build_mod_meta_attribute("MD5", &mod_meta.md5());
         let name = Self::build_mod_meta_attribute("Name", &mod_meta.name());
         let uuid = Self::build_mod_meta_attribute("UUID", &mod_meta.uuid());
-        let version64 = Self::build_mod_meta_attribute("Version64", &mod_meta.version64());
+        let version64 = Self::build_version64_attribute(mod_meta.version());
 
         let mut desc = XMLElement::new("node");
         desc.add_attribute("id", "ModuleShortDesc");
@@ -76,6 +75,14 @@ impl ModSettingsBuilder {
         desc.add_child(uuid).unwrap();
         desc.add_child(version64).unwrap();
         desc
+    }
+
+    fn build_version64_attribute(version: &Version) -> XMLElement {
+        let mut attribute = XMLElement::new("attribute");
+        attribute.add_attribute("id", "Version64");
+        attribute.add_attribute("type", "int64");
+        attribute.add_attribute("value", &version.version64().to_string());
+        attribute
     }
 
     fn build_mod_meta_attribute(name: &str, attribute_info: &MetaProperty) -> XMLElement {

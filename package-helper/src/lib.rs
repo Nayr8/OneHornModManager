@@ -9,7 +9,7 @@ mod meta;
 pub use package::Package;
 pub use package_reader::PackageReader;
 pub use error::PackageReadError;
-pub use meta::{Meta, MetaProperty};
+pub use meta::{Meta, MetaProperty, Version};
 
 
 

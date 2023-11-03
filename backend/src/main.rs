@@ -28,12 +28,12 @@ fn main() {
             file_browser::read_current_dir,
             file_browser::redirect_browser,
             file_browser::get_common_paths,
-            state::get_mod_details,
-            state::get_mods,
-            state::add_current_mod,
-            state::remove_mod,
-            state::save,
-            state::apply,
+            state::commands::get_mod_details,
+            state::commands::get_mods,
+            state::commands::add_current_mod,
+            state::commands::remove_mod,
+            state::commands::save,
+            state::commands::apply,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

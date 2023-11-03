@@ -12,6 +12,7 @@ pub use fs::*;
 pub struct Mod {
     pub name: String,
     pub description: String,
+    pub version: String,
 }
 
 // This is needed because of the awkward way results are handled in the translation from tauri -> js -> yew
