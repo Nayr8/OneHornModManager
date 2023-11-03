@@ -1,5 +1,5 @@
-use std::fs::File;
-use std::io::{ErrorKind, Read};
+use std::fs::{File, OpenOptions};
+use std::io::{ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
@@ -67,6 +67,34 @@ impl State {
                 panic!("Could not get local data directory")
             }
         }
+    }
+
+    pub fn save() {
+        info!("Saving...");
+        let state = State::get();
+
+        let state_string = match serde_json::to_string::<State>(&state) {
+            Ok(state_string) => state_string,
+            Err(error) => {
+                error!("Could not serialize state: {error:?}");
+                return; // TODO return and handle error
+            }
+        };
+
+        let data_dir = State::get_data_dir();
+        let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open(data_dir.join("state.json")) {
+            Ok(file) => file,
+            Err(error) => {
+                error!("Could not save file: {error:?}");
+                return; // TODO return and handle error
+            }
+        };
+
+        if let Err(error) = file.write_all(state_string.as_bytes()) {
+            error!("Could not save file: {error:?}");
+            return; // TODO return and handle error
+        }
+        info!("Saved successfully");
     }
 
     pub fn load() {

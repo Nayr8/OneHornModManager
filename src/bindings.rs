@@ -67,14 +67,6 @@ impl ModManager {
         });
     }
 
-    pub fn save(saving: UseStateHandle<bool>) {
-        saving.set(true);
-        spawn_local(async move {
-            invoke("save", JsValue::null()).await;
-            saving.set(false);
-        });
-    }
-
     pub fn remove_mod(index: usize, mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
         #[derive(Serialize)]
         struct Args {

@@ -21,14 +21,7 @@ pub fn top_bar(props: &TopBarProps) -> Html {
         }
     };
 
-    let saving = use_state(|| false);
     let applying = use_state(|| false);
-    let save = {
-        let saving = saving.clone();
-        move |_: MouseEvent| {
-            ModManager::save(saving.clone());
-        }
-    };
 
     let apply = {
         let applying = applying.clone();
@@ -47,14 +40,7 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                 <Button onclick={toggle_file_explorer.clone()}>
                     {"Add Mod"}
                 </Button>
-                <Button onclick={save} disabled={*saving || *applying}>
-                    if !*saving {
-                        {"Save"}
-                    } else {
-                        <Spinner size={SpinnerSize::Small} />
-                    }
-                </Button>
-                <Button onclick={apply} disabled={*saving || *applying}>
+                <Button onclick={apply} disabled={*applying}>
                     if !*applying {
                         {"Apply"}
                     } else {

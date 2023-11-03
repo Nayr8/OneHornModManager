@@ -36,39 +36,16 @@ pub fn add_current_mod() {
         path: path.to_string_lossy().to_string(),
         enabled: true,
     });
+    drop(state);
+    State::save();
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn remove_mod(index: usize) {
     let mut state = State::get();
     state.mods.remove(index);
-}
-
-#[tauri::command(rename_all = "snake_case")]
-pub fn save() {
-    let state = State::get();
-
-    let state_string = match serde_json::to_string::<State>(&state) {
-        Ok(state_string) => state_string,
-        Err(error) => {
-            error!("Could not serialize state: {error:?}");
-            return; // TODO return and handle error
-        }
-    };
-
-    let data_dir = State::get_data_dir();
-    let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open(data_dir.join("state.json")) {
-        Ok(file) => file,
-        Err(error) => {
-            error!("Could not save file: {error:?}");
-            return; // TODO return and handle error
-        }
-    };
-
-    if let Err(error) = file.write_all(state_string.as_bytes()) {
-        error!("Could not save file: {error:?}");
-        return; // TODO return and handle error
-    }
+    drop(state);
+    State::save();
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -174,4 +151,6 @@ pub fn set_mod_enabled_state(index: usize, enabled: bool) {
     };
 
     mod_state.enabled = enabled;
+    drop(state);
+    State::save();
 }

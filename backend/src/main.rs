@@ -33,7 +33,6 @@ fn main() {
             state::commands::get_mods,
             state::commands::add_current_mod,
             state::commands::remove_mod,
-            state::commands::save,
             state::commands::apply,
             state::commands::set_mod_enabled_state,
         ])
