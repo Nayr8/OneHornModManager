@@ -84,9 +84,10 @@ fn mod_component(props: &ModElementProps) -> Html {
     };
 
     html! {
+
         <Button class={classes!("mod-element", if props.mod_info.enabled { None } else { Some("make-element-disabled-lite") })} size={ButtonSize::Thin} onclick={onclick} selected={selected}>
-            <div style="font-size: 0.9em">{props.mod_info.name.clone()}</div>
-            <div style="font-size: 0.7em;transform: translate(0, 0.2em);overflow-x: hidden">{props.mod_info.description.clone()}</div>
+            <div style="font-size: 0.9em;">{props.mod_info.name.clone()}</div>
+            <div style="font-size: 0.7em;transform: translate(0, 0.2em);overflow-x:hidden;text-overflow: ellipsis">{props.mod_info.description.clone()}</div>
             <div style="font-size: 0.9em">{props.mod_info.version.clone()}</div>
         </Button>
     }

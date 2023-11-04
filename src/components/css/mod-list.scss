@@ -11,5 +11,5 @@
   grid-template-areas: "name description version";
   grid-template-columns: max-content auto max-content;
   grid-column-gap: 0.7em;
-  overflow-x: scroll;
+  overflow-x:hidden;
 }
