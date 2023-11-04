@@ -51,4 +51,5 @@ pub enum ModDetailsError {
     FilePathDoesNotLeadToValidFile,
     CannotUnpackPackageFile,
     CannotReadPackageMeta,
+    CannotFindPackageFile,
 }

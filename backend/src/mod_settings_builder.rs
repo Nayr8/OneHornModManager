@@ -1,6 +1,6 @@
 use xml_builder::{XML, XMLBuilder, XMLElement, XMLVersion};
 use package_helper::{Meta, MetaProperty, Version};
-use crate::state::ModState;
+use crate::state::mod_models::ModState;
 
 pub(crate) struct ModSettingsBuilder;
 

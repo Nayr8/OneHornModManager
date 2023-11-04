@@ -7,26 +7,23 @@ use models::{Mod, ModDetailsError};
 use package_helper::{Meta, PackageReader};
 use crate::{error, info};
 use crate::mod_settings_builder::ModSettingsBuilder;
+use crate::state::mod_models::{ModState, SelectedNewModInfo};
 
 pub mod commands;
+pub mod mod_models;
 
 static STATE: Mutex<State> = Mutex::new(State::new());
 
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ModState {
-    pub meta: Option<Meta>,
-    pub path: String,
-    pub enabled: bool,
-}
-
 #[derive(Serialize, Deserialize)]
 pub(crate) struct State {
-    #[serde(skip_serializing)]
-    selected_new_mod_meta: Option<(PathBuf, Option<Meta>)>,
+    #[serde(skip)]
+    pub(crate) bg3_appdata: String,
+
+    selected_new_mod_info: Option<SelectedNewModInfo>,
+
     mods: Vec<ModState>,
     gustav_dev_mod_meta: Option<Meta>,
-    pub(crate) bg3_appdata: String,
 }
 
 impl State {
@@ -36,7 +33,7 @@ impl State {
 
     const fn new() -> State {
         State {
-            selected_new_mod_meta: None,
+            selected_new_mod_info: None,
             mods: Vec::new(),
             gustav_dev_mod_meta: None,
             bg3_appdata: String::new(),
@@ -62,11 +59,20 @@ impl State {
 
     fn get_data_dir() -> PathBuf {
         match dirs::data_local_dir() {
-            Some(dir) => dir.join("Nayr8'sBG3ModManager"),
+            Some(mut dir) => {
+                dir.push("Nayr8'sBG3ModManager");
+                dir
+            },
             None => {
                 panic!("Could not get local data directory")
             }
         }
+    }
+
+    fn get_mod_store_dir() -> PathBuf {
+        let mut dir = State::get_data_dir();
+        dir.push("Mods");
+        dir
     }
 
     pub fn save() {
@@ -110,7 +116,7 @@ impl State {
                 }
                 _ => {
                     error!("Could not open 'state.json' attempting to remove possibly corrupted file: {e}");
-                    if let Err(e) = std::fs::remove_file("state.json") {
+                    if let Err(e) = std::fs::remove_file(data_directory.join("state.json")) {
                         error!("Could not delete 'state.json' saving state may not be possible: {e}");
                     }
                     return;
@@ -166,32 +172,34 @@ impl State {
         self.bg3_appdata = documents.join("Larian Studios/Baldur's Gate 3/")
     }
 
-    pub fn get_mod_details(meta: &Option<Meta>, file_path: &Path, enabled: bool) -> Mod {
-        match meta.as_ref() {
-            Some(meta) => Mod {
-                name: meta.name().value().to_string(),
-                description: meta.description().to_string(),
-                version: meta.version().to_string(),
+    pub fn get_mod_details(meta: Option<&Meta>, file_path: &Path, enabled: bool) -> Mod {
+        if let Some(meta) = meta { Mod {
+            name: meta.name().value().to_string(),
+            description: meta.description().to_string(),
+            version: meta.version().to_string(),
+            enabled,
+        } } else {
+            let name = file_path.file_name().unwrap()
+                .to_string_lossy()
+                .trim_end_matches(".pak")
+                .to_string();
+            Mod {
+                name,
+                description: String::new(),
+                version: String::new(),
                 enabled,
-            },
-            None => {
-                let name = file_path.file_name().unwrap()
-                    .to_string_lossy()
-                    .trim_end_matches(".pak")
-                    .to_string();
-                Mod {
-                    name,
-                    description: String::new(),
-                    version: String::new(),
-                    enabled,
-                }
             }
         }
     }
 }
 
-fn get_mod_meta(file_path: &Path) -> Result<Vec<Meta>, ModDetailsError> {
-    let package = PackageReader::read_package(file_path).map_err(|error| {
+fn get_mod_meta(dir_path: &Path) -> Result<Vec<Meta>, ModDetailsError> {
+    let file_path = find_pak_path(dir_path).ok_or_else(|| {
+        error!("Cannot find package file");
+        ModDetailsError::CannotFindPackageFile
+    })?;
+
+    let package = PackageReader::read_package(&file_path).map_err(|error| {
         error!("Cannot reading package: {error:?}");
         ModDetailsError::CannotUnpackPackageFile
     })?;
@@ -200,4 +208,17 @@ fn get_mod_meta(file_path: &Path) -> Result<Vec<Meta>, ModDetailsError> {
         error!("Cannot read package meta: {error:?}");
         ModDetailsError::CannotReadPackageMeta
     })
+}
+
+fn find_pak_path(dir_path: &Path) -> Option<PathBuf> {
+    let dir = std::fs::read_dir(dir_path).ok()?;
+    for entry in dir {
+        let Ok(entry) = entry else { continue };
+
+        if entry.file_name().to_string_lossy().ends_with(".pak") {
+            info!("Found package: {}", entry.file_name().to_string_lossy());
+            return Some(dir_path.join(entry.file_name()));
+        }
+    }
+    None
 }

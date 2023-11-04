@@ -28,6 +28,7 @@ symlink = "0.1.0"
 dirs = "5.0.1"
 steamlocate = "1.2.1"
 flate2 = "1.0.28"
+zip-extract = "0.1.2"
 
 models = { path = "../models" }
 package-helper = { path = "../package-helper" }

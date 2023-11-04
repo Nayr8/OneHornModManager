@@ -10,7 +10,6 @@ mod state;
 mod mod_settings_builder;
 mod logger;
 mod file_browser;
-mod extensions;
 
 fn main() {
     Logger::init();

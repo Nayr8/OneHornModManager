@@ -154,8 +154,8 @@ impl FileBrowser {
             });
         }
         if meta.is_file() {
-            // Only accept .pak files for now
-            if file_name.ends_with(".pak") {
+            // Only accept .pak and .zip files for now
+            if file_name.ends_with(".pak") || file_name.ends_with(".zip") {
                 return Some(FileEntry {
                     entry_type: EntryType::File,
                     path: Rc::new(path),
