@@ -41,10 +41,10 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                     {"Add Mod"}
                 </Button>
                 <Button onclick={apply} disabled={*applying}>
-                    if !*applying {
-                        {"Apply"}
-                    } else {
+                    if *applying {
                         <Spinner size={SpinnerSize::Small} />
+                    } else {
+                        {"Apply"}
                     }
                 </Button>
             }

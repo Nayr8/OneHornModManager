@@ -22,12 +22,9 @@ pub fn get_mods() -> Vec<Mod> {
 pub fn add_current_mod() {
     let mut state = State::get();
 
-    let mod_info = match state.selected_new_mod_info.take() {
-        Some(mod_info) => mod_info,
-        None => {
-            error!("No mod info cached");
-            return; // TODO return and handle error
-        }
+    let Some(mod_info) = state.selected_new_mod_info.take() else {
+        error!("No mod info cached");
+        return; // TODO return and handle error
     };
 
     state.mods.push(ModState::from(mod_info));
@@ -105,7 +102,7 @@ pub fn apply() {
         error!("Could not write mod_settings: {error:?}");
         return; // TODO return and handle error
     }
-    info!("Mod settings applied")
+    info!("Mod settings applied");
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -197,12 +194,9 @@ fn mov_zip(file_path: &Path) -> PathBuf {
 #[tauri::command(rename_all = "snake_case")]
 pub fn set_mod_enabled_state(index: usize, enabled: bool) {
     let mut state = State::get();
-    let mod_state = match state.mods.get_mut(index) {
-        Some(mod_state) => mod_state,
-        None => {
-            error!("Could not find mod to disable at position {index}");
-            return;
-        }
+    let Some(mod_state) = state.mods.get_mut(index) else {
+        error!("Could not find mod to disable at position {index}");
+        return;
     };
 
     mod_state.enabled = enabled;

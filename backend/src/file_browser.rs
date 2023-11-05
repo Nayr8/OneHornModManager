@@ -33,16 +33,16 @@ pub fn get_common_paths() -> Vec<(String, PathBuf)> {
     let file_browser = FileBrowser::get();
 
     if let Some(home_directory) = file_browser.home_directory.as_ref() {
-        paths.push(("Home".into(), home_directory.clone()))
+        paths.push(("Home".into(), home_directory.clone()));
     }
     if let Some(documents_directory) = file_browser.documents_directory.as_ref() {
-        paths.push(("Documents".into(), documents_directory.clone()))
+        paths.push(("Documents".into(), documents_directory.clone()));
     }
     if let Some(downloads_directory) = file_browser.downloads_directory.as_ref() {
-        paths.push(("Downloads".into(), downloads_directory.clone()))
+        paths.push(("Downloads".into(), downloads_directory.clone()));
     }
     if let Some(desktop_directory) = file_browser.desktop_directory.as_ref() {
-        paths.push(("Desktop".into(), desktop_directory.clone()))
+        paths.push(("Desktop".into(), desktop_directory.clone()));
     }
 
     paths
@@ -86,7 +86,7 @@ impl FileBrowser {
         std::mem::swap(&mut file_browser.current_directory, &mut path);
 
         if let Some(path) = path {
-            file_browser.history.push_back(path)
+            file_browser.history.push_back(path);
         }
         Ok(())
     }
@@ -134,16 +134,13 @@ impl FileBrowser {
             }
         };
 
-        let file_name = match path.file_name() {
-            Some(file_name) => {
-                let file_name = file_name.to_string_lossy();
-                format!("{file_name}")
-            }
-            None => {
-                let path = path.display();
-                warn!("Could not find filename from path {path}");
-                return None;
-            }
+        let file_name = if let Some(file_name) = path.file_name() {
+            let file_name = file_name.to_string_lossy();
+            format!("{file_name}")
+        } else {
+            let path = path.display();
+            warn!("Could not find filename from path {path}");
+            return None;
         };
 
         if meta.is_dir() {
@@ -155,7 +152,10 @@ impl FileBrowser {
         }
         if meta.is_file() {
             // Only accept .pak and .zip files for now
-            if file_name.ends_with(".pak") || file_name.ends_with(".zip") {
+            let extension = Path::new(&file_name).extension();
+            if extension.map_or(false, |extension| {
+                extension.eq_ignore_ascii_case("pak") || extension.eq_ignore_ascii_case("zip")
+            }) {
                 return Some(FileEntry {
                     entry_type: EntryType::File,
                     path: Rc::new(path),

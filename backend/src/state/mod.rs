@@ -41,12 +41,9 @@ impl State {
     }
 
     fn build_mod_settings(&mut self) -> String {
-        let gustav_dev_meta = match self.gustav_dev_mod_meta.as_ref() {
-            Some(gustav_dev_meta) => gustav_dev_meta,
-            None => {
-                self.gustav_dev_mod_meta = Some(Meta::gustav_dev());
-                self.gustav_dev_mod_meta.as_ref().unwrap()
-            },
+        let gustav_dev_meta = if let Some(gustav_dev_meta) = self.gustav_dev_mod_meta.as_ref() { gustav_dev_meta } else {
+            self.gustav_dev_mod_meta = Some(Meta::gustav_dev());
+            self.gustav_dev_mod_meta.as_ref().unwrap()
         };
 
         let xml = ModSettingsBuilder::build(&self.mods, gustav_dev_meta);
@@ -109,18 +106,15 @@ impl State {
         std::fs::create_dir_all(&data_directory).expect("Could not create data directory");
         let mut state_file = match File::open(data_directory.join("state.json")) {
             Ok(state_file) => state_file,
-            Err(e) => match e.kind(){
-                ErrorKind::NotFound => {
-                    info!("No 'state.json' file found");
-                    return;
+            Err(e) => if e.kind() == ErrorKind::NotFound {
+                info!("No 'state.json' file found");
+                return;
+            } else {
+                error!("Could not open 'state.json' attempting to remove possibly corrupted file: {e}");
+                if let Err(e) = std::fs::remove_file(data_directory.join("state.json")) {
+                    error!("Could not delete 'state.json' saving state may not be possible: {e}");
                 }
-                _ => {
-                    error!("Could not open 'state.json' attempting to remove possibly corrupted file: {e}");
-                    if let Err(e) = std::fs::remove_file(data_directory.join("state.json")) {
-                        error!("Could not delete 'state.json' saving state may not be possible: {e}");
-                    }
-                    return;
-                }
+                return;
             },
         };
 
@@ -128,7 +122,7 @@ impl State {
         if let Err(e) = state_file.read_to_string(&mut state_string) {
             error!("Could not read 'state.json' attempting to remove corrupted file: {e}");
             if let Err(e) = std::fs::remove_file("state.json") {
-                error!("Could not delete 'state.json' saving state may not be possible: {e}")
+                error!("Could not delete 'state.json' saving state may not be possible: {e}");
             }
         }
 
@@ -149,7 +143,7 @@ impl State {
         let mut state = STATE.lock();
         state.mods = state_data.mods;
         state.gustav_dev_mod_meta = state_data.gustav_dev_mod_meta;
-        info!("State loaded successfully")
+        info!("State loaded successfully");
     }
 
     #[cfg(target_os = "linux")]

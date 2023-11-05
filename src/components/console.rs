@@ -9,17 +9,15 @@ pub struct ConsoleProps {
 
 #[function_component(Console)]
 pub fn console(_props: &ConsoleProps) -> Html {
-    let log_lines = use_state(|| Vec::new());
+    let log_lines = use_state(Vec::new);
     Logger::read_logs_into(log_lines.clone()); // TODO reorganise this
 
     let log_lines: Html = log_lines.iter().rev().map(|log_line| {
         let class = match log_line.severity {
-            LogSeverity::Trace => "console-debug",
-            LogSeverity::Debug => "console-debug",
+            LogSeverity::Debug | LogSeverity::Trace => "console-debug",
             LogSeverity::Info => "console-info",
             LogSeverity::Warn => "console-warning",
-            LogSeverity::Error => "console-error",
-            LogSeverity::Critical => "console-error",
+            LogSeverity::Error | LogSeverity::Critical => "console-error",
         };
         html! {
             <div class={classes!(class)}>{log_line.to_string()}</div>

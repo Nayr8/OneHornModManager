@@ -1,17 +1,11 @@
 use yew::prelude::*;
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Default)]
 pub enum SpinnerSize {
     Small,
+    #[default]
     Normal,
 }
-
-impl Default for SpinnerSize {
-    fn default() -> Self {
-        SpinnerSize::Normal
-    }
-}
-
 #[derive(Properties, PartialEq)]
 pub struct SpinnerProps {
     #[prop_or_default]

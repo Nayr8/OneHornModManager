@@ -10,32 +10,32 @@ static LOGGER: Mutex<Logger> = Mutex::new(Logger::new());
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! trace {
-    ($($arg:tt)*) => {crate::logger::Logger::log_trace(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_trace(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! debug {
-    ($($arg:tt)*) => {crate::logger::Logger::log_debug(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_debug(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! info {
-    ($($arg:tt)*) => {crate::logger::Logger::log_info(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_info(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! warn {
-    ($($arg:tt)*) => {crate::logger::Logger::log_warn(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_warn(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! error {
-    ($($arg:tt)*) => {crate::logger::Logger::log_error(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_error(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! critical {
-    ($($arg:tt)*) => {crate::logger::Logger::log_critical(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_critical(format_args!($($arg)*).to_string())};
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -45,27 +45,27 @@ pub fn log_trace(message: String) {
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn log_debug(message: String) {
-    Logger::log_debug(message)
+    Logger::log_debug(message);
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn log_info(message: String) {
-    Logger::log_info(message)
+    Logger::log_info(message);
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn log_warn(message: String) {
-    Logger::log_warn(message)
+    Logger::log_warn(message);
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn log_error(message: String) {
-    Logger::log_error(message)
+    Logger::log_error(message);
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn log_critical(message: String) {
-    Logger::log_critical(message)
+    Logger::log_critical(message);
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -89,17 +89,17 @@ impl Logger {
         let default_panic = std::panic::take_hook();
         std::panic::set_hook(Box::new(move |info| {
             critical!("{info}\n{}", Backtrace::capture());
-            default_panic(info)
+            default_panic(info);
         }));
     }
 
     // Must NOT panic as it is also called in the panic handler
-    pub fn log(severity: LogSeverity, message: impl ToString) {
+    pub fn log(severity: LogSeverity, message: String) {
         let timestamp = Local::now();
         let log_line = LogLine {
             severity,
             timestamp: timestamp.timestamp(),
-            message: message.to_string(),
+            message,
         };
 
         println!("{log_line}");
@@ -122,30 +122,30 @@ impl Logger {
             },
             Err(e) => println!("Could not write log to file: {e}"),
         }
-        LOGGER.lock().log_lines.push(log_line)
+        LOGGER.lock().log_lines.push(log_line);
     }
 
-    pub fn log_trace(message: impl ToString) {
+    pub fn log_trace(message: String) {
         Logger::log(LogSeverity::Trace, message);
     }
 
-    pub fn log_debug(message: impl ToString) {
+    pub fn log_debug(message: String) {
         Logger::log(LogSeverity::Debug, message);
     }
 
-    pub fn log_info(message: impl ToString) {
+    pub fn log_info(message: String) {
         Logger::log(LogSeverity::Info, message);
     }
 
-    pub fn log_warn(message: impl ToString) {
+    pub fn log_warn(message: String) {
         Logger::log(LogSeverity::Warn, message);
     }
 
-    pub fn log_error(message: impl ToString) {
+    pub fn log_error(message: String) {
         Logger::log(LogSeverity::Error, message);
     }
 
-    pub fn log_critical(message: impl ToString) {
+    pub fn log_critical(message: String) {
         Logger::log(LogSeverity::Critical, message);
     }
 }

@@ -1,14 +1,11 @@
 use yew::prelude::*;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Default)]
 pub enum ButtonSize {
-    Thin, Standard, Big
-}
-
-impl Default for ButtonSize {
-    fn default() -> Self {
-        ButtonSize::Standard
-    }
+    Thin,
+    #[default]
+    Standard,
+    Big
 }
 
 #[derive(Properties, PartialEq)]

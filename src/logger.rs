@@ -10,22 +10,22 @@ use std::backtrace::Backtrace;
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! info {
-    ($($arg:tt)*) => {crate::logger::Logger::log_info(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_info(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! warn {
-    ($($arg:tt)*) => {crate::logger::Logger::log_warn(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_warn(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! error {
-    ($($arg:tt)*) => {crate::logger::Logger::log_error(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_error(format_args!($($arg)*).to_string())};
 }
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! critical {
-    ($($arg:tt)*) => {crate::logger::Logger::log_critical(format_args!($($arg)*))};
+    ($($arg:tt)*) => {$crate::logger::Logger::log_critical(format_args!($($arg)*).to_string())};
 }
 
 #[derive(Serialize, Deserialize)]
@@ -40,7 +40,7 @@ impl Logger {
         let default_panic = std::panic::take_hook();
         std::panic::set_hook(Box::new(move |info| {
             critical!("{info}\n{}", Backtrace::capture());
-            default_panic(info)
+            default_panic(info);
         }));
     }
 
@@ -52,32 +52,32 @@ impl Logger {
         });
     }
 
-    pub fn log_info(message: impl ToString) {
+    pub fn log_info(message: String) {
         let args = Self::build_args(message);
         spawn_local(async move {
             invoke("log_info", args).await;
         });
     }
-    pub fn log_warn(message: impl ToString) {
+    pub fn log_warn(message: String) {
         let args = Self::build_args(message);
         spawn_local(async move {
             invoke("log_warn", args).await;
         });
     }
-    pub fn log_error(message: impl ToString) {
+    pub fn log_error(message: String) {
         let args = Self::build_args(message);
         spawn_local(async move {
             invoke("log_error", args).await;
         });
     }
-    pub fn log_critical(message: impl ToString) {
+    pub fn log_critical(message: String) {
         let args = Self::build_args(message);
         spawn_local(async move {
             invoke("log_critical", args).await;
         });
     }
 
-    fn build_args(message: impl ToString) -> JsValue {
-        serde_wasm_bindgen::to_value(&LogArgs { message: message.to_string() }).unwrap()
+    fn build_args(message: String) -> JsValue {
+        serde_wasm_bindgen::to_value(&LogArgs { message }).unwrap()
     }
 }

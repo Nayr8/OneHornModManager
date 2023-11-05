@@ -13,10 +13,7 @@ pub struct ElementProps {
 
 #[function_component(Element)]
 pub fn element(props: &ElementProps) -> Html {
-    let class = match props.thin {
-        true => "element-thin",
-        false => "element",
-    };
+    let class = if props.thin { "element-thin" } else { "element" };
 
     html! {
         <div class={classes!(class, props.class.clone())}>

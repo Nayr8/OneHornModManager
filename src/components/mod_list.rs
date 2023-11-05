@@ -79,7 +79,7 @@ fn mod_component(props: &ModElementProps) -> Html {
         let selected_mod = props.selected_mod.clone();
         let index = props.index;
         Callback::from(move |_: MouseEvent| {
-            selected_mod.set(Some(index))
+            selected_mod.set(Some(index));
         })
     };
 

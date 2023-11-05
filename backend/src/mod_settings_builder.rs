@@ -45,7 +45,7 @@ impl ModSettingsBuilder {
         let gustav_dev = Self::build_mod_desc(gustav_dev_meta);
         children.add_child(gustav_dev).unwrap();
 
-        for mod_state in mod_metas.iter() {
+        for mod_state in mod_metas {
             if !mod_state.enabled { continue }
             if let Some(meta) = mod_state.meta.as_ref() {
                 let mod_desc = Self::build_mod_desc(meta);
@@ -61,10 +61,10 @@ impl ModSettingsBuilder {
     }
 
     fn build_mod_desc(mod_meta: &Meta) -> XMLElement {
-        let folder = Self::build_mod_meta_attribute("Folder", &mod_meta.folder());
-        let md5 = Self::build_mod_meta_attribute("MD5", &mod_meta.md5());
-        let name = Self::build_mod_meta_attribute("Name", &mod_meta.name());
-        let uuid = Self::build_mod_meta_attribute("UUID", &mod_meta.uuid());
+        let folder = Self::build_mod_meta_attribute("Folder", mod_meta.folder());
+        let md5 = Self::build_mod_meta_attribute("MD5", mod_meta.md5());
+        let name = Self::build_mod_meta_attribute("Name", mod_meta.name());
+        let uuid = Self::build_mod_meta_attribute("UUID", mod_meta.uuid());
         let version64 = Self::build_version64_attribute(mod_meta.version());
 
         let mut desc = XMLElement::new("node");
@@ -88,8 +88,8 @@ impl ModSettingsBuilder {
     fn build_mod_meta_attribute(name: &str, attribute_info: &MetaProperty) -> XMLElement {
         let mut attribute = XMLElement::new("attribute");
         attribute.add_attribute("id", name);
-        attribute.add_attribute("type", &attribute_info.value_type());
-        attribute.add_attribute("value", &attribute_info.value());
+        attribute.add_attribute("type", attribute_info.value_type());
+        attribute.add_attribute("value", attribute_info.value());
         attribute
     }
 }

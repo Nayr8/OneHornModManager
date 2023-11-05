@@ -123,6 +123,6 @@ impl ModManager {
                 index,
                 enabled,
             }).unwrap()).await;
-        })
+        });
     }
 }
