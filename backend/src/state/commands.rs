@@ -74,11 +74,24 @@ pub fn apply() {
         if !mod_state.enabled { continue }
 
         let mut path = mods_folder_path.clone();
-        let src_path = PathBuf::from(&mod_state.path);
+
+
+        let mut src_path = None;
+        let dir = std::fs::read_dir(&mod_state.path).unwrap();
+        for entry in dir {
+            let Ok(entry) = entry else { continue };
+
+            if entry.file_name().to_string_lossy().ends_with(".pak") {
+                src_path = Some(PathBuf::from(&mod_state.path).join(entry.file_name()));
+                break;
+            }
+        }
+        let src_path = src_path.unwrap();
+
         path.push(src_path.file_name().expect("Mod file not a file"));
 
-        if let Err(error) = symlink::symlink_file(&mod_state.path, path) {
-            error!("Could not apply mod '{}': {error}", mod_state.path);
+        if let Err(error) = symlink::symlink_file(&src_path, path) {
+            error!("Could not apply mod '{:?}': {error}", src_path);
             return;
         }
     }
@@ -141,6 +154,7 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
         return MMResult::Err(ModDetailsError::FilePathDoesNotLeadToValidFile)
     };
 
+    trace!("Copying data");
     let data_path = match extension.as_ref() {
         "pak" => mov_pak(&file_path),
         "zip" => mov_zip(&file_path),
@@ -150,6 +164,7 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
         }
     };
 
+    trace!("Fetching Meta");
     let meta = match get_mod_meta(&data_path) {
         Ok(mut meta) => {
             // FIXME: Find a way to use multiple metas
@@ -186,8 +201,9 @@ fn mov_zip(file_path: &Path) -> PathBuf {
     create_dir_all(&data_dir_path).unwrap();
 
     let src = File::open(file_path).unwrap();
+    trace!("Unzipping file");
     zip_extract::extract(src, &data_dir_path, true).unwrap();
-
+    trace!("File Unzipped");
     data_dir_path
 }
 
