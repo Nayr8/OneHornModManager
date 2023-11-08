@@ -1,16 +1,18 @@
-use std::fs::{File, OpenOptions};
+use std::fs::{create_dir_all, File, OpenOptions, remove_dir_all, copy};
 use std::io::{ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
 use models::{Mod, ModDetailsError};
 use package_helper::{Meta, PackageReader};
-use crate::{error, info};
+use crate::{debug, error, info, trace, warn};
 use crate::mod_settings_builder::ModSettingsBuilder;
+use crate::state::helpers::PathHelper;
 use crate::state::mod_models::{ModState, SelectedNewModInfo};
 
 pub mod commands;
 pub mod mod_models;
+mod helpers;
 
 static STATE: Mutex<State> = Mutex::new(State::new());
 
@@ -26,11 +28,8 @@ pub(crate) struct State {
     gustav_dev_mod_meta: Option<Meta>,
 }
 
+// Loading and saving
 impl State {
-    pub fn get() -> MutexGuard<'static, State> {
-        STATE.lock()
-    }
-
     const fn new() -> State {
         State {
             selected_new_mod_info: None,
@@ -40,70 +39,16 @@ impl State {
         }
     }
 
-    fn build_mod_settings(&mut self) -> String {
-        let gustav_dev_meta = if let Some(gustav_dev_meta) = self.gustav_dev_mod_meta.as_ref() { gustav_dev_meta } else {
-            self.gustav_dev_mod_meta = Some(Meta::gustav_dev());
-            self.gustav_dev_mod_meta.as_ref().unwrap()
-        };
-
-        let xml = ModSettingsBuilder::build(&self.mods, gustav_dev_meta);
-
-        let mut a = Vec::new();
-        xml.generate(&mut a).unwrap();
-
-        String::from_utf8(a).unwrap()
+    pub fn init() {
+        let mut state = State::get();
+        state.load();
+        state.bg3_appdata = PathHelper::find_bg3_app_data().to_string_lossy().to_string();
     }
 
-    fn get_data_dir() -> PathBuf {
-        match dirs::data_local_dir() {
-            Some(mut dir) => {
-                dir.push("Nayr8'sBG3ModManager");
-                dir
-            },
-            None => {
-                panic!("Could not get local data directory")
-            }
-        }
-    }
-
-    fn get_mod_store_dir() -> PathBuf {
-        let mut dir = State::get_data_dir();
-        dir.push("Mods");
-        dir
-    }
-
-    pub fn save() {
-        info!("Saving...");
-        let state = State::get();
-
-        let state_string = match serde_json::to_string::<State>(&state) {
-            Ok(state_string) => state_string,
-            Err(error) => {
-                error!("Could not serialize state: {error:?}");
-                return; // TODO return and handle error
-            }
-        };
-
-        let data_dir = State::get_data_dir();
-        let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open(data_dir.join("state.json")) {
-            Ok(file) => file,
-            Err(error) => {
-                error!("Could not save file: {error:?}");
-                return; // TODO return and handle error
-            }
-        };
-
-        if let Err(error) = file.write_all(state_string.as_bytes()) {
-            error!("Could not save file: {error:?}");
-            return; // TODO return and handle error
-        }
-        info!("Saved successfully");
-    }
-
-    pub fn load() {
+    fn load(&mut self) {
         info!("Attempting to load state");
-        let data_directory = Self::get_data_dir();
-        std::fs::create_dir_all(&data_directory).expect("Could not create data directory");
+        let data_directory = PathHelper::get_data_dir();
+        create_dir_all(&data_directory).expect("Could not create data directory");
         let mut state_file = match File::open(data_directory.join("state.json")) {
             Ok(state_file) => state_file,
             Err(e) => if e.kind() == ErrorKind::NotFound {
@@ -140,33 +85,210 @@ impl State {
             },
         };
 
-        let mut state = STATE.lock();
-        state.mods = state_data.mods;
-        state.gustav_dev_mod_meta = state_data.gustav_dev_mod_meta;
+        self.mods = state_data.mods;
+        self.gustav_dev_mod_meta = state_data.gustav_dev_mod_meta;
         info!("State loaded successfully");
     }
 
-    #[cfg(target_os = "linux")]
-    pub fn find_bg3_app_data(&mut self) {
-        let mut steam_dir = steamlocate::SteamDir::locate().unwrap();
-        let bg3_steam_app = steam_dir.app(&1086940).unwrap();
-        self.bg3_appdata = bg3_steam_app.path
-            .join("../../compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/").to_string_lossy().to_string();
+    fn save(&self) {
+        info!("Saving...");
+        let state_string = match serde_json::to_string::<State>(self) {
+            Ok(state_string) => state_string,
+            Err(error) => {
+                error!("Could not serialize state: {error:?}");
+                return; // TODO return and handle error
+            }
+        };
+
+        let data_dir = PathHelper::get_data_dir();
+        let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open(data_dir.join("state.json")) {
+            Ok(file) => file,
+            Err(error) => {
+                error!("Could not save file: {error:?}");
+                return; // TODO return and handle error
+            }
+        };
+
+        if let Err(error) = file.write_all(state_string.as_bytes()) {
+            error!("Could not save file: {error:?}");
+            return; // TODO return and handle error
+        }
+        info!("Saved successfully");
     }
 
-    #[cfg(target_os = "windows")]
-    pub fn find_bg3_app_data(&mut self) {
-        let appdata_local = dirs::config_local_dir().unwrap();
-        self.bg3_appdata = appdata_local.join("Larian Studios/Baldur's Gate 3/")
+    fn get() -> MutexGuard<'static, State> {
+        STATE.lock()
     }
 
-    #[cfg(target_os = "macos")]
-    pub fn find_bg3_app_data(&mut self) {
-        let documents = dirs::document_dir();
-        self.bg3_appdata = documents.join("Larian Studios/Baldur's Gate 3/")
+    fn build_mod_settings(&mut self) -> String {
+        let gustav_dev_meta = if let Some(gustav_dev_meta) = self.gustav_dev_mod_meta.as_ref() { gustav_dev_meta } else {
+            self.gustav_dev_mod_meta = Some(Meta::gustav_dev());
+            self.gustav_dev_mod_meta.as_ref().unwrap()
+        };
+
+        let xml = ModSettingsBuilder::build(&self.mods, gustav_dev_meta);
+
+        let mut a = Vec::new();
+        xml.generate(&mut a).unwrap();
+
+        String::from_utf8(a).unwrap()
     }
 
-    pub fn get_mod_details(meta: Option<&Meta>, file_path: &Path, enabled: bool) -> Mod {
+    pub fn apply() {
+        let mut state = State::get();
+
+        info!("Creating symlinks to mod pak files");
+        let mut mods_folder_path = PathBuf::from(&state.bg3_appdata);
+        mods_folder_path.push("Mods/");
+
+        for entry in std::fs::read_dir(&mods_folder_path).unwrap() {
+            if entry.is_err() { continue }
+            let entry = entry.unwrap();
+
+            if let Ok(file_type) = entry.file_type() {
+                if file_type.is_symlink() {
+                    symlink::remove_symlink_auto(entry.path()).unwrap();
+                }
+            }
+        }
+
+        for mod_state in &state.mods {
+            if !mod_state.enabled { continue }
+
+            let mut path = mods_folder_path.clone();
+
+
+            let mut src_path = None;
+            let dir = std::fs::read_dir(&mod_state.path).unwrap();
+            for entry in dir {
+                let Ok(entry) = entry else { continue };
+
+                if entry.file_name().to_string_lossy().ends_with(".pak") {
+                    src_path = Some(PathBuf::from(&mod_state.path).join(entry.file_name()));
+                    break;
+                }
+            }
+            let src_path = src_path.unwrap();
+
+            path.push(src_path.file_name().expect("Mod file not a file"));
+
+            if let Err(error) = symlink::symlink_file(&src_path, path) {
+                error!("Could not apply mod '{:?}': {error}", src_path);
+                return;
+            }
+        }
+
+        info!("Writing mod settings");
+        let mut mod_settings_path = PathBuf::from(&state.bg3_appdata);
+        mod_settings_path.push("PlayerProfiles/Public/modsettings.lsx");
+
+        let mod_settings = state.build_mod_settings();
+
+        let mut mod_settings_file = match OpenOptions::new()
+            .write(true).create(true).truncate(true)
+            .open(&mod_settings_path) {
+            Ok(file) => file,
+            Err(error) => {
+                error!("Could not apply mod_settings: {error:?}");
+                return; // TODO return and handle error
+            }
+        };
+        if let Err(error) = mod_settings_file.write_all(mod_settings.as_bytes()) {
+            error!("Could not write mod_settings: {error:?}");
+            return; // TODO return and handle error
+        }
+        info!("Mod settings applied");
+    }
+
+    pub fn get_mods() -> Vec<Mod> {
+        let state = State::get();
+
+        let mut mods = Vec::with_capacity(state.mods.len());
+        for mod_state in &state.mods {
+            mods.push(
+                State::meta_to_mod_details(mod_state.meta.as_ref(), &PathBuf::from(&mod_state.path), mod_state.enabled)
+            );
+        }
+        mods
+    }
+
+    pub fn remove_mod(index: usize) {
+        let mut state = State::get();
+        let Some(mod_state) = state.mods.get(index) else {
+            error!("Could not find mod at position {index}");
+            return;
+        };
+
+        let has_duplicates = state.mods.iter().enumerate().any(|(mod_index, state)| {
+            state.path == mod_state.path && mod_index != index
+        });
+        if !has_duplicates && remove_dir_all(&mod_state.path).is_err() {
+            error!("Could not remove mod data dir {}", &mod_state.path);
+        }
+        state.mods.remove(index);
+        state.save();
+    }
+
+    pub fn set_mod_enabled_state(index: usize, enabled: bool) {
+        let mut state = State::get();
+        let Some(mod_state) = state.mods.get_mut(index) else {
+            error!("Could not find mod to disable at position {index}");
+            return;
+        };
+
+        mod_state.enabled = enabled;
+        state.save();
+    }
+
+    fn try_get_meta_from_cache(&mut self, file_path: &Path) -> Option<Option<&Meta>> {
+        // Code is formatted weirdly due to lifetime fuckery with early returns
+        // See https://github.com/rust-lang/rust/issues/54663
+        trace!("Checking cache for the meta data for this package");
+        let meta_valid = if let Some(mod_info) = self.selected_new_mod_info.as_ref() {
+            mod_info.src_path() == file_path
+        } else { false };
+
+        if meta_valid {
+            self.selected_new_mod_info.as_ref().map(SelectedNewModInfo::meta)
+        } else {
+            if self.selected_new_mod_info.is_some() {
+                self.clear_mod_addition_cache();
+            }
+            None
+        }
+    }
+
+    fn clear_mod_addition_cache(&mut self) {
+        let Some(mod_info) = self.selected_new_mod_info.take() else { return };
+
+        let Some(file_name) = mod_info.src_path().file_stem() else { return };
+
+        let mut mod_store = PathHelper::get_mod_store_dir();
+        mod_store.push(file_name);
+
+        let mod_store_string = mod_store.to_string_lossy();
+        let cache_is_duplicate = self.mods.iter().any(|state| {
+            state.path == mod_store_string
+        });
+
+        if !cache_is_duplicate && remove_dir_all(&mod_store).is_err() {
+            warn!("Could not remove mod data dir for caches data {}", mod_store_string);
+        }
+    }
+
+    pub fn add_current_mod() {
+        let mut state = State::get();
+
+        let Some(mod_info) = state.selected_new_mod_info.take() else {
+            error!("No mod info cached");
+            return; // TODO return and handle error
+        };
+
+        state.mods.push(ModState::from(mod_info));
+        state.save();
+    }
+
+    fn meta_to_mod_details(meta: Option<&Meta>, file_path: &Path, enabled: bool) -> Mod {
         if let Some(meta) = meta { Mod {
             name: meta.name().value().to_string(),
             description: meta.description().to_string(),
@@ -185,34 +307,99 @@ impl State {
             }
         }
     }
-}
 
-fn get_mod_meta(dir_path: &Path) -> Result<Vec<Meta>, ModDetailsError> {
-    let file_path = find_pak_path(dir_path).ok_or_else(|| {
-        error!("Cannot find package file");
-        ModDetailsError::CannotFindPackageFile
-    })?;
+    pub fn get_mod_details(file_path: PathBuf) -> Result<Mod, ModDetailsError> {
+        info!("Fetching mod details");
+        let mut state = State::get();
 
-    let package = PackageReader::read_package(&file_path).map_err(|error| {
-        error!("Cannot reading package: {error:?}");
-        ModDetailsError::CannotUnpackPackageFile
-    })?;
+        trace!("Checking cache for the meta data for this package");
+        if let Some(meta) = state.try_get_meta_from_cache(&file_path) {
+            debug!("Retrieved meta from cache");
+            let details = State::meta_to_mod_details(meta, &file_path, true);
 
-    package.get_meta().map_err(|error| {
-        error!("Cannot read package meta: {error:?}");
-        ModDetailsError::CannotReadPackageMeta
-    })
-}
-
-fn find_pak_path(dir_path: &Path) -> Option<PathBuf> {
-    let dir = std::fs::read_dir(dir_path).ok()?;
-    for entry in dir {
-        let Ok(entry) = entry else { continue };
-
-        if entry.file_name().to_string_lossy().ends_with(".pak") {
-            info!("Found package: {}", entry.file_name().to_string_lossy());
-            return Some(dir_path.join(entry.file_name()));
+            info!("Returning mod details {{name: {}, description: {}, version: {}}}", details.name, details.description, details.version);
+            return Ok(details)
         }
+
+        let extension = file_path.extension().map(std::ffi::OsStr::to_string_lossy);
+        let data_path = match extension.as_ref().map(std::convert::AsRef::as_ref) {
+            Some("pak") => State::mov_pak(&file_path),
+            Some("zip") => State::extract_zip(&file_path),
+            _ => {
+                error!("File {file_path:?} does not have a supported extension");
+                return Err(ModDetailsError::FilePathDoesNotLeadToValidFile)
+            }
+        };
+
+        let meta = match State::get_mod_metas(&data_path) {
+            Ok(mut meta) => {
+                // FIXME: Find a way to use multiple metas
+                meta.drain(..).next()
+            },
+            Err(error) => return Err(error)
+        };
+
+        let details = State::meta_to_mod_details(meta.as_ref(), &file_path, true);
+
+        state.selected_new_mod_info = Some(SelectedNewModInfo::new(file_path, meta, data_path));
+
+        info!("Returning mod details {{name: {}, description: {}, version: {}}}", details.name, details.description, details.version);
+        Ok(details)
     }
-    None
+
+    fn mov_pak(file_path: &Path) -> PathBuf {
+        let name = file_path.file_stem().unwrap();
+        let mut data_dir_path = PathHelper::get_mod_store_dir();
+        data_dir_path.push(name);
+
+        create_dir_all(&data_dir_path).unwrap();
+
+        copy(file_path, data_dir_path.join(file_path.file_name().unwrap())).unwrap();
+
+        data_dir_path
+    }
+
+    fn extract_zip(file_path: &Path) -> PathBuf {
+        let name = file_path.file_stem().unwrap();
+        let mut data_dir_path = PathHelper::get_mod_store_dir();
+        data_dir_path.push(name);
+
+        create_dir_all(&data_dir_path).unwrap();
+
+        let src = File::open(file_path).unwrap();
+        trace!("Unzipping file");
+        zip_extract::extract(src, &data_dir_path, true).unwrap();
+        trace!("File Unzipped");
+        data_dir_path
+    }
+
+    fn get_mod_metas(dir_path: &Path) -> Result<Vec<Meta>, ModDetailsError> {
+        let file_path = State::find_pak_path(dir_path).ok_or_else(|| {
+            error!("Cannot find package file");
+            ModDetailsError::CannotFindPackageFile
+        })?;
+
+        let package = PackageReader::read_package(&file_path).map_err(|error| {
+            error!("Cannot reading package: {error:?}");
+            ModDetailsError::CannotUnpackPackageFile
+        })?;
+
+        package.get_meta().map_err(|error| {
+            error!("Cannot read package meta: {error:?}");
+            ModDetailsError::CannotReadPackageMeta
+        })
+    }
+
+    fn find_pak_path(dir_path: &Path) -> Option<PathBuf> {
+        let dir = std::fs::read_dir(dir_path).ok()?;
+        for entry in dir {
+            let Ok(entry) = entry else { continue };
+
+            if entry.file_name().to_string_lossy().ends_with(".pak") {
+                info!("Found package: {}", entry.file_name().to_string_lossy());
+                return Some(dir_path.join(entry.file_name()));
+            }
+        }
+        None
+    }
 }

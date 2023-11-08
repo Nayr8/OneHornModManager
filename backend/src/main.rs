@@ -14,8 +14,7 @@ mod file_browser;
 fn main() {
     Logger::init();
     FileBrowser::init();
-    State::load();
-    State::get().find_bg3_app_data();
+    State::init();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             logger::log_trace,
