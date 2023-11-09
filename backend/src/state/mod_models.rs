@@ -5,7 +5,7 @@ use package_helper::Meta;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ModState {
     pub meta: Option<Meta>,
-    pub path: String,
+    pub path: PathBuf,
     pub enabled: bool,
 }
 
@@ -13,7 +13,7 @@ impl From<SelectedNewModInfo> for ModState {
     fn from(value: SelectedNewModInfo) -> Self {
         ModState {
             meta: value.meta,
-            path: value.unpacked_data.to_string_lossy().to_string(),
+            path: value.unpacked_data.clone(),
             enabled: true,
         }
     }
@@ -22,8 +22,8 @@ impl From<SelectedNewModInfo> for ModState {
 #[derive(Serialize, Deserialize)]
 pub struct SelectedNewModInfo {
     src_path: PathBuf,
-    meta: Option<Meta>,
-    unpacked_data: PathBuf,
+    pub meta: Option<Meta>,
+    pub unpacked_data: PathBuf,
 }
 
 impl SelectedNewModInfo {

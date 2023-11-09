@@ -31,3 +31,13 @@ pub fn get_mod_details(file_path: PathBuf) -> MMResult<Mod, ModDetailsError> {
 pub fn set_mod_enabled_state(index: usize, enabled: bool) {
     State::set_mod_enabled_state(index, enabled);
 }
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn create_profile(name: String) {
+    State::create_profile(name);
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn switch_profile(index: usize) {
+    State::switch_profile(index);
+}

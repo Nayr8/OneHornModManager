@@ -33,6 +33,8 @@ fn main() {
             state::commands::remove_mod,
             state::commands::apply,
             state::commands::set_mod_enabled_state,
+            state::commands::create_profile,
+            state::commands::switch_profile,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
