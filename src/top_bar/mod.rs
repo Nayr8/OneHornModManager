@@ -1,9 +1,13 @@
+
+
 use yew::prelude::*;
 use crate::bindings::ModManager;
 use crate::components::Button;
 use crate::components::Spinner;
 use crate::components::spinner::SpinnerSize;
-use crate::components::profiles::Profiles;
+use profiles::Profiles;
+
+mod profiles;
 
 #[derive(Properties, PartialEq)]
 pub struct TopBarProps {

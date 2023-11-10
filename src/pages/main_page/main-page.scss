@@ -1,3 +1,6 @@
+@use 'mod-list';
+@use 'selected-mod';
+
 .main-page {
   grid-row: main-start / main-end;
   grid-column: main-start / main-end;

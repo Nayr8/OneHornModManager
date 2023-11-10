@@ -1,10 +1,10 @@
 use std::rc::Rc;
 use yew::prelude::*;
-use crate::components::main_page::MainPage;
-use crate::components::file_explorer::FileExplorer;
-use crate::components::top_bar::TopBar;
-use crate::components::bottom_bar::BottomBar;
-use crate::components::console::Console;
+use crate::pages::main_page::MainPage;
+use crate::pages::file_explorer::FileExplorer;
+use crate::top_bar::TopBar;
+use crate::bottom_bar::BottomBar;
+use crate::console::Console;
 use models::Mod;
 
 

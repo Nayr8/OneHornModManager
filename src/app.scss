@@ -1,3 +1,9 @@
+@use 'pages/pages';
+@use 'bottom_bar/bottom-bar';
+@use 'console/console';
+@use 'top_bar/top-bar';
+@use 'components/components';
+
 html, body {
   background: var(--background);
   color: var(--text);

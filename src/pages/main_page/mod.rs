@@ -2,9 +2,11 @@ use std::rc::Rc;
 use yew::prelude::*;
 use models::Mod;
 use crate::bindings::ModManager;
-use crate::components::mod_list::ModList;
+use mod_list::ModList;
 use crate::components::Button;
 use crate::components::button::ButtonSize;
+
+mod mod_list;
 
 
 #[derive(Properties, PartialEq)]
