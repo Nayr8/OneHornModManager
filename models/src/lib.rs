@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 mod logging;
@@ -7,6 +8,12 @@ mod fs;
 pub use logging::*;
 pub use errors::*;
 pub use fs::*;
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+pub struct Profiles {
+    pub current_profile: usize,
+    pub profiles: HashMap<usize, String>,
+}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Mod {

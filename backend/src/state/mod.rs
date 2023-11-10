@@ -189,6 +189,15 @@ impl State {
         state.profiles.switch_profile(index);
     }
 
+    pub fn get_profiles() -> models::Profiles {
+        let state = State::get();
+
+        models::Profiles {
+            current_profile: state.profiles.current_profile(),
+            profiles: state.profiles.profiles(),
+        }
+    }
+
 
 
     fn new() -> State {

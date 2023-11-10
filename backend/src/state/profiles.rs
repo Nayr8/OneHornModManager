@@ -41,12 +41,16 @@ impl Profiles {
         self.profiles.get(&self.current_profile).unwrap().mods.as_slice()
     }
 
-    pub fn profiles(&self) -> HashMap<usize, &str> {
+    pub fn profiles(&self) -> HashMap<usize, String> {
         let mut profiles = HashMap::new();
         for (index, profile) in &self.profiles {
-            profiles.insert(*index, profile.name.as_str());
+            profiles.insert(*index, profile.name.clone());
         }
         profiles
+    }
+
+    pub fn current_profile(&self) -> usize {
+        self.current_profile
     }
 
     pub fn calculate_extraction_path(&self, src_path: &Path) -> PathBuf {

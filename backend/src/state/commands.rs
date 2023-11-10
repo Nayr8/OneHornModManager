@@ -41,3 +41,8 @@ pub fn create_profile(name: String) {
 pub fn switch_profile(index: usize) {
     State::switch_profile(index);
 }
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn get_profiles() -> models::Profiles {
+    State::get_profiles()
+}

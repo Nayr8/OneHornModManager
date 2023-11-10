@@ -11,13 +11,14 @@ lz4_flex = "0.11.1"
 regex = "1.9.5"
 roxmltree = "0.18.0"
 yew = { version = "0.20", features = ["csr"] }
-serde = { version = "1.0", features = ["derive", "rc"] }
+serde = { version = "1.0", features = ["derive", "rc", "std"] }
 serde-wasm-bindgen = "0.4"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize", "std"] }
 wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3", features = ["EventTarget", "Event"]}
 js-sys = "0.3"
 chrono = "0.4.31"
+serde_json = "1.0.108"
 
 models = { path = "models" }
 log = "0.4.20"

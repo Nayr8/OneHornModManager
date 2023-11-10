@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
-use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod, ModDetailsError};
+use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod, ModDetailsError, Profiles};
 use crate::{error, invoke};
 
 
@@ -123,6 +123,18 @@ impl ModManager {
                 index,
                 enabled,
             }).unwrap()).await;
+        });
+    }
+
+    pub fn get_profiles(profiles: UseStateHandle<Option<Profiles>>) {
+        spawn_local(async move {
+            let fetched_profiles = invoke("get_profiles", JsValue::null()).await;
+
+            // A bit hacky but serde_wasm_bindgen will not deserialize a int kiy hashmap as it thinks they are strings
+            let fetched_profiles = js_sys::JSON::stringify(&fetched_profiles).unwrap().as_string().unwrap();
+            let fetched_profiles = serde_json::from_str::<Profiles>(&fetched_profiles).unwrap();
+
+            profiles.set(Some(fetched_profiles));
         });
     }
 }

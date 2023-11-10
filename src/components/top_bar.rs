@@ -3,6 +3,7 @@ use crate::bindings::ModManager;
 use crate::components::Button;
 use crate::components::Spinner;
 use crate::components::spinner::SpinnerSize;
+use crate::components::profiles::Profiles;
 
 #[derive(Properties, PartialEq)]
 pub struct TopBarProps {
@@ -37,6 +38,7 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                     {"Back to Mod List"}
                 </Button>
             } else {
+                <Profiles />
                 <Button onclick={toggle_file_explorer.clone()}>
                     {"Add Mod"}
                 </Button>
