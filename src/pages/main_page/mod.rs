@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use yew::prelude::*;
-use models::Mod;
+use models::{Mod, Status};
 use crate::bindings::ModManager;
 use mod_list::ModList;
 use crate::components::Button;
@@ -11,7 +11,7 @@ mod mod_list;
 
 #[derive(Properties, PartialEq)]
 pub struct MainPageProps {
-    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
+    pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
     pub selected_mod: UseStateHandle<Option<usize>>,
     pub file_explorer_open: UseStateHandle<bool>,
 }
@@ -33,14 +33,14 @@ pub fn main_page(props: &MainPageProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct SelectedModProps {
-    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
+    pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
     pub selected_mod: UseStateHandle<Option<usize>>,
 }
 #[function_component(SelectedMod)]
 pub fn selected_mod(props: &SelectedModProps) -> Html {
     let selected_mod = (|selected_mod, mods| {
         let selected_mod: &usize = selected_mod?;
-        let mods: &Rc<Vec<Mod>> = mods?;
+        let Status::Loaded(mods): Status<&Rc<Vec<Mod>>, &()> = mods else { return None };
         mods.get(*selected_mod)
     })(props.selected_mod.as_ref(), props.mods.as_ref());
 

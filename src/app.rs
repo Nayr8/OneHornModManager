@@ -5,12 +5,12 @@ use crate::pages::file_explorer::FileExplorer;
 use crate::top_bar::TopBar;
 use crate::bottom_bar::BottomBar;
 use crate::console::Console;
-use models::Mod;
+use models::{Mod, Status};
 
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let mods: UseStateHandle<Option<Rc<Vec<Mod>>>> = use_state(|| None);
+    let mods: UseStateHandle<Status<Rc<Vec<Mod>>>> = use_state(|| Status::Loading);
 
     let file_explorer_open = use_state(|| false);
     let console_open = use_state(|| false);

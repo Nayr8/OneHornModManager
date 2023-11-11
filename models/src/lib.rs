@@ -23,6 +23,23 @@ pub struct Mod {
     pub enabled: bool,
 }
 
+#[derive(Serialize, Deserialize, PartialEq)]
+pub enum Status<OK: PartialEq, ERR: PartialEq = ()> {
+    Loading,
+    Loaded(OK),
+    Error(ERR)
+}
+
+impl<OK: PartialEq, ERR: PartialEq> Status<OK, ERR> {
+    pub const fn as_ref(&self) -> Status<&OK, &ERR> {
+        match self {
+            Status::Loading => Status::Loading,
+            Status::Loaded(ok) => Status::Loaded(ok),
+            Status::Error(err) => Status::Error(err),
+        }
+    }
+}
+
 // This is needed because of the awkward way results are handled in the translation from tauri -> js -> yew
 #[derive(Serialize, Deserialize)]
 pub enum MMResult<OK, ERR> {

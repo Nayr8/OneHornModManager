@@ -1,39 +1,35 @@
 use std::path::PathBuf;
 use std::rc::Rc;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
-use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod, ModDetailsError, Profiles};
+use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod, ModDetailsError, Profiles, Status};
 use crate::{error, invoke};
 
 
 pub struct FileBrowser;
 
-#[derive(Serialize, Deserialize)]
-struct RedirectBrowserArgs {
-    path: Rc<PathBuf>,
-}
 
 impl FileBrowser {
-    pub fn get_common_paths(common_paths: UseStateHandle<Option<Vec<(String, Rc<PathBuf>)>>>) {
+    pub fn get_common_paths(common_paths: UseStateHandle<Status<Vec<(String, Rc<PathBuf>)>>>) {
         spawn_local(async move {
             let fetched_common_paths = invoke("get_common_paths", JsValue::null()).await;
             let fetched_common_paths = serde_wasm_bindgen::from_value::<Vec<(String, Rc<PathBuf>)>>(fetched_common_paths).unwrap();
 
-            common_paths.set(Some(fetched_common_paths));
+            common_paths.set(Status::Loaded(fetched_common_paths));
         });
     }
 
     pub fn redirect_browser(path: Rc<PathBuf>) {
-        let args = RedirectBrowserArgs {
-            path
-        };
+        #[derive(Serialize)]
+        struct Args {
+            path: Rc<PathBuf>,
+        }
 
         spawn_local(async move {
-            let result = invoke("redirect_browser", serde_wasm_bindgen::to_value(&args).unwrap()).await;
+            let result = invoke("redirect_browser", serde_wasm_bindgen::to_value(&Args { path: path.clone() }).unwrap()).await;
             if let Err(e) = serde_wasm_bindgen::from_value::<Result<(), FileBrowserRedirectError>>(result).unwrap() {
-                let path = args.path;
                 error!("Could not redirect to {path:?}: {e:?}");
             }
         });
@@ -53,10 +49,6 @@ impl FileBrowser {
 
 pub struct ModManager;
 
-#[derive(Serialize)]
-struct GetModDetailsArgs {
-    file_path: Rc<PathBuf>,
-}
 
 impl ModManager {
     pub fn apply(applying: UseStateHandle<bool>) {
@@ -67,7 +59,7 @@ impl ModManager {
         });
     }
 
-    pub fn remove_mod(index: usize, mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
+    pub fn remove_mod(index: usize, mods: UseStateHandle<Status<Rc<Vec<Mod>>>>) {
         #[derive(Serialize)]
         struct Args {
             index: usize,
@@ -84,30 +76,30 @@ impl ModManager {
         });
     }
 
-    pub fn get_mods(mods: UseStateHandle<Option<Rc<Vec<Mod>>>>) {
+    pub fn get_mods(mods: UseStateHandle<Status<Rc<Vec<Mod>>>>) {
         spawn_local(async move {
             let fetched_mods = invoke("get_mods", JsValue::null()).await;
 
             let fetched_mods = serde_wasm_bindgen::from_value::<Rc<Vec<Mod>>>(fetched_mods).unwrap();
 
-            mods.set(Some(fetched_mods));
+            mods.set(Status::Loaded(fetched_mods));
         });
     }
 
-    pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Option<Rc<Mod>>>, mod_details_error: UseStateHandle<Option<ModDetailsError>>) {
-        let args = GetModDetailsArgs {
-            file_path: current_file
-        };
-
+    pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Status<Rc<Mod>, ModDetailsError>>) {
+        #[derive(Serialize)]
+        struct Args {
+            current_file: Rc<PathBuf>,
+        }
         spawn_local(async move {
-            let details_result = invoke("get_mod_details", serde_wasm_bindgen::to_value(&args).unwrap()).await;
+            let details_result = invoke("get_mod_details", serde_wasm_bindgen::to_value(&Args { current_file }).unwrap()).await;
 
             let details =
                 serde_wasm_bindgen::from_value::<MMResult<Rc<Mod>, ModDetailsError>>(details_result).unwrap();
 
             match details {
-                MMResult::Ok(details) => mod_details.set(Some(details)),
-                MMResult::Err(error) => mod_details_error.set(Some(error)),
+                MMResult::Ok(details) => mod_details.set(Status::Loaded(details)),
+                MMResult::Err(error) => mod_details.set(Status::Error(error)),
             }
         });
     }
@@ -126,7 +118,7 @@ impl ModManager {
         });
     }
 
-    pub fn get_profiles(profiles: UseStateHandle<Option<Profiles>>) {
+    pub fn get_profiles(profiles: UseStateHandle<Status<Profiles>>) {
         spawn_local(async move {
             let fetched_profiles = invoke("get_profiles", JsValue::null()).await;
 
@@ -134,7 +126,7 @@ impl ModManager {
             let fetched_profiles = js_sys::JSON::stringify(&fetched_profiles).unwrap().as_string().unwrap();
             let fetched_profiles = serde_json::from_str::<Profiles>(&fetched_profiles).unwrap();
 
-            profiles.set(Some(fetched_profiles));
+            profiles.set(Status::Loaded(fetched_profiles));
         });
     }
 
@@ -145,6 +137,6 @@ impl ModManager {
         }
         spawn_local(async move {
             invoke("switch_profile", serde_wasm_bindgen::to_value(&Args { index }).unwrap()).await;
-        })
+        });
     }
 }

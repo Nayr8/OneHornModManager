@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use yew::prelude::*;
-use models::Mod;
+use models::{Mod, Status};
 use crate::bindings::ModManager;
 use crate::components::Button;
 use crate::components::Spinner;
@@ -13,7 +13,7 @@ mod profiles;
 pub struct TopBarProps {
     pub file_explorer_open: UseStateHandle<bool>,
     pub selected_mod: UseStateHandle<Option<usize>>,
-    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
+    pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
 }
 
 #[function_component(TopBar)]

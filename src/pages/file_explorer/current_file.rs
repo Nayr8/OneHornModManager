@@ -1,4 +1,3 @@
-use std::ops::Deref;
 use yew::prelude::*;
 use models::FileEntry;
 use crate::components::{Button, Element};
@@ -19,7 +18,7 @@ pub fn files(props: &CurrentFileProps) -> Html {
 
     html! {
         <div class="file-base">
-            if let Some(current_file) = props.current_file.deref() {
+            if let Some(current_file) = &*props.current_file {
                 <Element class="current-file">{&current_file.file_name}</Element>
                 <Button class="current-file-confirm" onclick={add_mod}>{"Confirm"}</Button>
             } else {

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use yew::prelude::*;
-use models::FileEntry;
+use models::{FileEntry, Status};
 use crate::bindings::FileBrowser;
 use crate::components::{Spinner, Button};
 
@@ -13,7 +13,7 @@ pub struct FileNavProps {
 #[function_component(FileNav)]
 pub fn file_nav(props: &FileNavProps) -> Html {
 
-    let common_paths = use_state(|| None);
+    let common_paths = use_state(|| Status::Loading);
 
     use_effect_with_deps(|common_paths| {
         FileBrowser::get_common_paths(common_paths.clone());
@@ -21,7 +21,7 @@ pub fn file_nav(props: &FileNavProps) -> Html {
 
     html! {
         <div class="file-nav">
-            if let Some(common_paths) = common_paths.as_ref() {
+            if let Status::Loaded(common_paths) = common_paths.as_ref() {
                 <div style="text-align: center;padding-bottom: 0.3em;font-size: 1.2em">{"Quick Access"}</div>
                 <div class="file-nav-common-paths">
                     {common_paths.iter().map(|(name, path)| {

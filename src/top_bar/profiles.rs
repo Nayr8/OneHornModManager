@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use yew::prelude::*;
-use models::Mod;
+use models::{Mod, Status};
+use models::Status::Loaded;
 use crate::bindings::ModManager;
 use crate::components::Spinner;
 use crate::components::spinner::SpinnerSize;
@@ -8,19 +9,19 @@ use crate::components::spinner::SpinnerSize;
 #[derive(Properties, PartialEq)]
 pub struct ProfilesProps {
     pub selected_mod: UseStateHandle<Option<usize>>,
-    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
+    pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
 }
 
 #[function_component(Profiles)]
 pub fn profiles(props: &ProfilesProps) -> Html {
-    let profiles = use_state(|| None);
+    let profiles = use_state(|| Status::Loading);
     let open = use_state(|| false);
 
     use_effect_with_deps(|profiles| {
         ModManager::get_profiles(profiles.clone());
     }, profiles.clone());
 
-    let Some(profiles_ref) = profiles.as_ref() else {
+    let Loaded(profiles_ref) = profiles.as_ref() else {
         return html! {
             <div class="element">
                 <Spinner size={SpinnerSize::Small} />
@@ -44,6 +45,7 @@ pub fn profiles(props: &ProfilesProps) -> Html {
             let index = *index;
             move |_: MouseEvent| {
                 open.set(false);
+                mods.set(Status::Loading);
                 ModManager::switch_profile(index);
                 ModManager::get_profiles(profiles.clone());
                 selected_mod.set(None);

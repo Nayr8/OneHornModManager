@@ -1,6 +1,6 @@
 use std::ops::Deref;
 use yew::prelude::*;
-use models::FileEntry;
+use models::{FileEntry, Status};
 use crate::bindings::ModManager;
 use crate::components::Spinner;
 use crate::components::Button;
@@ -14,12 +14,11 @@ pub struct AddNewModMenuProps {
 }
 #[function_component(AddNewModMenu)]
 pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
-    let details = use_state(|| None);
-    let details_error = use_state(|| None);
+    let details = use_state(|| Status::Loading);
 
-    use_effect_with_deps(|(current_file, details, details_error)| {
-        ModManager::get_mod_details(current_file.path.clone(), details.clone(), details_error.clone())
-    }, (props.current_file.deref().clone().unwrap(), details.clone(), details_error.clone()));
+    use_effect_with_deps(|(current_file, details)| {
+        ModManager::get_mod_details(current_file.path.clone(), details.clone());
+    }, (props.current_file.deref().clone().unwrap(), details.clone()));
 
     let close_mod_menu = {
         let current_file = props.current_file.clone();
@@ -38,16 +37,14 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
         }
     };
 
-    match details_error.as_ref() {
-        Some(error) => html! {
-            <div style="margin: auto;text-align: center">
-                <div style="font-size: 2.5em">{"Error"}</div>
-                <div style="margin-bottom: 2em">{format!("{error:?}")}</div>
-                <Button onclick={close_mod_menu} size={ButtonSize::Big} style="margin: auto;width: min-content">{"Back"}</Button>
+    match details.as_ref() {
+        Status::Loading => html! {
+            <div style="margin: auto">
+                <Spinner />
+                <div>{"Reading Metadata..."}</div>
             </div>
         },
-        None => match details.as_ref() {
-            Some(details) => html! {
+        Status::Loaded(details) => html! {
             <div style="margin: auto;text-align: center">
                 <div style="font-size: 2.5em">{&details.name}</div>
                 <div>{&details.description}</div>
@@ -56,13 +53,13 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
                     <Button onclick={add_mod} size={ButtonSize::Big} style="width: min-content">{"Add mod"}</Button>
                 </div>
             </div>
-            },
-            None => html! {
-                <div style="margin: auto">
-                    <Spinner />
-                    <div>{"Reading Metadata..."}</div>
-                </div>
-            }
-        }
+        },
+        Status::Error(error) => html! {
+            <div style="margin: auto;text-align: center">
+                <div style="font-size: 2.5em">{"Error"}</div>
+                <div style="margin-bottom: 2em">{format!("{error:?}")}</div>
+                <Button onclick={close_mod_menu} size={ButtonSize::Big} style="margin: auto;width: min-content">{"Back"}</Button>
+            </div>
+        },
     }
 }

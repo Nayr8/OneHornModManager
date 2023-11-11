@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use yew::prelude::*;
-use models::Mod;
+use models::{Mod, Status};
 use crate::bindings::ModManager;
 use crate::components::Button;
 use crate::components::button::ButtonSize;
@@ -8,7 +8,7 @@ use crate::components::Spinner;
 
 #[derive(Properties, PartialEq)]
 pub struct ModListProps {
-    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
+    pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
     pub selected_mod: UseStateHandle<Option<usize>>,
     pub file_explorer_open: UseStateHandle<bool>,
 }
@@ -19,7 +19,7 @@ pub fn mod_list(props: &ModListProps) -> Html {
     }, props.mods.clone());
 
 
-    if let Some(mods) = props.mods.as_ref() {
+    if let Status::Loaded(mods) = props.mods.as_ref() {
         if mods.len() == 0 {
             let toggle_file_explorer = {
                 let file_explorer_open = props.file_explorer_open.clone();
