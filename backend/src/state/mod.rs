@@ -182,11 +182,13 @@ impl State {
     pub fn create_profile(name: String) {
         let mut state = State::get();
         state.profiles.add_profile(name);
+        state.save();
     }
 
     pub fn switch_profile(index: usize) {
         let mut state = State::get();
         state.profiles.switch_profile(index);
+        state.save();
     }
 
     pub fn get_profiles() -> models::Profiles {
