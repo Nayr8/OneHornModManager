@@ -1,6 +1,6 @@
-
-
+use std::rc::Rc;
 use yew::prelude::*;
+use models::Mod;
 use crate::bindings::ModManager;
 use crate::components::Button;
 use crate::components::Spinner;
@@ -13,6 +13,7 @@ mod profiles;
 pub struct TopBarProps {
     pub file_explorer_open: UseStateHandle<bool>,
     pub selected_mod: UseStateHandle<Option<usize>>,
+    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
 }
 
 #[function_component(TopBar)]
@@ -42,7 +43,7 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                     {"Back to Mod List"}
                 </Button>
             } else {
-                <Profiles />
+                <Profiles selected_mod={props.selected_mod.clone()} mods={props.mods.clone()} />
                 <Button onclick={toggle_file_explorer.clone()}>
                     {"Add Mod"}
                 </Button>

@@ -1,22 +1,26 @@
+use std::rc::Rc;
 use yew::prelude::*;
+use models::Mod;
 use crate::bindings::ModManager;
-use crate::components::{Spinner, Button};
+use crate::components::Spinner;
 use crate::components::spinner::SpinnerSize;
 
 #[derive(Properties, PartialEq)]
 pub struct ProfilesProps {
-
+    pub selected_mod: UseStateHandle<Option<usize>>,
+    pub mods: UseStateHandle<Option<Rc<Vec<Mod>>>>,
 }
 
 #[function_component(Profiles)]
 pub fn profiles(props: &ProfilesProps) -> Html {
     let profiles = use_state(|| None);
+    let open = use_state(|| false);
 
     use_effect_with_deps(|profiles| {
         ModManager::get_profiles(profiles.clone());
     }, profiles.clone());
 
-    let Some(profiles) = profiles.as_ref() else {
+    let Some(profiles_ref) = profiles.as_ref() else {
         return html! {
             <div class="element">
                 <Spinner size={SpinnerSize::Small} />
@@ -24,9 +28,43 @@ pub fn profiles(props: &ProfilesProps) -> Html {
         };
     };
 
+    let toggle_open = {
+        let open = open.clone();
+        move |_: MouseEvent| {
+            open.set(!*open);
+        }
+    };
+
+    let profiles_list_html = profiles_ref.profiles.iter().map(|(index, profile)| {
+        let onclick = {
+            let open = open.clone();
+            let profiles = profiles.clone();
+            let selected_mod = props.selected_mod.clone();
+            let mods = props.mods.clone();
+            let index = *index;
+            move |_: MouseEvent| {
+                open.set(false);
+                ModManager::switch_profile(index);
+                ModManager::get_profiles(profiles.clone());
+                selected_mod.set(None);
+                ModManager::get_mods(mods.clone());
+            }
+        };
+        html! {
+            <div class="profile make-element-button" onclick={onclick}>{profile}</div>}
+    }).collect::<Html>();
+
     html! {
-        <div>
-            <Button>{format!("Profile: {}", profiles.profiles[&profiles.current_profile])}</Button>
+        <div class="element profiles">
+            <div class="selected-profile make-element-button" onclick={toggle_open}>
+                {format!("Profile: {}", profiles_ref.profiles[&profiles_ref.current_profile])}
+            </div>
+            if *open {
+                <div class="profiles-list">
+                    {profiles_list_html}
+                    <div class="profile make-element-button new-profile">{"+"}</div>
+                </div>
+            }
         </div>
     }
 }

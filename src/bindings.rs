@@ -137,4 +137,14 @@ impl ModManager {
             profiles.set(Some(fetched_profiles));
         });
     }
+
+    pub fn switch_profile(index: usize) {
+        #[derive(Serialize)]
+        struct Args {
+            index: usize
+        }
+        spawn_local(async move {
+            invoke("switch_profile", serde_wasm_bindgen::to_value(&Args { index }).unwrap()).await;
+        })
+    }
 }

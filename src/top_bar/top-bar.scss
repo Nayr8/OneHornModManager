@@ -12,3 +12,44 @@
   background: var(--top-bar);
   border-bottom: solid var(--border);
 }
+
+.profiles {
+  overflow: visible;
+  padding: 0;
+  height: 2em;
+}
+
+.selected-profile {
+  padding: 0.25em 0.6em 0.25em 0.6em;
+  height: 1.5em;
+}
+
+.profiles-list {
+  overflow-y: scroll;
+
+  min-height: max-content;
+  max-height: 50vw;
+
+  border-style: solid;
+  border-color: var(--border);
+  border-radius: 0 0 0.3em 0.3em;
+  border-top: none;
+
+  background: var(--unselected-option);
+
+  position: relative;
+  z-index: 25;
+}
+
+.profile {
+  padding: 0.25em 0.6em 0.25em 0.6em;
+  height: 1.5em;
+
+  border-top: solid 0.15em var(--border);
+
+  background: var(--unselected-option);
+}
+
+.new-profile {
+  text-align: center;
+}

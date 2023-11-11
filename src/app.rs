@@ -20,7 +20,8 @@ pub fn app() -> Html {
         <div class="app">
             <TopBar
                 file_explorer_open={file_explorer_open.clone()}
-                selected_mod={selected_mod.clone()} />
+                selected_mod={selected_mod.clone()}
+                mods={mods.clone()} />
             if *file_explorer_open {
                 <FileExplorer
                     file_explorer_open={file_explorer_open.clone()} />
