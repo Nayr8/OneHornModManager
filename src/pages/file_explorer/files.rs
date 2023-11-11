@@ -62,7 +62,8 @@ pub fn directory_parent(props: &DirectoryParentProps) -> Html {
 
     html! {
         <Button class="dir" onclick={onclick}>
-            <div />
+            //<div />
+            <img src="public/file_browser_up.png" />
             <div>{".."}</div>
         </Button>
     }
@@ -84,11 +85,16 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
         false
     };
 
-    let (type_name, onclick, class): (&str, Callback<MouseEvent>, &str) = match props.entry.entry_type {
+    let (type_path, onclick, class): (&str, Callback<MouseEvent>, &str) = match props.entry.entry_type {
         EntryType::File => {
             let file_info = props.entry.clone();
             let current_file = props.current_file.clone();
-            ("FILE", Callback::from(move |_:MouseEvent| {
+            let icon_path = if props.entry.file_name.ends_with(".zip") {
+                "public/file_browser_zip.png"
+            } else {
+                "public/file_browser_d20.png"
+            };
+            (icon_path, Callback::from(move |_:MouseEvent| {
                 if is_selected {
                     current_file.set(None);
                 } else {
@@ -100,7 +106,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
             let path = props.entry.path.clone();
             let current_path = props.current_path.clone();
             let current_entries = props.current_entries.clone();
-            ("DIR", Callback::from(move |_: MouseEvent| {
+            ("public/file_browser_folder.png", Callback::from(move |_: MouseEvent| {
                 FileBrowser::redirect_browser(path.clone());
                 FileBrowser::read_current_dir_into(current_path.clone(), current_entries.clone());
             }), "dir")
@@ -109,7 +115,8 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
 
     html! {
         <Button class={classes!(class)} size={ButtonSize::Thin} selected={is_selected} onclick={onclick}>
-            <div>{type_name}</div>
+            //<div>{type_name}</div>
+            <img src={type_path} />
             <div>
                 { &props.entry.file_name }
             </div>
