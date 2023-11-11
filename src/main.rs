@@ -6,6 +6,7 @@ mod pages;
 pub mod bottom_bar;
 pub mod console;
 pub mod top_bar;
+mod helpers;
 
 use wasm_bindgen::prelude::*;
 use app::App;

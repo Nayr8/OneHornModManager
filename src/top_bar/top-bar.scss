@@ -50,6 +50,19 @@
   background: var(--unselected-option);
 }
 
-.new-profile {
+.new-profile-text {
   text-align: center;
+}
+
+.new-profile {
+  display: grid;
+  grid-template-columns: auto max-content;
+}
+
+.new-profile-input {
+  padding: 0.25em 0.6em 0.25em 0.6em;
+  height: 1.5em;
+  font-size: 1em;
+  color: var(--text);
+  border: solid 0.15em var(--border);
 }

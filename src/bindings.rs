@@ -139,4 +139,14 @@ impl ModManager {
             invoke("switch_profile", serde_wasm_bindgen::to_value(&Args { index }).unwrap()).await;
         });
     }
+    
+    pub fn create_profile(name: String) {
+        #[derive(Serialize)]
+        struct Args {
+            name: String
+        }
+        spawn_local(async move {
+            invoke("create_profile", serde_wasm_bindgen::to_value(&Args { name }).unwrap()).await;
+        });
+    }
 }
