@@ -3,9 +3,8 @@ use std::fmt::{Display, Formatter};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use circular_buffer::CircularBuffer;
 use spin::{Mutex, MutexGuard};
-use models::{EntryType, FileBrowserRedirectError, FileEntry};
+use models::{EntryType, FileBrowserRedirectError, FileEntry, MMResult};
 use crate::warn;
 
 static FILE_BROWSER: Mutex<FileBrowser> = Mutex::new(FileBrowser {
@@ -14,12 +13,13 @@ static FILE_BROWSER: Mutex<FileBrowser> = Mutex::new(FileBrowser {
     documents_directory: None,
     downloads_directory: None,
     desktop_directory: None,
-    history: CircularBuffer::new(),
+    history: Vec::new(),
+    future: Vec::new(),
 });
 
 #[tauri::command(rename_all = "snake_case")]
-pub fn redirect_browser(path: String) -> Result<(), FileBrowserRedirectError> {
-    FileBrowser::redirect(PathBuf::from(path))
+pub fn redirect_browser(path: String) -> MMResult<(), FileBrowserRedirectError> {
+    FileBrowser::redirect(PathBuf::from(path)).into()
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -48,13 +48,30 @@ pub fn get_common_paths() -> Vec<(String, PathBuf)> {
     paths
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub fn go_back() {
+    FileBrowser::go_back();
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn go_forward() {
+    FileBrowser::go_forward();
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn can_go_back_forward() -> (bool, bool) {
+    let file_browser = FileBrowser::get();
+    (!file_browser.history.is_empty(), !file_browser.future.is_empty())
+}
+
 pub struct FileBrowser {
     current_directory: Option<PathBuf>,
     home_directory: Option<PathBuf>,
     documents_directory: Option<PathBuf>,
     downloads_directory: Option<PathBuf>,
     desktop_directory: Option<PathBuf>,
-    history: CircularBuffer<10, PathBuf>,
+    history: Vec<PathBuf>,
+    future: Vec<PathBuf>,
 }
 
 impl FileBrowser {
@@ -72,6 +89,24 @@ impl FileBrowser {
         file_browser.current_directory = Some(file_browser.home_directory.clone().unwrap_or(PathBuf::from("/")));
     }
 
+    fn go_back() {
+        let mut file_browser = FileBrowser::get();
+        if let Some(path) = file_browser.history.pop() {
+            let mut path = Some(path);
+            std::mem::swap(&mut file_browser.current_directory, &mut path);
+            file_browser.future.push(path.unwrap());
+        }
+    }
+
+    fn go_forward() {
+        let mut file_browser = FileBrowser::get();
+        if let Some(path) = file_browser.future.pop() {
+            let mut path = Some(path);
+            std::mem::swap(&mut file_browser.current_directory, &mut path);
+            file_browser.history.push(path.unwrap());
+        }
+    }
+
     fn redirect(path: PathBuf) -> Result<(), FileBrowserRedirectError> {
         let mut file_browser = Self::get();
 
@@ -83,11 +118,15 @@ impl FileBrowser {
         }
 
         let mut path = Some(path);
+        if path == file_browser.current_directory {
+            return Ok(());
+        }
         std::mem::swap(&mut file_browser.current_directory, &mut path);
 
         if let Some(path) = path {
-            file_browser.history.push_back(path);
+            file_browser.history.push(path);
         }
+        file_browser.future = Vec::new();
         Ok(())
     }
 

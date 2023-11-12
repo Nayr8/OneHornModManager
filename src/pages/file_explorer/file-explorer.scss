@@ -7,12 +7,21 @@
     height: 100%;
 
     display: grid;
-    grid-template-areas: "file-nav    file-location .."
-                         "file-nav    file-main     .."
-                         "file-cancel file-base     ..";
+    grid-template-areas: "file-nav-top file-location .."
+                         "file-nav     file-main     .."
+                         "file-cancel  file-base     ..";
     grid-template-columns: 15em 1fr 3.5em;
     grid-template-rows: 3em 1fr 3.5em;
     background: var(--top-bar);
+}
+
+.file-nav-top {
+    grid-row: file-nav-top-start / file-nav-top-end;
+    grid-column: file-nav-top-start / file-nav-top-end;
+
+    display: grid;
+    grid-template-columns: auto auto;
+    margin: auto
 }
 
 .file-nav {
@@ -21,7 +30,7 @@
 
     padding-left: 1em;
     padding-right: 1em;
-    padding-top: 3em;
+    padding-top: 1em;
 
     overflow: scroll;
 }

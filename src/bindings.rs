@@ -45,6 +45,26 @@ impl FileBrowser {
             entries.set(new_entries);
         });
     }
+
+    pub fn get_navigation_enabled_state(navigation_enabled_state: UseStateHandle<(bool, bool)>) {
+        spawn_local(async move {
+            let navigation_enabled = invoke("can_go_back_forward", JsValue::null()).await;
+            let navigation_enabled = serde_wasm_bindgen::from_value::<(bool, bool)>(navigation_enabled).unwrap();
+            navigation_enabled_state.set(navigation_enabled);
+        });
+    }
+
+    pub fn go_back() {
+        spawn_local(async move {
+            invoke("go_back", JsValue::null()).await;
+        });
+    }
+
+    pub fn go_forward() {
+        spawn_local(async move {
+            invoke("go_forward", JsValue::null()).await;
+        });
+    }
 }
 
 pub struct ModManager;

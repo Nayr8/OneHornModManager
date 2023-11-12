@@ -9,6 +9,7 @@ use crate::components::{Spinner, Button};
 pub struct FileNavProps {
     pub current_path: UseStateHandle<Rc<PathBuf>>,
     pub current_entries: UseStateHandle<Vec<FileEntry>>,
+    pub navigation_enabled_state: UseStateHandle<(bool, bool)>,
 }
 #[function_component(FileNav)]
 pub fn file_nav(props: &FileNavProps) -> Html {
@@ -29,9 +30,11 @@ pub fn file_nav(props: &FileNavProps) -> Html {
                             let path = path.clone();
                             let current_path = props.current_path.clone();
                             let current_entries = props.current_entries.clone();
+                            let navigation_enabled_state = props.navigation_enabled_state.clone();
                             move |_| {
                                 FileBrowser::redirect_browser(path.clone());
                                 FileBrowser::read_current_dir_into(current_path.clone(), current_entries.clone());
+                                FileBrowser::get_navigation_enabled_state(navigation_enabled_state.clone());
                             }
                         };
                         html! {

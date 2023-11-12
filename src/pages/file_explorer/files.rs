@@ -12,6 +12,7 @@ pub struct FilesProps {
     pub current_path: UseStateHandle<Rc<PathBuf>>,
     pub current_entries: UseStateHandle<Vec<FileEntry>>,
     pub current_file: UseStateHandle<Option<FileEntry>>,
+    pub navigation_enabled_state: UseStateHandle<(bool, bool)>,
 }
 
 #[function_component(Files)]
@@ -23,7 +24,8 @@ pub fn files(props: &FilesProps) -> Html {
                 entry={(*entry).clone()}
                 current_path={props.current_path.clone()}
                 current_entries={props.current_entries.clone()}
-                current_file={props.current_file.clone()}  />
+                current_file={props.current_file.clone()} 
+                navigation_enabled_state={props.navigation_enabled_state.clone()} />
         }
     }).collect();
 
@@ -71,10 +73,11 @@ pub fn directory_parent(props: &DirectoryParentProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct DirectoryEntryProps {
-    entry: FileEntry,
-    current_path: UseStateHandle<Rc<PathBuf>>,
-    current_entries: UseStateHandle<Vec<FileEntry>>,
-    current_file: UseStateHandle<Option<FileEntry>>,
+    pub entry: FileEntry,
+    pub current_path: UseStateHandle<Rc<PathBuf>>,
+    pub current_entries: UseStateHandle<Vec<FileEntry>>,
+    pub current_file: UseStateHandle<Option<FileEntry>>,
+    pub navigation_enabled_state: UseStateHandle<(bool, bool)>,
 }
 
 #[function_component(DirectoryEntry)]
@@ -106,16 +109,17 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
             let path = props.entry.path.clone();
             let current_path = props.current_path.clone();
             let current_entries = props.current_entries.clone();
+            let navigation_enabled_state = props.navigation_enabled_state.clone();
             ("public/file_browser_folder.png", Callback::from(move |_: MouseEvent| {
                 FileBrowser::redirect_browser(path.clone());
                 FileBrowser::read_current_dir_into(current_path.clone(), current_entries.clone());
+                FileBrowser::get_navigation_enabled_state(navigation_enabled_state.clone());
             }), "dir")
         }
     };
 
     html! {
         <Button class={classes!(class)} size={ButtonSize::Thin} selected={is_selected} onclick={onclick}>
-            //<div>{type_name}</div>
             <img src={type_path} />
             <div>
                 { &props.entry.file_name }
