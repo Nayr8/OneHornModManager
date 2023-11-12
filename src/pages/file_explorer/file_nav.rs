@@ -37,8 +37,21 @@ pub fn file_nav(props: &FileNavProps) -> Html {
                                 FileBrowser::get_navigation_enabled_state(navigation_enabled_state.clone());
                             }
                         };
+                        let img_src = match name.as_str() {
+                            "Home" => Some("public/file_browser_home.png"),
+                            "Documents" => Some("public/file_browser_documents.png"),
+                            "Downloads" => Some("public/file_browser_downloads.png"),
+                            "Desktop" => Some("public/file_browser_desktop.png"),
+                            _ => None
+                        };
+
                         html! {
-                            <Button onclick={onclick}>{name}</Button>
+                            <Button onclick={onclick}>
+                                if let Some(img_src) = img_src {
+                                    <img src={img_src} style="margin-right: 0.35em" />
+                                }
+                                {name}
+                            </Button>
                         }
                     }).collect::<Html>()}
                 </div>
