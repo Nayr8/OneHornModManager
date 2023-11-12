@@ -1,10 +1,7 @@
 use std::rc::Rc;
 use yew::prelude::*;
 use models::{Mod, Status};
-use crate::bindings::ModManager;
 use crate::components::Button;
-use crate::components::Spinner;
-use crate::components::spinner::SpinnerSize;
 use profiles::Profiles;
 
 mod profiles;
@@ -27,15 +24,6 @@ pub fn top_bar(props: &TopBarProps) -> Html {
         }
     };
 
-    let applying = use_state(|| false);
-
-    let apply = {
-        let applying = applying.clone();
-        move |_: MouseEvent| {
-            ModManager::apply(applying.clone());
-        }
-    };
-
     html! {
         <div class="top-bar">
             if *props.file_explorer_open {
@@ -46,13 +34,6 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                 <Profiles selected_mod={props.selected_mod.clone()} mods={props.mods.clone()} />
                 <Button onclick={toggle_file_explorer.clone()}>
                     {"Add Mod"}
-                </Button>
-                <Button onclick={apply} disabled={*applying}>
-                    if *applying {
-                        <Spinner size={SpinnerSize::Small} />
-                    } else {
-                        {"Apply"}
-                    }
                 </Button>
             }
         </div>

@@ -1,10 +1,13 @@
 @use 'mod-list';
-@use 'selected-mod';
+@use 'selected-mod-panel';
+@use 'apply-mods-panel';
 
 .main-page {
   grid-row: main-start / main-end;
   grid-column: main-start / main-end;
   display: grid;
   grid-template-columns: 1fr 30em;
-  grid-template-areas: "mod-list selected-mod";
+  grid-template-rows: 1fr auto;
+  grid-template-areas: "mod-list selected-mod"
+                       "mod-list apply-mods";
 }
