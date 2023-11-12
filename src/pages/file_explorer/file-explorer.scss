@@ -7,9 +7,9 @@
     height: 100%;
 
     display: grid;
-    grid-template-areas: "file-nav file-location .."
-                         "file-nav file-main     .."
-                         "file-nav file-base     ..";
+    grid-template-areas: "file-nav    file-location .."
+                         "file-nav    file-main     .."
+                         "file-cancel file-base     ..";
     grid-template-columns: 15em 1fr 3.5em;
     grid-template-rows: 3em 1fr 3.5em;
     background: var(--top-bar);
@@ -74,6 +74,15 @@
 
     background: var(--top-bar);
 
+}
+
+.file-cancel {
+    grid-column: file-cancel-start / file-cancel-end;
+    grid-row: file-cancel-start / file-cancel-end;
+
+    background: var(--top-bar);
+
+    margin: auto;
 }
 
 .current-file {

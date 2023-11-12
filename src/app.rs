@@ -24,7 +24,8 @@ pub fn app() -> Html {
                 mods={mods.clone()} />
             if *file_explorer_open {
                 <FileExplorer
-                    file_explorer_open={file_explorer_open.clone()} />
+                    file_explorer_open={file_explorer_open.clone()}
+                    selected_mod={selected_mod.clone()} />
             } else {
                 <MainPage
                     mods={mods.clone()}

@@ -11,6 +11,8 @@ use crate::helpers::DomHelper;
 pub struct ProfilesProps {
     pub selected_mod: UseStateHandle<Option<usize>>,
     pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
+    #[prop_or_default]
+    pub disabled: bool,
 }
 
 #[function_component(Profiles)]
@@ -87,11 +89,19 @@ pub fn profiles(props: &ProfilesProps) -> Html {
                 }
             };
 
+
             html! {
                 <div class="element profiles">
-                    <div class="selected-profile make-element-button" onclick={toggle_open}>
-                        {format!("Profile: {}", profiles_ref.profiles[&profiles_ref.current_profile])}
-                    </div>
+                    if props.disabled {
+                        <div class="selected-profile make-element-disabled">
+                            {format!("Profile: {}", profiles_ref.profiles[&profiles_ref.current_profile])}
+                        </div>
+                    } else {
+                        <div class={classes!("selected-profile", "make-element-button", if props.disabled { Some("make-element-disabled") } else { None })} onclick={toggle_open}>
+                            {format!("Profile: {}", profiles_ref.profiles[&profiles_ref.current_profile])}
+                        </div>
+                    }
+
                     if *open {
                         <div class="profiles-list">
                             {profiles_list_html}

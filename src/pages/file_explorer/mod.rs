@@ -8,6 +8,8 @@ use files::Files;
 use current_file::CurrentFile;
 use file_nav::FileNav;
 use add_new_mod::AddNewModMenu;
+use crate::components::Button;
+
 mod location;
 mod files;
 mod current_file;
@@ -17,6 +19,7 @@ mod file_nav;
 #[derive(Properties, PartialEq)]
 pub struct FileExplorerProps {
     pub file_explorer_open: UseStateHandle<bool>,
+    pub selected_mod: UseStateHandle<Option<usize>>,
 }
 #[function_component(FileExplorer)]
 pub fn file_explorer(props: &FileExplorerProps) -> Html {
@@ -38,20 +41,31 @@ pub fn file_explorer(props: &FileExplorerProps) -> Html {
             <AddNewModMenu current_file={current_file.clone()} add_mod_menu={add_mod_menu.clone()} file_explorer_open={props.file_explorer_open.clone()} />
         }
     } else {
+        let cancel = {
+            let file_explorer_open = props.file_explorer_open.clone();
+            let selected_mod = props.selected_mod.clone();
+            move |_: MouseEvent| {
+                file_explorer_open.set(false);
+                selected_mod.set(None);
+            }
+        };
         html! {
-        <div class="file-explorer">
-            <FileNav
-                current_path={current_path.clone()}
-                current_entries={current_entries.clone()} />
-            <FileExplorerLocation current_directory={current_directory_str} />
-            <Files
-                current_path={current_path.clone()}
-                current_entries={current_entries.clone()}
-                current_file={current_file.clone()} />
-            <CurrentFile
-                current_file={current_file.clone()}
-                add_mod_menu={add_mod_menu.clone()} />
-        </div>
+            <div class="file-explorer">
+                <FileNav
+                    current_path={current_path.clone()}
+                    current_entries={current_entries.clone()} />
+                <div class="file-cancel">
+                    <Button onclick={cancel}>{"Return to mod list"}</Button>
+                </div>
+                <FileExplorerLocation current_directory={current_directory_str} />
+                <Files
+                    current_path={current_path.clone()}
+                    current_entries={current_entries.clone()}
+                    current_file={current_file.clone()} />
+                <CurrentFile
+                    current_file={current_file.clone()}
+                    add_mod_menu={add_mod_menu.clone()} />
+            </div>
         }
     }
 
