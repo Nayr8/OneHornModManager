@@ -32,9 +32,6 @@ pub fn top_bar(props: &TopBarProps) -> Html {
                 </Button>
             } else {
                 <Profiles selected_mod={props.selected_mod.clone()} mods={props.mods.clone()} />
-                <Button onclick={toggle_file_explorer.clone()}>
-                    {"Add Mod"}
-                </Button>
             }
         </div>
     }

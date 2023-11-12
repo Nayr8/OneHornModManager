@@ -20,15 +20,15 @@ pub fn mod_list(props: &ModListProps) -> Html {
 
 
     if let Status::Loaded(mods) = props.mods.as_ref() {
+        let toggle_file_explorer = {
+            let file_explorer_open = props.file_explorer_open.clone();
+            let selected_mod = props.selected_mod.clone();
+            move |_: MouseEvent| {
+                file_explorer_open.set(!*file_explorer_open);
+                selected_mod.set(None);
+            }
+        };
         if mods.len() == 0 {
-            let toggle_file_explorer = {
-                let file_explorer_open = props.file_explorer_open.clone();
-                let selected_mod = props.selected_mod.clone();
-                move |_: MouseEvent| {
-                    file_explorer_open.set(!*file_explorer_open);
-                    selected_mod.set(None);
-                }
-            };
 
             html! {
                 <div style="margin: auto;text-align: center">
@@ -45,6 +45,7 @@ pub fn mod_list(props: &ModListProps) -> Html {
             html! {
                 <div class="mod-list">
                     { mods_html }
+                    <Button onclick={toggle_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;width: min-content;margin-top: 3em;margin-bottom: 3em">{"Add Mod"}</Button>
                 </div>
             }
         }
