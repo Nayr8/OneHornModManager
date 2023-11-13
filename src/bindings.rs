@@ -109,10 +109,10 @@ impl ModManager {
     pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Status<Rc<Mod>, ModDetailsError>>) {
         #[derive(Serialize)]
         struct Args {
-            current_file: Rc<PathBuf>,
+            file_path: Rc<PathBuf>,
         }
         spawn_local(async move {
-            let details_result = invoke("get_mod_details", serde_wasm_bindgen::to_value(&Args { current_file }).unwrap()).await;
+            let details_result = invoke("get_mod_details", serde_wasm_bindgen::to_value(&Args { file_path: current_file }).unwrap()).await;
 
             let details =
                 serde_wasm_bindgen::from_value::<MMResult<Rc<Mod>, ModDetailsError>>(details_result).unwrap();
