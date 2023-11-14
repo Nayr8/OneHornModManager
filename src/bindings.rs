@@ -1,12 +1,21 @@
 use std::path::PathBuf;
 use std::rc::Rc;
-use serde::Serialize;
-use wasm_bindgen::JsValue;
+use serde::{Serialize, Serializer};
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
 use models::{FileBrowserRedirectError, FileEntry, MMResult, Mod, ModDetailsError, Profiles, Status};
-use crate::{error, invoke};
+use crate::error;
+use tauri_sys::tauri;
+use wasm_bindgen::JsValue;
+use wasm_bindgen::prelude::wasm_bindgen;
 
+pub struct Null;
+
+impl Serialize for Null {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        serializer.serialize_none()
+    }
+}
 
 pub struct FileBrowser;
 
@@ -14,22 +23,17 @@ pub struct FileBrowser;
 impl FileBrowser {
     pub fn get_common_paths(common_paths: UseStateHandle<Status<Vec<(String, Rc<PathBuf>)>>>) {
         spawn_local(async move {
-            let fetched_common_paths = invoke("get_common_paths", JsValue::null()).await;
-            let fetched_common_paths = serde_wasm_bindgen::from_value::<Vec<(String, Rc<PathBuf>)>>(fetched_common_paths).unwrap();
-
-            common_paths.set(Status::Loaded(fetched_common_paths));
+            common_paths.set(Status::Loaded(tauri::invoke("get_common_paths", &Null).await.unwrap()));
         });
     }
 
     pub fn redirect_browser(path: Rc<PathBuf>) {
         #[derive(Serialize)]
-        struct Args {
-            path: Rc<PathBuf>,
-        }
+        struct Args { path: Rc<PathBuf> }
 
         spawn_local(async move {
-            let result = invoke("redirect_browser", serde_wasm_bindgen::to_value(&Args { path: path.clone() }).unwrap()).await;
-            if let Err(e) = serde_wasm_bindgen::from_value::<Result<(), FileBrowserRedirectError>>(result).unwrap() {
+            let result: Result<(), FileBrowserRedirectError> = tauri::invoke("get_common_paths", &Args { path: path.clone() }).await.unwrap();
+            if let Err(e) = result {
                 error!("Could not redirect to {path:?}: {e:?}");
             }
         });
@@ -37,10 +41,7 @@ impl FileBrowser {
 
     pub fn read_current_dir_into(path: UseStateHandle<Rc<PathBuf>>, entries: UseStateHandle<Vec<FileEntry>>) {
         spawn_local(async move {
-            let current_dir = invoke("read_current_dir", JsValue::null()).await;
-            let (new_path, new_entries) =
-                serde_wasm_bindgen::from_value::<(Rc<PathBuf>, Vec<FileEntry>)>(current_dir).unwrap();
-
+            let (new_path, new_entries): (Rc<PathBuf>, Vec<FileEntry>) = tauri::invoke("read_current_dir", &Null).await.unwrap();
             path.set(new_path);
             entries.set(new_entries);
         });
@@ -48,21 +49,19 @@ impl FileBrowser {
 
     pub fn get_navigation_enabled_state(navigation_enabled_state: UseStateHandle<(bool, bool)>) {
         spawn_local(async move {
-            let navigation_enabled = invoke("can_go_back_forward", JsValue::null()).await;
-            let navigation_enabled = serde_wasm_bindgen::from_value::<(bool, bool)>(navigation_enabled).unwrap();
-            navigation_enabled_state.set(navigation_enabled);
+            navigation_enabled_state.set(tauri::invoke("can_go_back_forward", &Null).await.unwrap());
         });
     }
 
     pub fn go_back() {
         spawn_local(async move {
-            invoke("go_back", JsValue::null()).await;
+            let _: () = tauri::invoke("go_back", &Null).await.unwrap();
         });
     }
 
     pub fn go_forward() {
         spawn_local(async move {
-            invoke("go_forward", JsValue::null()).await;
+            let _: () = tauri::invoke("go_forward", &Null).await.unwrap();
         });
     }
 }
@@ -74,50 +73,37 @@ impl ModManager {
     pub fn apply(applying: UseStateHandle<bool>) {
         applying.set(true);
         spawn_local(async move {
-            invoke("apply", JsValue::null()).await;
+            let _: () = tauri::invoke("apply", &Null).await.unwrap();
             applying.set(false);
         });
     }
 
     pub fn remove_mod(index: usize, mods: UseStateHandle<Status<Rc<Vec<Mod>>>>) {
         #[derive(Serialize)]
-        struct Args {
-            index: usize,
-        }
+        struct Args { index: usize }
         spawn_local(async move {
-            invoke("remove_mod", serde_wasm_bindgen::to_value(&Args { index }).unwrap()).await;
+            let _: () = tauri::invoke("remove_mod", &Args { index }).await.unwrap();
             ModManager::get_mods(mods);
         });
     }
 
     pub fn add_mod() {
         spawn_local(async {
-            invoke("add_current_mod", JsValue::null()).await;
+            let _: () = tauri::invoke("add_current_mod", &Null).await.unwrap();
         });
     }
 
     pub fn get_mods(mods: UseStateHandle<Status<Rc<Vec<Mod>>>>) {
         spawn_local(async move {
-            let fetched_mods = invoke("get_mods", JsValue::null()).await;
-
-            let fetched_mods = serde_wasm_bindgen::from_value::<Rc<Vec<Mod>>>(fetched_mods).unwrap();
-
-            mods.set(Status::Loaded(fetched_mods));
+            mods.set(Status::Loaded(tauri::invoke("get_mods", &Null).await.unwrap()));
         });
     }
 
     pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Status<Rc<Mod>, ModDetailsError>>) {
         #[derive(Serialize)]
-        struct Args {
-            file_path: Rc<PathBuf>,
-        }
+        struct Args { file_path: Rc<PathBuf> }
         spawn_local(async move {
-            let details_result = invoke("get_mod_details", serde_wasm_bindgen::to_value(&Args { file_path: current_file }).unwrap()).await;
-
-            let details =
-                serde_wasm_bindgen::from_value::<MMResult<Rc<Mod>, ModDetailsError>>(details_result).unwrap();
-
-            match details {
+            match tauri::invoke("get_mod_details", &Args { file_path: current_file }).await.unwrap() {
                 MMResult::Ok(details) => mod_details.set(Status::Loaded(details)),
                 MMResult::Err(error) => mod_details.set(Status::Error(error)),
             }
@@ -126,23 +112,23 @@ impl ModManager {
 
     pub fn set_mod_enabled_state(index: usize, enabled: bool) {
         #[derive(Serialize)]
-        struct Args {
-            index: usize,
-            enabled: bool
-        }
+        struct Args { index: usize, enabled: bool }
         spawn_local(async move {
-            invoke("set_mod_enabled_state", serde_wasm_bindgen::to_value(&Args {
-                index,
-                enabled,
-            }).unwrap()).await;
+            let _: () = tauri::invoke("set_mod_enabled_state", &Args { index, enabled }).await.unwrap();
         });
     }
 
     pub fn get_profiles(profiles: UseStateHandle<Status<Profiles>>) {
+        #[wasm_bindgen]
+        extern "C" {
+            #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
+            pub async fn invoke(cmd: &str, args: JsValue) -> JsValue;
+        }
         spawn_local(async move {
+            // Cannot use tauri sys because of int key hashmap weirdness
             let fetched_profiles = invoke("get_profiles", JsValue::null()).await;
 
-            // A bit hacky but serde_wasm_bindgen will not deserialize a int kiy hashmap as it thinks they are strings
+            // A bit hacky but serde_wasm_bindgen will not deserialize a int key hashmap as it thinks they are strings
             let fetched_profiles = js_sys::JSON::stringify(&fetched_profiles).unwrap().as_string().unwrap();
             let fetched_profiles = serde_json::from_str::<Profiles>(&fetched_profiles).unwrap();
 
@@ -152,21 +138,17 @@ impl ModManager {
 
     pub fn switch_profile(index: usize) {
         #[derive(Serialize)]
-        struct Args {
-            index: usize
-        }
+        struct Args { index: usize }
         spawn_local(async move {
-            invoke("switch_profile", serde_wasm_bindgen::to_value(&Args { index }).unwrap()).await;
+            let _: () = tauri::invoke("switch_profile", &Args { index }).await.unwrap();
         });
     }
     
     pub fn create_profile(name: String) {
         #[derive(Serialize)]
-        struct Args {
-            name: String
-        }
+        struct Args { name: String }
         spawn_local(async move {
-            invoke("create_profile", serde_wasm_bindgen::to_value(&Args { name }).unwrap()).await;
+            let _: () = tauri::invoke("switch_profile", &Args { name }).await.unwrap();
         });
     }
 }

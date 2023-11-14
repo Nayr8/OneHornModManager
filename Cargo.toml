@@ -20,8 +20,9 @@ js-sys = "0.3"
 chrono = "0.4.31"
 serde_json = "1.0.108"
 
+tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", features = ["all"] }
+
 models = { path = "models" }
-log = "0.4.20"
 
 [workspace]
 members = ["backend", "package-helper"]

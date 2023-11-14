@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
 use models::LogLine;
-use crate::invoke;
 use std::backtrace::Backtrace;
+use tauri_sys::tauri;
+use crate::bindings::Null;
 
 
 #[allow(unused_macros)]
@@ -46,38 +46,28 @@ impl Logger {
 
     pub fn read_logs_into(log_lines: UseStateHandle<Vec<LogLine>>) {
         spawn_local(async move {
-            let messages = invoke("get_log_messages", JsValue::null()).await;
-            let messages = serde_wasm_bindgen::from_value::<Vec<LogLine>>(messages).unwrap();
-            log_lines.set(messages);
+            log_lines.set(tauri::invoke("get_log_messages", &Null).await.unwrap());
         });
     }
 
     pub fn log_info(message: String) {
-        let args = Self::build_args(message);
         spawn_local(async move {
-            invoke("log_info", args).await;
+            let _: () = tauri::invoke("log_info", &LogArgs { message }).await.unwrap();
         });
     }
     pub fn log_warn(message: String) {
-        let args = Self::build_args(message);
         spawn_local(async move {
-            invoke("log_warn", args).await;
+            let _: () = tauri::invoke("log_warn", &LogArgs { message }).await.unwrap();
         });
     }
     pub fn log_error(message: String) {
-        let args = Self::build_args(message);
         spawn_local(async move {
-            invoke("log_error", args).await;
+            let _: () = tauri::invoke("log_error", &LogArgs { message }).await.unwrap();
         });
     }
     pub fn log_critical(message: String) {
-        let args = Self::build_args(message);
         spawn_local(async move {
-            invoke("log_critical", args).await;
+            let _: () = tauri::invoke("log_critical", &LogArgs { message }).await.unwrap();
         });
-    }
-
-    fn build_args(message: String) -> JsValue {
-        serde_wasm_bindgen::to_value(&LogArgs { message }).unwrap()
     }
 }
