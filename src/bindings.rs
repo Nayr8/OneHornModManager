@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::sync::Arc;
 use serde::{Serialize, Serializer};
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
@@ -21,15 +22,15 @@ pub struct FileBrowser;
 
 
 impl FileBrowser {
-    pub fn get_common_paths(common_paths: UseStateHandle<Status<Vec<(String, Rc<PathBuf>)>>>) {
+    pub fn get_common_paths(common_paths: UseStateHandle<Status<Vec<(String, Arc<PathBuf>)>>>) {
         spawn_local(async move {
             common_paths.set(Status::Loaded(tauri::invoke("get_common_paths", &Null).await.unwrap()));
         });
     }
 
-    pub fn redirect_browser(path: Rc<PathBuf>) {
+    pub fn redirect_browser(path: Arc<PathBuf>) {
         #[derive(Serialize)]
-        struct Args { path: Rc<PathBuf> }
+        struct Args { path: Arc<PathBuf> }
 
         spawn_local(async move {
             let result: Result<(), FileBrowserRedirectError> = tauri::invoke("redirect_browser", &Args { path: path.clone() }).await.unwrap();
@@ -39,9 +40,9 @@ impl FileBrowser {
         });
     }
 
-    pub fn read_current_dir_into(path: UseStateHandle<Rc<PathBuf>>, entries: UseStateHandle<Vec<FileEntry>>) {
+    pub fn read_current_dir_into(path: UseStateHandle<Arc<PathBuf>>, entries: UseStateHandle<Vec<FileEntry>>) {
         spawn_local(async move {
-            let (new_path, new_entries): (Rc<PathBuf>, Vec<FileEntry>) = tauri::invoke("read_current_dir", &Null).await.unwrap();
+            let (new_path, new_entries): (Arc<PathBuf>, Vec<FileEntry>) = tauri::invoke("read_current_dir", &Null).await.unwrap();
             path.set(new_path);
             entries.set(new_entries);
         });
@@ -99,9 +100,9 @@ impl ModManager {
         });
     }
 
-    pub fn get_mod_details(current_file: Rc<PathBuf>, mod_details: UseStateHandle<Status<Rc<Mod>, ModDetailsError>>) {
+    pub fn get_mod_details(current_file: Arc<PathBuf>, mod_details: UseStateHandle<Status<Arc<Mod>, ModDetailsError>>) {
         #[derive(Serialize)]
-        struct Args { file_path: Rc<PathBuf> }
+        struct Args { file_path: Arc<PathBuf> }
         spawn_local(async move {
             match tauri::invoke("get_mod_details", &Args { file_path: current_file }).await.unwrap() {
                 MMResult::Ok(details) => mod_details.set(Status::Loaded(details)),

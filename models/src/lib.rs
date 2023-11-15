@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
 use serde::{Deserialize, Serialize};
 
 mod logging;
@@ -45,6 +46,15 @@ impl<OK: PartialEq, ERR: PartialEq> Status<OK, ERR> {
 pub enum MMResult<OK, ERR> {
     Ok(OK),
     Err(ERR)
+}
+
+impl<OK: Debug, ERR: Debug> Debug for MMResult<OK, ERR> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MMResult::Ok(ok) => write!(f, "Ok({ok:?})"),
+            MMResult::Err(err) => write!(f, "Err({err:?})"),
+        }
+    }
 }
 
 impl<OK, ERR> From<Result<OK, ERR>> for MMResult<OK, ERR> {

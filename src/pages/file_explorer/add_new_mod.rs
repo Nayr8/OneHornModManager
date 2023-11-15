@@ -41,7 +41,7 @@ pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
         Status::Loading => html! {
             <div style="margin: auto">
                 <Spinner />
-                <div>{"Reading Metadata..."}</div>
+                <div>{"Moving/Unzipping file and reading meta..."}</div>
             </div>
         },
         Status::Loaded(details) => html! {

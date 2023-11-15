@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use std::rc::Rc;
+use std::sync::Arc;
 use yew::prelude::*;
 use models::{EntryType, FileEntry};
 use crate::bindings::FileBrowser;
@@ -9,7 +9,7 @@ use crate::components::button::ButtonSize;
 
 #[derive(Properties, PartialEq)]
 pub struct FilesProps {
-    pub current_path: UseStateHandle<Rc<PathBuf>>,
+    pub current_path: UseStateHandle<Arc<PathBuf>>,
     pub current_entries: UseStateHandle<Vec<FileEntry>>,
     pub current_file: UseStateHandle<Option<FileEntry>>,
     pub navigation_enabled_state: UseStateHandle<(bool, bool)>,
@@ -34,7 +34,7 @@ pub fn files(props: &FilesProps) -> Html {
         <div class="files">
             if let Some(parent) = parent {
                 <DirectoryParent
-                parent={Rc::new(parent.to_owned())}
+                parent={Arc::new(parent.to_owned())}
                 current_path={props.current_path.clone()}
                 current_entries={props.current_entries.clone()} />
             }
@@ -45,8 +45,8 @@ pub fn files(props: &FilesProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct DirectoryParentProps {
-    parent: Rc<PathBuf>,
-    current_path: UseStateHandle<Rc<PathBuf>>,
+    parent: Arc<PathBuf>,
+    current_path: UseStateHandle<Arc<PathBuf>>,
     current_entries: UseStateHandle<Vec<FileEntry>>,
 }
 
@@ -74,7 +74,7 @@ pub fn directory_parent(props: &DirectoryParentProps) -> Html {
 #[derive(Properties, PartialEq)]
 pub struct DirectoryEntryProps {
     pub entry: FileEntry,
-    pub current_path: UseStateHandle<Rc<PathBuf>>,
+    pub current_path: UseStateHandle<Arc<PathBuf>>,
     pub current_entries: UseStateHandle<Vec<FileEntry>>,
     pub current_file: UseStateHandle<Option<FileEntry>>,
     pub navigation_enabled_state: UseStateHandle<(bool, bool)>,

@@ -8,7 +8,6 @@ pub mod console;
 pub mod top_bar;
 mod helpers;
 
-use wasm_bindgen::prelude::*;
 use app::App;
 use crate::logger::Logger;
 

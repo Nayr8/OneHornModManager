@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use std::rc::Rc;
+use std::sync::Arc;
 use yew::prelude::*;
 use models::{FileEntry, Status};
 use crate::bindings::FileBrowser;
@@ -7,7 +7,7 @@ use crate::components::{Spinner, Button};
 
 #[derive(Properties, PartialEq)]
 pub struct FileNavProps {
-    pub current_path: UseStateHandle<Rc<PathBuf>>,
+    pub current_path: UseStateHandle<Arc<PathBuf>>,
     pub current_entries: UseStateHandle<Vec<FileEntry>>,
     pub navigation_enabled_state: UseStateHandle<(bool, bool)>,
 }

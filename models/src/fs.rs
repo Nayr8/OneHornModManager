@@ -1,12 +1,12 @@
 use std::path::PathBuf;
-use std::rc::Rc;
+use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
 pub struct FileEntry {
     pub entry_type: EntryType,
-    pub path: Rc<PathBuf>,
-    pub file_name: Rc<String>,
+    pub path: Arc<PathBuf>,
+    pub file_name: Arc<String>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Copy, Clone, Debug)]

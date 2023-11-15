@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::rc::Rc;
+use std::sync::Arc;
 use spin::{Mutex, MutexGuard};
 use models::{EntryType, FileBrowserRedirectError, FileEntry, MMResult};
 use crate::warn;
@@ -22,12 +22,12 @@ pub fn redirect_browser(path: String) -> MMResult<(), FileBrowserRedirectError> 
     FileBrowser::redirect(PathBuf::from(path)).into()
 }
 
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command(rename_all = "snake_case", async)]
 pub fn read_current_dir() -> (PathBuf, Vec<FileEntry>) {
     FileBrowser::read_current_dir()
 }
 
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command(rename_all = "snake_case", async)]
 pub fn get_common_paths() -> Vec<(String, PathBuf)> {
     let mut paths = Vec::new();
     let file_browser = FileBrowser::get();
@@ -48,17 +48,17 @@ pub fn get_common_paths() -> Vec<(String, PathBuf)> {
     paths
 }
 
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command(rename_all = "snake_case", async)]
 pub fn go_back() {
     FileBrowser::go_back();
 }
 
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command(rename_all = "snake_case", async)]
 pub fn go_forward() {
     FileBrowser::go_forward();
 }
 
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command(rename_all = "snake_case", async)]
 pub fn can_go_back_forward() -> (bool, bool) {
     let file_browser = FileBrowser::get();
     (!file_browser.history.is_empty(), !file_browser.future.is_empty())
@@ -185,8 +185,8 @@ impl FileBrowser {
         if meta.is_dir() {
             return Some(FileEntry {
                 entry_type: EntryType::Directory,
-                path: Rc::new(path), // TODO decide whether to use Rc or have a different model in each side
-                file_name: Rc::new(file_name),
+                path: Arc::new(path), // TODO decide whether to use Rc or have a different model in each side
+                file_name: Arc::new(file_name),
             });
         }
         if meta.is_file() {
@@ -197,8 +197,8 @@ impl FileBrowser {
             }) {
                 return Some(FileEntry {
                     entry_type: EntryType::File,
-                    path: Rc::new(path),
-                    file_name: Rc::new(file_name),
+                    path: Arc::new(path),
+                    file_name: Arc::new(file_name),
                 });
             }
             return None;

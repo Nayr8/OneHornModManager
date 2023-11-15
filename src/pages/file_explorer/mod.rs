@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use std::rc::Rc;
 use yew::prelude::*;
 use models::FileEntry;
 use crate::bindings::FileBrowser;
@@ -23,7 +22,7 @@ pub struct FileExplorerProps {
 }
 #[function_component(FileExplorer)]
 pub fn file_explorer(props: &FileExplorerProps) -> Html {
-    let current_path = use_state(|| Rc::new(PathBuf::new()));
+    let current_path = use_state(|| std::sync::Arc::new(PathBuf::new()));
     let current_entries = use_state(|| Vec::<FileEntry>::new());
     let navigation_enabled_state = use_state(|| (false, false));
 

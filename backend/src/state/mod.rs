@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use spin::{Mutex, MutexGuard};
+use tauri::Window;
 use models::{Mod, ModDetailsError};
 use package_helper::{Meta, PackageReader};
 use crate::{debug, error, info, trace, warn};
