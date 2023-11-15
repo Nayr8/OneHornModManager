@@ -32,7 +32,7 @@ impl FileBrowser {
         struct Args { path: Rc<PathBuf> }
 
         spawn_local(async move {
-            let result: Result<(), FileBrowserRedirectError> = tauri::invoke("get_common_paths", &Args { path: path.clone() }).await.unwrap();
+            let result: Result<(), FileBrowserRedirectError> = tauri::invoke("redirect_browser", &Args { path: path.clone() }).await.unwrap();
             if let Err(e) = result {
                 error!("Could not redirect to {path:?}: {e:?}");
             }
