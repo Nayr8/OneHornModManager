@@ -1,7 +1,5 @@
 use std::path::PathBuf;
-use tauri::Window;
 use models::{MMResult, Mod, ModDetailsError};
-use crate::error;
 use crate::state::State;
 
 #[tauri::command(rename_all = "snake_case", async)]
