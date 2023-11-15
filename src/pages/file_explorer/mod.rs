@@ -77,12 +77,12 @@ pub fn file_explorer(props: &FileExplorerProps) -> Html {
             <div class="file-explorer">
                 <div class="file-nav-top">
                     <Button disabled={!navigation_enabled_state.0} onclick={go_back}>
-                        if navigation_enabled_state.0 { <img src="public/file_browser_back.png" /> }
-                        else { <img src="public/file_browser_back_disabled.png" /> }
+                        if navigation_enabled_state.0 { <img src="public/file_browser_back.png" style="height: 1.6em" /> }
+                        else { <img src="public/file_browser_back_disabled.png" style="height: 1.6em" /> }
                     </Button>
                     <Button disabled={!navigation_enabled_state.1} onclick={go_forward}>
-                        if navigation_enabled_state.1 { <img src="public/file_browser_forward.png" /> }
-                        else { <img src="public/file_browser_forward_disabled.png" /> }
+                        if navigation_enabled_state.1 { <img src="public/file_browser_forward.png" style="height: 1.6em" /> }
+                        else { <img src="public/file_browser_forward_disabled.png" style="height: 1.6em" /> }
                     </Button>
                 </div>
                 <FileNav

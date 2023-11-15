@@ -64,8 +64,7 @@ pub fn directory_parent(props: &DirectoryParentProps) -> Html {
 
     html! {
         <Button class="dir" onclick={onclick}>
-            //<div />
-            <img src="public/file_browser_up.png" />
+            <img src="public/file_browser_up.png" style="height: 1.6em" />
             <div>{".."}</div>
         </Button>
     }
@@ -120,7 +119,7 @@ pub fn directory_entry(props: &DirectoryEntryProps) -> Html {
 
     html! {
         <Button class={classes!(class)} size={ButtonSize::Thin} selected={is_selected} onclick={onclick}>
-            <img src={type_path} />
+            <img src={type_path} style="height: 1.6em" />
             <div>
                 { &props.entry.file_name }
             </div>
