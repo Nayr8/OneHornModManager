@@ -10,17 +10,19 @@ pub struct TopBarProps {
     pub file_explorer_open: UseStateHandle<bool>,
     pub selected_mod: UseStateHandle<Option<usize>>,
     pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
+    pub profile_open: UseStateHandle<bool>,
+    pub profile_create_new: UseStateHandle<bool>,
 }
 
 #[function_component(TopBar)]
 pub fn top_bar(props: &TopBarProps) -> Html {
     html! {
         <div class="top-bar">
-            if *props.file_explorer_open {
-                <Profiles selected_mod={props.selected_mod.clone()} mods={props.mods.clone()} disabled=true />
-            } else {
-                <Profiles selected_mod={props.selected_mod.clone()} mods={props.mods.clone()} />
-            }
+            <Profiles selected_mod={props.selected_mod.clone()}
+                mods={props.mods.clone()}
+                profile_open={props.profile_open.clone()}
+                profile_create_new={props.profile_create_new.clone()}
+                disabled={*props.file_explorer_open} />
         </div>
     }
 }
