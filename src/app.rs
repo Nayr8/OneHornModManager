@@ -15,13 +15,18 @@ pub fn app() -> Html {
     let file_explorer_open = use_state(|| false);
     let console_open = use_state(|| false);
     let selected_mod: UseStateHandle<Option<usize>> = use_state(|| None);
+    
+    let profile_open = use_state(|| false);
+    let profile_create_new = use_state(|| false);
 
     html! {
         <div class="app">
             <TopBar
                 file_explorer_open={file_explorer_open.clone()}
                 selected_mod={selected_mod.clone()}
-                mods={mods.clone()} />
+                mods={mods.clone()}
+                profile_open={profile_open.clone()}
+                profile_create_new={profile_create_new.clone()} />
             if *file_explorer_open {
                 <FileExplorer
                     file_explorer_open={file_explorer_open.clone()}
@@ -30,7 +35,9 @@ pub fn app() -> Html {
                 <MainPage
                     mods={mods.clone()}
                     selected_mod={selected_mod.clone()}
-                    file_explorer_open={file_explorer_open.clone()} />
+                    file_explorer_open={file_explorer_open.clone()}
+                    profile_open={profile_open.clone()}
+                    profile_create_new={profile_create_new.clone()} />
             }
             if *console_open {
                 <Console />
