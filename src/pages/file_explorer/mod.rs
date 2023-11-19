@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 use yew::prelude::*;
 use models::FileEntry;
 use crate::bindings::FileBrowser;
@@ -19,11 +20,12 @@ mod file_nav;
 pub struct FileExplorerProps {
     pub file_explorer_open: UseStateHandle<bool>,
     pub selected_mod: UseStateHandle<Option<usize>>,
+    pub dropped_file: UseStateHandle<Option<Arc<PathBuf>>>,
 }
 #[function_component(FileExplorer)]
 pub fn file_explorer(props: &FileExplorerProps) -> Html {
-    let current_path = use_state(|| std::sync::Arc::new(PathBuf::new()));
-    let current_entries = use_state(|| Vec::<FileEntry>::new());
+    let current_path = use_state(|| Arc::new(PathBuf::new()));
+    let current_entries = use_state(Vec::<FileEntry>::new);
     let navigation_enabled_state = use_state(|| (false, false));
 
     use_effect_with_deps(|navigation_enabled_state| {
@@ -38,11 +40,15 @@ pub fn file_explorer(props: &FileExplorerProps) -> Html {
 
     let current_directory_str = current_path.to_string_lossy().to_string();
 
-    let add_mod_menu = use_state(|| false);
+    let add_mod_menu = use_state(|| props.dropped_file.is_some());
 
     if *add_mod_menu {
         html! {
-            <AddNewModMenu current_file={current_file.clone()} add_mod_menu={add_mod_menu.clone()} file_explorer_open={props.file_explorer_open.clone()} />
+            <AddNewModMenu
+                current_file={current_file.clone()}
+                add_mod_menu={add_mod_menu.clone()}
+                file_explorer_open={props.file_explorer_open.clone()}
+                dropped_file={props.dropped_file.clone()} />
         }
     } else {
         let cancel = {

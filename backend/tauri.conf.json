@@ -40,7 +40,8 @@
         "maximized": true,
         "title": "Nayr8's Mod Manager",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "fileDropEnabled": true
       }
     ]
   }
