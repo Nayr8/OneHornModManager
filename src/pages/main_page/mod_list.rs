@@ -11,6 +11,8 @@ pub struct ModListProps {
     pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
     pub selected_mod: UseStateHandle<Option<usize>>,
     pub file_explorer_open: UseStateHandle<bool>,
+    pub profile_open: UseStateHandle<bool>,
+    pub profile_create_new: UseStateHandle<bool>,
 }
 #[function_component(ModList)]
 pub fn mod_list(props: &ModListProps) -> Html {
@@ -20,12 +22,16 @@ pub fn mod_list(props: &ModListProps) -> Html {
 
 
     if let Status::Loaded(mods) = props.mods.as_ref() {
-        let toggle_file_explorer = {
+        let open_file_explorer = {
             let file_explorer_open = props.file_explorer_open.clone();
             let selected_mod = props.selected_mod.clone();
+            let profile_open = props.profile_open.clone();
+            let profile_create_new = props.profile_create_new.clone();
             move |_: MouseEvent| {
-                file_explorer_open.set(!*file_explorer_open);
+                file_explorer_open.set(true);
                 selected_mod.set(None);
+                profile_open.set(false);
+                profile_create_new.set(false);
             }
         };
         if mods.len() == 0 {
@@ -33,7 +39,7 @@ pub fn mod_list(props: &ModListProps) -> Html {
             html! {
                 <div style="margin: auto;text-align: center">
                     <div style="font-size: 2.5em">{"No Mods Found"}</div>
-                    <Button onclick={toggle_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;margin-top: 1em;width: min-content">{"Add Mod"}</Button>
+                    <Button onclick={open_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;margin-top: 1em;width: min-content">{"Add Mod"}</Button>
                 </div>
             }
         } else {
@@ -45,7 +51,7 @@ pub fn mod_list(props: &ModListProps) -> Html {
             html! {
                 <div class="mod-list">
                     { mods_html }
-                    <Button onclick={toggle_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;width: min-content;margin-top: 3em;margin-bottom: 3em">{"Add Mod"}</Button>
+                    <Button onclick={open_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;width: min-content;margin-top: 3em;margin-bottom: 3em">{"Add Mod"}</Button>
                 </div>
             }
         }

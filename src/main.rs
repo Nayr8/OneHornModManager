@@ -2,6 +2,8 @@ mod app;
 mod components;
 mod logger;
 mod bindings;
+
+mod listeners;
 mod pages;
 pub mod bottom_bar;
 pub mod console;

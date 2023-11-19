@@ -15,6 +15,8 @@ pub struct MainPageProps {
     pub mods: UseStateHandle<Status<Rc<Vec<Mod>>>>,
     pub selected_mod: UseStateHandle<Option<usize>>,
     pub file_explorer_open: UseStateHandle<bool>,
+    pub profile_open: UseStateHandle<bool>,
+    pub profile_create_new: UseStateHandle<bool>,
 }
 #[function_component(MainPage)]
 pub fn main_page(props: &MainPageProps) -> Html {
@@ -23,7 +25,9 @@ pub fn main_page(props: &MainPageProps) -> Html {
             <ModList
                 mods={props.mods.clone()}
                 selected_mod={props.selected_mod.clone()}
-                file_explorer_open={props.file_explorer_open.clone()} />
+                file_explorer_open={props.file_explorer_open.clone()}
+                profile_open={props.profile_open.clone()}
+                profile_create_new={props.profile_create_new.clone()} />
             <SelectedMod
                 mods={props.mods.clone()}
                 selected_mod={props.selected_mod.clone()} />
