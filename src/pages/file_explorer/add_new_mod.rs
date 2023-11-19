@@ -1,4 +1,6 @@
 use std::ops::Deref;
+use std::path::PathBuf;
+use std::sync::Arc;
 use yew::prelude::*;
 use models::{FileEntry, Status};
 use crate::bindings::ModManager;
@@ -11,14 +13,19 @@ pub struct AddNewModMenuProps {
     pub current_file: UseStateHandle<Option<FileEntry>>,
     pub add_mod_menu: UseStateHandle<bool>,
     pub file_explorer_open: UseStateHandle<bool>,
+    pub dropped_file: UseStateHandle<Option<Arc<PathBuf>>>,
 }
 #[function_component(AddNewModMenu)]
 pub fn add_new_mod_menu(props: &AddNewModMenuProps) -> Html {
     let details = use_state(|| Status::Loading);
 
-    use_effect_with_deps(|(current_file, details)| {
-        ModManager::get_mod_details(current_file.path.clone(), details.clone());
-    }, (props.current_file.deref().clone().unwrap(), details.clone()));
+    use_effect_with_deps(|(current_file, details, dropped_file)| {
+
+        ModManager::get_mod_details(match dropped_file.as_ref() {
+            Some(dropped_file) => dropped_file.clone(),
+            None => current_file.clone().unwrap().path.clone()
+        }, details.clone());
+    }, (props.current_file.deref().clone(), details.clone(), props.dropped_file.clone()));
 
     let close_mod_menu = {
         let current_file = props.current_file.clone();
