@@ -3,13 +3,27 @@
   grid-row: mod-list-start / mod-list-end;
   grid-column: mod-list-start / mod-list-end;
   overflow: scroll;
-  padding: 0.6em 0.6em 0 0.5em;
+  background: var(--bar);
+  margin: 1em;
+  border-radius: 0.3em;
+  display: grid;
+  grid-template-rows: min-content minmax(5em, 1fr);
 }
 
 .mod-element {
   display: grid;
   grid-template-areas: "name description version";
   grid-template-columns: max-content auto max-content;
-  grid-column-gap: 0.7em;
+  grid-column-gap: 1em;
   overflow-x:hidden;
+}
+
+.add-mod {
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  min-height: 5em;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr min-content 1fr;
 }
