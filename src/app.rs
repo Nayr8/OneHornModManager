@@ -35,6 +35,7 @@ pub fn app() -> Html {
 
     html! {
         <div class="app">
+            <div class="bg" />
             <TopBar
                 file_explorer_open={file_explorer_open.clone()}
                 selected_mod={selected_mod.clone()}

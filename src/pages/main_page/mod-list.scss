@@ -3,11 +3,12 @@
   grid-row: mod-list-start / mod-list-end;
   grid-column: mod-list-start / mod-list-end;
   overflow: scroll;
-  background: var(--bar);
+  background: var(--content);
   margin: 1em;
   border-radius: 0.3em;
   display: grid;
   grid-template-rows: min-content minmax(5em, 1fr);
+  z-index: 10;
 }
 
 .mod-element {

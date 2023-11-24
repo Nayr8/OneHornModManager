@@ -41,7 +41,6 @@
     margin: 0.1em;
     padding: 0.6em;
 
-    border-style: solid;
     border-radius: 0.3em;
     border-color: var(--border);
 }
@@ -51,9 +50,8 @@
     grid-row: file-main-start / file-main-end;
     padding: 0.6em 0.8em 0 0.5em;
 
-    border: solid var(--border);
     border-radius: 0.3em;
-    background: var(--background);
+    background: var(--content);
 
     overflow: scroll;
 }
@@ -81,7 +79,10 @@
     grid-template-columns: 0.5em 1fr max-content 2em;
     grid-template-rows: 1fr max-content 1fr;
 
-    background: var(--top-bar);
+    margin: 0.5em 0;
+
+    background: var(--content);
+    border-radius: 0.3em;
 
 }
 

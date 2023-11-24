@@ -52,8 +52,8 @@ pub fn mod_list(props: &ModListProps) -> Html {
                 <div class="mod-list">
                     <div>{ mods_html }</div>
                     <Button onclick={open_file_explorer.clone()} size={ButtonSize::Big} class="add-mod">
-                        //<div style="grid-row-start: 2">{"Add Mod"}</div>
-                        <img src="public/add_mod.svg" style="width: 5em, height: 5em" />
+                        <div style="grid-row-start: 2">{"Add Mod"}</div>
+                        //<img src="public/add_mod.svg" style="width: 5em, height: 5em" />
                     </Button>
                 </div>
             }
