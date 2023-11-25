@@ -34,26 +34,22 @@ pub fn mod_list(props: &ModListProps) -> Html {
                 profile_create_new.set(false);
             }
         };
-        if mods.len() == 0 {
 
-            html! {
-                <div style="margin: auto;text-align: center">
-                    <div style="font-size: 2.5em">{"No Mods Found"}</div>
-                    <Button onclick={open_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;margin-top: 1em;width: min-content">{"Add Mod"}</Button>
-                </div>
-            }
-        } else {
-
-            let mods_html: Html = mods.iter().enumerate().map(|(index, mod_info)| html! {
-                <ModElement mod_info={(*mod_info).clone()} selected_mod={props.selected_mod.clone()} index={index} />
-            }).collect();
-
-            html! {
+        html! {
+            <>
                 <div class="mod-list">
-                    { mods_html }
-                    <Button onclick={open_file_explorer.clone()} size={ButtonSize::Big} style="margin: auto;width: min-content;margin-top: 3em;margin-bottom: 3em">{"Add Mod"}</Button>
+                    if mods.len() == 0 {
+                        <div class="no-mods-found">{"No Mods Found"}</div>
+                    } else {
+                        <div>{ mods.iter().enumerate().map(|(index, mod_info)| html! {
+                            <ModElement mod_info={(*mod_info).clone()} selected_mod={props.selected_mod.clone()} index={index} />
+                        }).collect::<Html>() }</div>
+                    }
                 </div>
-            }
+                <Button onclick={open_file_explorer.clone()} size={ButtonSize::Big} class="add-mod">
+                    <div style="grid-row-start: 2">{"Add Mod"}</div>
+                </Button>
+            </>
         }
     } else {
         html! {

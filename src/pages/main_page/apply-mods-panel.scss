@@ -1,12 +1,6 @@
 .apply-mods-panel {
   grid-row: apply-mods-start / apply-mods-end;
   grid-column: apply-mods-start / apply-mods-end;
-
-
-
-  border-top: solid 0.15em var(--border);
-  border-left: solid 0.15em var(--border);
-  background: var(--top-bar);
 }
 
 .apply-mods-button {

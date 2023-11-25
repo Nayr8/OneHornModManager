@@ -1,17 +1,19 @@
 :root {
-  --top-bar: #20293e;
-  --selected-option: #37496b;
-  --unselected-option: #28334c;
-  --unselected-option-dark: #1d2945;
-  --hovered-option: #475d87;
-  --text: #c8d3f2;
-  --text-disabled: #6c7181;
-  --background: #212b50;
-  --border: #121723;
-  --console: black;
-  --console-debug: gray;
-  --console-info: white;
-  --console-warning: yellow;
-  --console-error: red;
-  --spinner-main: #6c7181;
+   --text: #eeeeee;
+   --text-disabled: #808080;
+
+   --background: #0f0f0f;
+   --background2: #572212;
+   --content: rgba(50, 50, 50, 0.33);
+   --content-solid: rgba(50, 50, 50, 0.66);
+   --hovered-option: #32323288;
+   --selected-option: rgba(50, 50, 50, 0.66);
+
+
+   --console: black;
+   --console-debug: gray;
+   --console-info: white;
+   --console-warning: yellow;
+   --console-error: red;
+   --spinner-main: #6c7181;
 }
