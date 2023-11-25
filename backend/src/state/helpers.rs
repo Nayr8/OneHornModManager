@@ -25,7 +25,7 @@ impl PathHelper {
 
     pub fn get_data_dir() -> PathBuf {
         let mut data_dir = dirs::data_local_dir().expect("Could not get local data directory");
-        data_dir.push("Nayr8'sBG3ModManager");
+        data_dir.push("OneHornModManager");
         data_dir
     }
 
