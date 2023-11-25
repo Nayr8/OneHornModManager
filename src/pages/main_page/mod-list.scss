@@ -20,11 +20,19 @@
 }
 
 .add-mod {
-  width: 100%;
   text-align: center;
-  box-sizing: border-box;
-  min-height: 5em;
-  height: 100%;
   display: grid;
+  height: 3em;
   grid-template-rows: 1fr min-content 1fr;
+  grid-row: add-mod-start / add-mod-end;
+  grid-column: add-mod-start / add-mod-end;
+  background: var(--content);
+  margin: 0.6em;
+  border-radius: 0.3em;
+}
+
+.no-mods-found {
+  font-size: 2em;
+  text-align: center;
+  margin-top: 2em;
 }

@@ -45,6 +45,12 @@
     border-color: var(--border);
 }
 
+.file-nav-common-path {
+    margin-bottom: 0.2em;
+    display: grid;
+    grid-template-columns: 1.8em 1fr;
+}
+
 .files {
     grid-column: file-main-start / file-main-end;
     grid-row: file-main-start / file-main-end;
@@ -77,7 +83,7 @@
                          ".. ..           ..                   ..";
 
     grid-template-columns: 0.5em 1fr max-content 2em;
-    grid-template-rows: 1fr max-content 1fr;
+    grid-template-rows: 0.75em 1em 0.75em;
 
     margin: 0.5em 0;
 
@@ -118,11 +124,14 @@
     grid-template-rows: 1fr max-content 1fr;
     grid-template-columns: 0.5em 1fr 0.5em;
 
+    background: var(--content);
+    border-radius: 0.3em;
+    margin: 0.5em 0;
 }
 
 .file-location {
     grid-column: location-start / location-end;
     grid-row: location-start / location-end;
 
-    overflow: scroll;
+    overflow-x: scroll;
 }
