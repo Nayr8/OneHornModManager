@@ -1,9 +1,6 @@
 
 
 .element {
-  border-style: solid;
-  border-radius: 0.3em;
-  margin: 0.1em;
   padding: 0.25em 0.6em 0.25em 0.6em;
   height: 1.5em;
 
@@ -12,13 +9,9 @@
   white-space: nowrap;
   overflow-x: scroll;
   overflow-y: hidden;
-
-  border-color: var(--border);
-  background: var(--unselected-option);
 }
 
 .make-element-disabled-lite {
-  background: var(--top-bar);
   color: var(--text-disabled);
 }
 
@@ -38,7 +31,6 @@
 }
 
 .make-element-disabled {
-  background: var(--top-bar);
   color: var(--text-disabled);
   &:hover {
     cursor: default;

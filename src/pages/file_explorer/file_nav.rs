@@ -47,10 +47,12 @@ pub fn file_nav(props: &FileNavProps) -> Html {
 
                         html! {
                             <Button onclick={onclick}>
-                                if let Some(img_src) = img_src {
-                                    <img src={img_src} style="margin-right: 0.35em;height: 1.4em" />
-                                }
-                                {name}
+                                <div class="file-nav-common-path">
+                                    if let Some(img_src) = img_src {
+                                        <img src={img_src} style="margin-right: 0.35em;height: 1.4em" />
+                                    }
+                                    <div>{name}</div>
+                                </div>
                             </Button>
                         }
                     }).collect::<Html>()}

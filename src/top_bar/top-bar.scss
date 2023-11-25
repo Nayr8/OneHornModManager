@@ -8,9 +8,6 @@
   grid-auto-flow: column;
   grid-template-columns: repeat(5, max-content);
   padding-left: 0.5em;
-
-  background: var(--top-bar);
-  border-bottom: solid var(--border);
 }
 
 .profiles {
@@ -30,12 +27,10 @@
   min-height: max-content;
   max-height: 50vw;
 
-  border-style: solid;
-  border-color: var(--border);
   border-radius: 0 0 0.3em 0.3em;
   border-top: none;
 
-  background: var(--unselected-option);
+  background: var(--content);
 
   position: relative;
   z-index: 25;
@@ -44,10 +39,7 @@
 .profile {
   padding: 0.25em 0.6em 0.25em 0.6em;
   height: 1.5em;
-
-  border-top: solid 0.15em var(--border);
-
-  background: var(--unselected-option);
+  background: var(--content-solid);
 }
 
 .new-profile-text {
@@ -64,5 +56,6 @@
   height: 1.5em;
   font-size: 1em;
   color: var(--text);
-  border: solid 0.15em var(--border);
+  background: var(--content-solid);
+  border: none;
 }

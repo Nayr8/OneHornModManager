@@ -12,7 +12,6 @@
                          "file-cancel  file-base     ..";
     grid-template-columns: 15em 1fr 3.5em;
     grid-template-rows: 3em 1fr 3.5em;
-    background: var(--top-bar);
 }
 
 .file-nav-top {
@@ -41,9 +40,13 @@
     margin: 0.1em;
     padding: 0.6em;
 
-    border-style: solid;
     border-radius: 0.3em;
-    border-color: var(--border);
+}
+
+.file-nav-common-path {
+    margin-bottom: 0.2em;
+    display: grid;
+    grid-template-columns: 1.8em 1fr;
 }
 
 .files {
@@ -51,9 +54,8 @@
     grid-row: file-main-start / file-main-end;
     padding: 0.6em 0.8em 0 0.5em;
 
-    border: solid var(--border);
     border-radius: 0.3em;
-    background: var(--background);
+    background: var(--content);
 
     overflow: scroll;
 }
@@ -67,7 +69,6 @@
 
 .dir {
     @extend .file;
-    background: var(--unselected-option-dark);
 }
 
 .file-base {
@@ -79,17 +80,18 @@
                          ".. ..           ..                   ..";
 
     grid-template-columns: 0.5em 1fr max-content 2em;
-    grid-template-rows: 1fr max-content 1fr;
+    grid-template-rows: 0.75em 1em 0.75em;
 
-    background: var(--top-bar);
+    margin: 0.5em 0;
+
+    background: var(--content);
+    border-radius: 0.3em;
 
 }
 
 .file-cancel {
     grid-column: file-cancel-start / file-cancel-end;
     grid-row: file-cancel-start / file-cancel-end;
-
-    background: var(--top-bar);
 
     margin: auto;
 }
@@ -117,11 +119,14 @@
     grid-template-rows: 1fr max-content 1fr;
     grid-template-columns: 0.5em 1fr 0.5em;
 
+    background: var(--content);
+    border-radius: 0.3em;
+    margin: 0.5em 0;
 }
 
 .file-location {
     grid-column: location-start / location-end;
     grid-row: location-start / location-end;
 
-    overflow: scroll;
+    overflow-x: scroll;
 }

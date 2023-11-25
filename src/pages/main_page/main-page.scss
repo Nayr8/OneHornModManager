@@ -7,7 +7,9 @@
   grid-column: main-start / main-end;
   display: grid;
   grid-template-columns: 1fr 30em;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: 1fr auto 5em;
   grid-template-areas: "mod-list selected-mod"
-                       "mod-list apply-mods";
+                       "mod-list selected-mods"
+                       "add-mod apply-mods";
+  margin-bottom: 1em;
 }
