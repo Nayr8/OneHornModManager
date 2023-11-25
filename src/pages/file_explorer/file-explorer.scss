@@ -12,7 +12,6 @@
                          "file-cancel  file-base     ..";
     grid-template-columns: 15em 1fr 3.5em;
     grid-template-rows: 3em 1fr 3.5em;
-    background: var(--top-bar);
 }
 
 .file-nav-top {
@@ -42,7 +41,6 @@
     padding: 0.6em;
 
     border-radius: 0.3em;
-    border-color: var(--border);
 }
 
 .file-nav-common-path {
@@ -71,7 +69,6 @@
 
 .dir {
     @extend .file;
-    background: var(--unselected-option-dark);
 }
 
 .file-base {
@@ -95,8 +92,6 @@
 .file-cancel {
     grid-column: file-cancel-start / file-cancel-end;
     grid-row: file-cancel-start / file-cancel-end;
-
-    background: var(--top-bar);
 
     margin: auto;
 }

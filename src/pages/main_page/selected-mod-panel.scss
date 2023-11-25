@@ -7,14 +7,10 @@
                        "options"
                        "..";
   grid-template-rows: max-content min-content min-content min-content 1fr;
-  background: var(--top-bar);
-  border-left: solid var(--border);
   padding-top: 15%;
 }
 
 .no-selected-mod-panel {
-  background: var(--top-bar);
-  border-left: solid var(--border);
   text-align: center;
   font-size: 1.2em;
   padding-top: 1em;

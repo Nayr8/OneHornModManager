@@ -8,9 +8,6 @@
   grid-auto-flow: column;
   grid-template-columns: repeat(5, max-content);
   padding-left: 0.5em;
-
-  background: var(--content);
-  border-bottom: solid var(--border);
 }
 
 .profiles {
