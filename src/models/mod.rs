@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Clone)]
+#[derive(Deserialize, PartialEq, Clone)]
 pub struct Mod {
     pub name: String,
     pub description: String,
@@ -12,6 +12,12 @@ pub struct Mod {
 pub enum AppState {
     ModList,
     FileBrowser,
+}
+
+#[derive(PartialEq, Clone, Copy, Debug)]
+pub enum BrowserState {
+    FileBrowser,
+    AddMod,
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
@@ -32,9 +38,9 @@ impl CommonPath {
     pub fn to_svg_path(&self) -> &'static str {
         match self {
             CommonPath::Home => "public/images/home.svg",
-            CommonPath::Documents => "public/images/home.svg",
+            CommonPath::Documents => "public/images/documents.svg",
             CommonPath::Downloads => "public/images/home.svg",
-            CommonPath::Desktop => "public/images/home.svg",
+            CommonPath::Desktop => "public/images/desktop.svg",
         }
     }
 }
@@ -50,4 +56,19 @@ pub struct FileEntry {
 pub enum EntryType {
     File,
     Directory,
+}
+
+impl EntryType {
+    pub fn to_svg_path(&self) -> &'static str {
+        match self {
+            EntryType::File => "public/images/home.svg",
+            EntryType::Directory => "public/images/home.svg",
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct ModDetails {
+    pub name: String,
+    pub description: String,
 }

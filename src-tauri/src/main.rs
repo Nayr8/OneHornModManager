@@ -27,6 +27,7 @@ fn main() {
             state::commands::create_profile,
             state::commands::get_mods,
             state::commands::get_mod_details,
+            state::commands::add_current_mod,
 
             // File Browser
             file_browser::commands::redirect_browser,

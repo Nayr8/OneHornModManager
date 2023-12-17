@@ -18,4 +18,8 @@ impl Profile {
     pub fn get_mods(&self) -> &[ModState] {
         self.mods.as_slice()
     }
+
+    pub fn add_mod(&mut self, mod_state: ModState) {
+        self.mods.push(mod_state);
+    }
 }

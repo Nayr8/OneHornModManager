@@ -23,10 +23,10 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#505050"
      inkscape:document-units="px"
-     inkscape:zoom="16"
-     inkscape:cx="28.9375"
-     inkscape:cy="22.4375"
-     inkscape:window-width="2690"
+     inkscape:zoom="22.627417"
+     inkscape:cx="6.3860581"
+     inkscape:cy="13.567611"
+     inkscape:window-width="2133"
      inkscape:window-height="1323"
      inkscape:window-x="40"
      inkscape:window-y="925"
@@ -83,5 +83,45 @@
        y="1.2287734"
        rx="0.13229166"
        ry="0.13229166" />
+    <rect
+       style="fill:#f9f9f9;stroke-width:0.256493"
+       id="rect1"
+       width="6.3340068"
+       height="0.24896862"
+       x="1.0687113"
+       y="4.8602562" />
+    <path
+       sodipodi:type="star"
+       style="fill:#f9f9f9;stroke-width:0.264583"
+       id="path1"
+       inkscape:flatsided="true"
+       sodipodi:sides="3"
+       sodipodi:cx="3.7649677"
+       sodipodi:cy="2.552037"
+       sodipodi:r1="0.80511367"
+       sodipodi:r2="0.40255684"
+       sodipodi:arg1="0.52359878"
+       sodipodi:arg2="1.5707963"
+       inkscape:rounded="5.6864236e-15"
+       inkscape:randomized="0"
+       d="m 4.4622166,2.9545938 -1.3944978,0 0.6972489,-1.2076705 z"
+       inkscape:transform-center-y="-0.079377943"
+       transform="matrix(0.82587789,0,0,0.39436889,1.1207595,1.5400735)" />
+    <rect
+       style="fill:#f9f9f9;stroke-width:0.257931"
+       id="rect2"
+       width="1.3229166"
+       height="0.79374999"
+       x="-2.0845625"
+       y="3.3603685"
+       transform="matrix(-0.7709672,0.63687485,0.63687485,0.7709672,0,0)" />
+    <rect
+       style="fill:#f9f9f9;stroke-width:0.257931"
+       id="rect2-6"
+       width="1.3229166"
+       height="0.79374999"
+       x="4.3942037"
+       y="-1.9820313"
+       transform="rotate(39.559178)" />
   </g>
 </svg>

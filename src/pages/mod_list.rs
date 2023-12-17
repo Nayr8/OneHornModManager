@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use crate::bindings::ManagerBindings;
 use crate::components::{Button, ErrorMessage, Spinner, Svg};
 use crate::helpers::localisation::LocalisationHelper;
 use crate::models::Mod;
@@ -7,14 +8,20 @@ use crate::Status;
 #[derive(Properties, PartialEq)]
 pub struct ModListProps {
     pub t: UseStateHandle<LocalisationHelper>,
-    pub mods: UseStateHandle<Status<Vec<Mod>, ()>>,
 }
 
 #[function_component]
 pub fn ModList(props: &ModListProps) -> Html {
+    let mods = use_state(|| Status::Loading);
 
+    use_effect_with_deps({
+        let mods = mods.clone();
+        move |_| {
+            ManagerBindings::get_mods(mods);
+        }
+    }, ());
 
-    match &*props.mods {
+    match &*mods {
         Status::Loading => html! {
             <Spinner size=10.0 style="margin-left: auto;margin-right: auto;margin-top: 10%"/>
         },

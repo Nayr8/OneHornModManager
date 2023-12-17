@@ -207,4 +207,21 @@ impl State {
             return; // TODO return and handle error
         }
     }
+
+    fn add_current_mod(&mut self) {
+        let Some(selected_new_mod_info) = self.selected_new_mod_info.take() else {
+            return;
+        };
+
+        let Some(profile) = self.profiles.get_mut(&self.current_profile) else {
+            return;
+        };
+
+        profile.add_mod(ModState {
+            meta: selected_new_mod_info.meta,
+            path: selected_new_mod_info.unpacked_data,
+            enabled: true,
+        });
+        self.save();
+    }
 }

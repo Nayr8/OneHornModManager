@@ -1,8 +1,10 @@
 use serde::{Serialize, Serializer};
 
 mod file_browser;
+mod manager;
 
 pub use file_browser::FileBrowserBindings;
+pub use manager::ManagerBindings;
 
 pub struct Null;
 

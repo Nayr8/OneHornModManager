@@ -16,7 +16,10 @@
       "home": "Home",
       "documents": "Documents",
       "downloads": "Downloads",
-      "desktop": "Desktop"
+      "desktop": "Desktop",
+      "choose_file": "Add",
+      "error_getting_mod_details": "Error getting mod details",
+      "add_selected_mod": "Add"
     }
   }
 }

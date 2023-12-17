@@ -1,22 +1,14 @@
 use yew::prelude::*;
 use crate::helpers::localisation::LocalisationHelper;
 use crate::menus::side_bar::SideBar;
-use crate::models::{Mod, AppState};
+use crate::models::AppState;
 use crate::pages::{FileBrowser, ModList};
-use crate::Status;
 
 
 #[function_component]
 pub fn App() -> Html {
     let t = use_state(|| LocalisationHelper::default());
-    let state = use_state(|| AppState::FileBrowser);
-    let mods = use_state(|| Status::Loaded::<_, ()>(vec![
-        Mod {
-            name: "BetterHotBar2_UW_4x31".into(),
-            description: "BetterHotBar2_UW_4x31".into(),
-            enabled: true,
-        }
-    ]));
+    let state = use_state(|| AppState::ModList);
 
     use_effect_with_deps({
         let t = t.clone();
@@ -29,10 +21,9 @@ pub fn App() -> Html {
         <div class="app">
             <SideBar t={t.clone()} state={state.clone()} />
             {match *state {
-                AppState::ModList => html! { <ModList t={t.clone()} mods={mods.clone()}/> },
-                AppState::FileBrowser => html! { <FileBrowser t={t.clone()}/> }
+                AppState::ModList => html! { <ModList t={t.clone()}/> },
+                AppState::FileBrowser => html! { <FileBrowser t={t.clone()} app_state={state.clone()}/> }
             }}
-
         </div>
     }
 }

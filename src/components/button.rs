@@ -9,6 +9,8 @@ pub struct ButtonProps {
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
+    pub style: String,
+    #[prop_or_default]
     pub disabled: bool,
     #[prop_or_default]
     pub highlight_on_hover: bool,
@@ -28,7 +30,7 @@ pub fn Button(props: &ButtonProps) -> Html {
         classes!("button", props.class.clone(), props.highlight_on_hover.then_some("highlight_on_hover"))
     };
     html! {
-        <div class={classes} onclick={onclick}>
+        <div class={classes} onclick={onclick} style={props.style.clone()}>
             {props.children.clone()}
         </div>
     }

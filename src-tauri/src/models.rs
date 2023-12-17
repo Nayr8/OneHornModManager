@@ -10,6 +10,13 @@ pub struct ModState {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Mod {
+    pub name: String,
+    pub description: String,
+    pub enabled: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModDetails {
     pub name: String,
     pub description: String,
