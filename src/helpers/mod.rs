@@ -1,13 +1,12 @@
-use wasm_bindgen::JsCast;
+pub mod localisation;
 
-pub struct DomHelper;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
+use js_sys::Promise;
 
-impl DomHelper {
-    pub fn read_input(id: &str) -> Option<String> {
-        let input_node = web_sys::window()?
-            .document()?
-            .get_element_by_id(id)?
-            .dyn_into::<web_sys::HtmlInputElement>().ok()?;
-        Some(input_node.value())
-    }
+pub async fn convert_promise_to_result(promise: Promise) -> Result<JsValue, JsValue> {
+    let future = JsFuture::from(promise);
+    let result = future.await?;
+
+    Ok(result)
 }

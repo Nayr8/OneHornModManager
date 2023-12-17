@@ -1,4 +1,7 @@
-# One Horn Mod Manager for Baldur's Gate 3 on Linux and Steamdeck
-A Linux and Steam Deck compatible Mod Manager for Baldur's Gate 3.
+# Tauri + Yew
 
-This Tool is in the Alpha stage and everything is subject to change
+This template should help get you started developing with Tauri and Yew.
+
+## Recommended IDE Setup
+
+[VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).

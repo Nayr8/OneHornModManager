@@ -1,58 +1,34 @@
 use yew::prelude::*;
 
-#[derive(Copy, Clone, Eq, PartialEq, Default)]
-pub enum ButtonSize {
-    Thin,
-    #[default]
-    Standard,
-    Big
-}
-
 #[derive(Properties, PartialEq)]
 pub struct ButtonProps {
     #[prop_or_default]
     pub children: Children,
-
+    #[prop_or_default]
+    pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
-    pub style: String,
-    #[prop_or_default]
     pub disabled: bool,
     #[prop_or_default]
-    pub size: ButtonSize,
-    #[prop_or_default]
-    pub selected: bool,
-    #[prop_or_default]
-    pub onclick: Option<Callback<MouseEvent>>,
+    pub highlight_on_hover: bool,
 }
 
-#[function_component(Button)]
-pub fn button(props: &ButtonProps) -> Html {
-    let classes = classes!(
-        "element",
-        if props.disabled { "make-element-disabled" } else { "make-element-button" },
-        match props.size {
-            ButtonSize::Thin => Some("make_element-thin"),
-            ButtonSize::Standard => None,
-            ButtonSize::Big => Some("make_element-big"),
-        },
-        if props.selected { Some("make-element-selected") } else { None },
+#[function_component]
+pub fn Button(props: &ButtonProps) -> Html {
+    let onclick = if props.disabled {
+        None
+    } else {
+        Some(props.onclick.clone())
+    };
+
+    let classes = if props.disabled {
         props.class.clone()
-    );
-
-    if let Some(onclick) = &props.onclick {
-        if !props.disabled {
-            return html! {
-                <div class={classes} style={props.style.clone()} onclick={onclick}>
-                    {props.children.clone()}
-                </div>
-            };
-        }
-    }
-
+    } else {
+        classes!("button", props.class.clone(), props.highlight_on_hover.then_some("highlight_on_hover"))
+    };
     html! {
-        <div class={classes} style={props.style.clone()}>
+        <div class={classes} onclick={onclick}>
             {props.children.clone()}
         </div>
     }

@@ -1,20 +1,21 @@
 mod app;
+mod menus;
+mod helpers;
 mod components;
-mod logger;
+mod models;
+mod pages;
 mod bindings;
 
-mod listeners;
-mod pages;
-pub mod bottom_bar;
-pub mod console;
-pub mod top_bar;
-mod helpers;
-
 use app::App;
-use crate::logger::Logger;
+
+#[derive(PartialEq)]
+pub enum Status<T: PartialEq, ERR: PartialEq> {
+    Loading,
+    Loaded(T),
+    Error(ERR),
+}
 
 
 fn main() {
-    Logger::init();
     yew::Renderer::<App>::new().render();
 }

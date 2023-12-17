@@ -1,0 +1,22 @@
+{
+  "menu": {
+    "sidebar": {
+      "home": "Mod List",
+      "add_mod": "Add mod",
+      "change_profile": "Switch profile",
+      "settings":  "Settings"
+    }
+  },
+  "page": {
+    "mod_list": {
+      "error_getting_mods": "Error getting mods"
+    },
+    "file_browser": {
+      "quick_access": "Quick Access",
+      "home": "Home",
+      "documents": "Documents",
+      "downloads": "Downloads",
+      "desktop": "Desktop"
+    }
+  }
+}

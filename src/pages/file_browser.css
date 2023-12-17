@@ -1,0 +1,55 @@
+
+.file-browser {
+    display: grid;
+    grid-template-areas: "nav          location"
+                         "quick-access files"
+                         "..           selected";
+    grid-template-columns: 20em 1fr;
+    grid-template-rows: 2.5em 1fr 2.5em;
+    margin: 1em;
+    justify-items: center;
+}
+
+.nav {
+    grid-area: nav;
+    display: grid;
+    grid-template-columns: max-content max-content;
+    column-gap: 1em;
+}
+
+.location {
+    grid-area: location;
+}
+
+.quick-access {
+    display: grid;
+    grid-area: quick-access;
+    width: 15em;
+    justify-items: center;
+    grid-template-rows: 10% max-content 1fr;
+}
+
+.quick-access-image {
+    width: 1.2em;
+    height: 1.2em;
+    transform: translate(0, 0.15em);
+}
+
+.quick-access-paths {
+    display: grid;
+    row-gap: 0.3em;
+}
+
+.common-path-button {
+    display: grid;
+    grid-template-columns: 1.5em 1fr;
+    padding: 0.2em;
+}
+
+.files {
+    grid-area: files;
+}
+
+.selected {
+    grid-area: selected;
+}

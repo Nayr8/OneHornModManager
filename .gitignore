@@ -1,3 +1,5 @@
-/Cargo.lock
-/target/
 /dist/
+/target/
+/Cargo.lock
+/.vscode/
+/.idea/one-horn-rewrite.iml

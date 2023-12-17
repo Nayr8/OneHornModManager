@@ -1,0 +1,76 @@
+
+
+/*=============================================
+=                  Button                     =
+=============================================*/
+
+.button:hover {
+    cursor: pointer;
+}
+
+.highlight_on_hover:hover {
+    background-color: var(--hovered);
+}
+
+/*=============================================
+=                  Tooltip                    =
+=============================================*/
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-content {
+    visibility: hidden;
+    background: var(--background);
+    color: var(--text);
+    text-align: center;
+    padding: 5px;
+    border: solid 1px var(--text);
+    border-radius: 6px;
+    position: absolute;
+    transform: translate(3em, -125%);
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.tooltip-wrapper:hover .tooltip-content {
+    visibility: visible;
+}
+
+/*=============================================
+=                  Spinner                    =
+=============================================*/
+
+.spinner {
+    border: solid;
+    border-radius: 50%;
+    border-color: var(--text) transparent var(--text) transparent;
+    animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/*=============================================
+=               Error Message                 =
+=============================================*/
+
+.error {
+    display: grid;
+    place-items: center;
+    grid-template-rows: auto max-content 1fr;
+    align-self: center;
+    row-gap: 1em;
+}
+
+.error-image {
+    width: 5em;
+    height: 5em;
+}
