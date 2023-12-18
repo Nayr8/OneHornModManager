@@ -1,10 +1,11 @@
 {
   "menu": {
     "sidebar": {
-      "home": "Mod List",
+      "home": "Mod list",
       "add_mod": "Add mod",
       "change_profile": "Switch profile",
-      "settings":  "Settings"
+      "settings": "Settings",
+      "apply": "Apply mods"
     }
   },
   "page": {

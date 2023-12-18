@@ -28,6 +28,7 @@ fn main() {
             state::commands::get_mods,
             state::commands::get_mod_details,
             state::commands::add_current_mod,
+            state::commands::apply,
 
             // File Browser
             file_browser::commands::redirect_browser,

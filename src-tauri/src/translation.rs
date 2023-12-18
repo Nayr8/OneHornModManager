@@ -1,12 +1,13 @@
 use hashbrown::HashMap;
-use log::info;
+use log::{error, info};
 use serde_json::Value;
 
 
 #[tauri::command]
 pub fn load_translation(translation: String) -> Result<HashMap<String, String>, ()> {
     info!("Loading translation {translation}");
-    let json = std::fs::read_to_string(format!("../public/translations/{translation}.json")).map_err(|e| {
+    let json = std::fs::read_to_string(format!("../public/translations/{translation}.json")).map_err(|error| {
+        error!("Could not load translation file: {error}");
         ()
     })?;
 

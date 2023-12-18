@@ -25,6 +25,7 @@ log = "0.4.20"
 simple_logger = "4.3.0"
 zip-extract = "0.1.2"
 xml-builder = "0.5.2"
+symlink = "0.1.0"
 
 
 package-helper = { path = "../package-helper" }

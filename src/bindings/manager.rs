@@ -36,4 +36,10 @@ impl ManagerBindings {
             mods.set(Status::Loaded(mod_details));
         })
     }
+
+    pub fn apply() {
+        spawn_local(async move {
+            let _: () = tauri::invoke("apply", &Null).await.unwrap();
+        })
+    }
 }

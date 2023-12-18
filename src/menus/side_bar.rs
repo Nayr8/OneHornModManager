@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use crate::bindings::ManagerBindings;
 use crate::components::{Button, Svg, Tooltip};
 use crate::helpers::localisation::LocalisationHelper;
 use crate::models::AppState;
@@ -50,8 +51,10 @@ pub fn SideBar(props: &SideBarProps) -> Html {
         SideBarButtonProps {
             tooltip: props.t.trans("menu:sidebar:apply"),
             svg_path: "public/images/apply.svg".into(),
-            onclick: Default::default(),
-            disabled: true,
+            onclick: Callback::from(|_| {
+                ManagerBindings::apply();
+            }),
+            disabled: false,
         },
     ];
 

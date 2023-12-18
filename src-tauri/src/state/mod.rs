@@ -4,14 +4,16 @@ use std::path::{Path, PathBuf};
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use log::{error, info};
+use log::{error, info, trace, warn};
 use package_helper::{Meta, PackageReader};
 use crate::helper::PathHelper;
 use crate::models::{ModDetails, ModState, SelectedNewModInfo};
+use crate::state::mod_settings_builder::ModSettingsBuilder;
 use crate::state::profile::Profile;
 
 mod profile;
 pub mod commands;
+mod mod_settings_builder;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
@@ -19,6 +21,11 @@ pub struct State {
     profiles: HashMap<Uuid, Profile>,
 
     selected_new_mod_info: Option<SelectedNewModInfo>,
+
+    #[serde(skip, default="PathHelper::find_bg3_app_data")]
+    bg3_appdata: PathBuf,
+    #[serde(skip, default="Meta::gustav_dev")]
+    gustav_dev_mod_meta: Meta,
 }
 
 impl State {
@@ -27,6 +34,8 @@ impl State {
             current_profile: Uuid::nil(),
             profiles: HashMap::new(),
             selected_new_mod_info: None,
+            bg3_appdata: PathHelper::find_bg3_app_data(),
+            gustav_dev_mod_meta: Meta::gustav_dev(),
         }
     }
 
@@ -91,9 +100,18 @@ impl State {
 
         let extension = path.extension().map(std::ffi::OsStr::to_string_lossy);
         let data_path = match extension.as_ref().map(std::convert::AsRef::as_ref) {
-            Some("pak") => self.mov_pak(&path),
-            Some("zip") => self.extract_zip(&path),
-            _ => return Err(()),
+            Some("pak") => self.mov_pak(&path).map_err(|_| {
+                error!("Error moving .pak file");
+                ()
+            })?,
+            Some("zip") => self.extract_zip(&path).map_err(|_| {
+                error!("Error unpacking .zip file");
+                ()
+            })?,
+            _ => {
+                error!("Tried to get mod details from an unsupported extension");
+                return Err(())
+            },
         };
 
         let meta = match State::get_mod_metas(&data_path) {
@@ -101,7 +119,10 @@ impl State {
                 // FIXME: Find a way to use multiple metas
                 meta.drain(..).next()
             },
-            Err(()) => return Err(())
+            Err(()) => {
+                error!("Error occurred trying to get meta");
+                return Err(())
+            }
         };
 
         self.selected_new_mod_info = Some(SelectedNewModInfo {
@@ -123,24 +144,24 @@ impl State {
         })
     }
 
-    fn mov_pak(&self, path: &Path) -> PathBuf {
+    fn mov_pak(&self, path: &Path) -> Result<PathBuf, ()> {
         let data_dir_path = self.calculate_extraction_path(path);
 
         create_dir_all(&data_dir_path).unwrap();
 
-        copy(path, data_dir_path.join(path.file_name().unwrap())).unwrap();
+        copy(path, data_dir_path.join(path.file_name().ok_or(())?)).map_err(|_| ())?;
 
-        data_dir_path
+        Ok(data_dir_path)
     }
 
-    fn extract_zip(&self, path: &Path) -> PathBuf {
+    fn extract_zip(&self, path: &Path) -> Result<PathBuf, ()> {
         let data_dir_path = self.calculate_extraction_path(path);
 
-        create_dir_all(&data_dir_path).unwrap();
+        create_dir_all(&data_dir_path).map_err(|_| ())?;
 
-        let src = File::open(path).unwrap();
-        zip_extract::extract(src, &data_dir_path, true).unwrap();
-        data_dir_path
+        let src = File::open(path).map_err(|_| ())?;
+        zip_extract::extract(src, &data_dir_path, true).map_err(|_| ())?;
+        Ok(data_dir_path)
     }
 
     fn try_get_cached_details(&self, path: &Path) -> Option<ModDetails> {
@@ -191,6 +212,7 @@ impl State {
     }
 
     fn save(&self) {
+        info!("Saving...");
         let Ok(state_string) = serde_json::to_string::<State>(self) else { return };// TODO return and handle error
 
 
@@ -203,17 +225,20 @@ impl State {
             }
         };
 
-        if let Err(_) = file.write_all(state_string.as_bytes()) {
+        if let Err(error) = file.write_all(state_string.as_bytes()) {
+            error!("Could not save file: {error:?}");
             return; // TODO return and handle error
         }
     }
 
     fn add_current_mod(&mut self) {
         let Some(selected_new_mod_info) = self.selected_new_mod_info.take() else {
+            warn!("Tried to add mod that selected mod when no mod was selected");
             return;
         };
 
         let Some(profile) = self.profiles.get_mut(&self.current_profile) else {
+            error!("Could not get current profile {}", self.current_profile);
             return;
         };
 
@@ -223,5 +248,80 @@ impl State {
             enabled: true,
         });
         self.save();
+    }
+
+    // FIXME: IF the paths don't exist anymore there will be a partial crash
+    pub fn apply(&mut self) {
+        info!("Creating symlinks to mod pak files");
+        let mut mods_folder_path = PathBuf::from(&self.bg3_appdata);
+        mods_folder_path.push("Mods/");
+
+        trace!("Removing symlinks from Mods folder '{}'", mods_folder_path.to_string_lossy());
+        for entry in std::fs::read_dir(&mods_folder_path).unwrap() {
+            if entry.is_err() { continue }
+            let entry = entry.unwrap();
+
+            if let Ok(file_type) = entry.file_type() {
+                if file_type.is_symlink() {
+                    symlink::remove_symlink_auto(entry.path()).unwrap();
+                }
+            }
+        }
+
+        for mod_state in self.get_mods() {
+            if !mod_state.enabled { continue }
+
+            let mut path = mods_folder_path.clone();
+
+            let mut src_path = None;
+            let dir = std::fs::read_dir(&mod_state.path).unwrap();
+            for entry in dir {
+                let Ok(entry) = entry else { continue };
+
+                if entry.file_name().to_string_lossy().ends_with(".pak") {
+                    src_path = Some(PathBuf::from(&mod_state.path).join(entry.file_name()));
+                    break;
+                }
+            }
+            let src_path = src_path.unwrap();
+
+            path.push(src_path.file_name().expect("Mod file not a file"));
+
+            if let Err(error) = symlink::symlink_file(&src_path, path) {
+                error!("Could not apply mod '{:?}': {error}", src_path);
+                return;
+            }
+        }
+
+        info!("Writing mod settings");
+        let mut mod_settings_path = PathBuf::from(&self.bg3_appdata);
+        mod_settings_path.push("PlayerProfiles/Public/modsettings.lsx");
+
+        let mod_settings = self.build_mod_settings();
+
+        let mut mod_settings_file = match OpenOptions::new()
+            .write(true).create(true).truncate(true)
+            .open(&mod_settings_path) {
+            Ok(file) => file,
+            Err(error) => {
+                error!("Could not apply mod_settings: {error:?}");
+                return; // TODO return and handle error
+            }
+        };
+        if let Err(error) = mod_settings_file.write_all(mod_settings.as_bytes()) {
+            error!("Could not write mod_settings: {error:?}");
+            return; // TODO return and handle error
+        }
+        info!("Mod settings applied");
+    }
+
+    fn build_mod_settings(&mut self) -> String {
+
+        let xml = ModSettingsBuilder::build(self.get_mods(), &self.gustav_dev_mod_meta);
+
+        let mut a = Vec::new();
+        xml.generate(&mut a).unwrap();
+
+        String::from_utf8(a).unwrap()
     }
 }

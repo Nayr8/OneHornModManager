@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
+use log::{error, warn};
 use crate::models::{EntryType, FileEntry};
 
 pub mod commands;
@@ -39,6 +40,8 @@ impl FileBrowser {
             let mut path = Some(path);
             std::mem::swap(&mut self.current_directory, &mut path);
             self.future.push(path.unwrap());
+        } else {
+            warn!("Could not navigate browser backwards: no history");
         }
     }
 
@@ -47,15 +50,21 @@ impl FileBrowser {
             let mut path = Some(path);
             std::mem::swap(&mut self.current_directory, &mut path);
             self.history.push(path.unwrap());
+        } else {
+            warn!("Could not navigate browser forwards: no future");
         }
     }
 
     fn redirect(&mut self, path: PathBuf) -> Result<(), ()> {
         match fs::metadata(&path) {
             Ok(meta) => if !meta.is_dir() {
+                error!("'{}' is not a directory", path.to_string_lossy());
                 return Err(());
             },
-            Err(_) => return Err(()),
+            Err(error) => {
+                error!("Could not get metadata from path '{}': {error:?}", path.to_string_lossy());
+                return Err(())
+            },
         }
 
         let mut path = Some(path);
@@ -152,6 +161,7 @@ impl FileBrowser {
                 Some(entry)
             },
             Err(_) => {
+                error!("Failed to resolve symlink '{}'", path.to_string_lossy());
                 None
             }
         }
