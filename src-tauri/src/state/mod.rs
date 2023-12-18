@@ -26,6 +26,9 @@ pub struct State {
     bg3_appdata: PathBuf,
     #[serde(skip, default="Meta::gustav_dev")]
     gustav_dev_mod_meta: Meta,
+
+    #[serde(default)]
+    mod_data_to_remove_on_apply: Vec<PathBuf>,
 }
 
 impl State {
@@ -36,6 +39,7 @@ impl State {
             selected_new_mod_info: None,
             bg3_appdata: PathHelper::find_bg3_app_data(),
             gustav_dev_mod_meta: Meta::gustav_dev(),
+            mod_data_to_remove_on_apply: Vec::new(),
         }
     }
 
@@ -312,16 +316,43 @@ impl State {
             error!("Could not write mod_settings: {error:?}");
             return; // TODO return and handle error
         }
+
+        for path in self.mod_data_to_remove_on_apply.drain(..) {
+            if let Err(error) = std::fs::remove_dir_all(&path) {
+                error!("Could not remove mod data from {}: {error:?}", path.to_string_lossy());
+            }
+        }
         info!("Mod settings applied");
     }
 
     fn build_mod_settings(&mut self) -> String {
-
         let xml = ModSettingsBuilder::build(self.get_mods(), &self.gustav_dev_mod_meta);
 
         let mut a = Vec::new();
         xml.generate(&mut a).unwrap();
 
         String::from_utf8(a).unwrap()
+    }
+
+    pub fn delete_mod(&mut self, mod_index: usize) {
+        let Some(profile) = self.profiles.get_mut(&self.current_profile) else {
+            error!("Could not get current profile");
+            return;
+        };
+
+        let Ok(mod_state) = profile.remove_mod(mod_index) else {
+            return;
+        };
+
+        self.mod_data_to_remove_on_apply.push(mod_state.path);
+    }
+
+    pub fn toggle_mod_enabled(&mut self, mod_index: usize) {
+        let Some(profile) = self.profiles.get_mut(&self.current_profile) else {
+            error!("Could not get current profile");
+            return;
+        };
+
+        profile.toggle_mod_enabled(mod_index);
     }
 }

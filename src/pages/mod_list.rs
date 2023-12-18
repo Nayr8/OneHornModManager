@@ -25,12 +25,13 @@ pub fn ModList(props: &ModListProps) -> Html {
         Status::Loading => html! {
             <Spinner size=10.0 style="margin-left: auto;margin-right: auto;margin-top: 10%"/>
         },
-        Status::Loaded(mods) => html! {
+        Status::Loaded(mods_inner) => html! {
             <div class="mod-list">
-                {mods.iter().enumerate().map(|(index, mod_data)| html! {
+                {mods_inner.iter().enumerate().map(|(index, mod_data)| html! {
                     <ModRow
                         mod_data={mod_data.clone()}
                         index={index}
+                        mods={mods.clone()}
                     />
                 }).collect::<Html>()}
             </div>
@@ -43,15 +44,28 @@ pub fn ModList(props: &ModListProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct ModRowProps {
-    pub mod_data: Mod,
-    pub index: usize,
+    mod_data: Mod,
+    index: usize,
+    mods: UseStateHandle<Status<Vec<Mod>, ()>>
 }
 
 #[function_component]
 pub fn ModRow(props: &ModRowProps) -> Html {
+    let index = props.index;
+    let mods = props.mods.clone();
+    let toggle_mod_enabled = move |_| {
+        ManagerBindings::toggle_mod_enabled(index, mods.clone());
+    };
+    let mods = props.mods.clone();
+    let delete_mod = move |_| {
+        ManagerBindings::delete(index, mods.clone());
+    };
     html! {
         <div class="mod">
-            <Button>
+            <Button onclick={delete_mod}>
+                <Svg svg_path="public/images/delete.svg" class="delete" />
+            </Button>
+            <Button onclick={toggle_mod_enabled}>
                 if props.mod_data.enabled {
                     <Svg svg_path="public/images/switch.svg" class="state-switch-enabled" override_colour="var(--enabled-switch)" />
                 } else {

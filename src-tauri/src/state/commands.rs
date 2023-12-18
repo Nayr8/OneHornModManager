@@ -54,3 +54,17 @@ pub fn apply(state: tauri::State<Mutex<State>>) {
     let mut state = state.inner().lock();
     state.apply();
 }
+
+#[tauri::command]
+pub fn delete(state: tauri::State<Mutex<State>>, index: usize) {
+    info!("Deleting mod {index}");
+    let mut state = state.inner().lock();
+    state.delete_mod(index);
+}
+
+#[tauri::command]
+pub fn toggle_mod_enabled(state: tauri::State<Mutex<State>>, index: usize) {
+    info!("Toggling mod enabled status {index}");
+    let mut state = state.inner().lock();
+    state.toggle_mod_enabled(index);
+}

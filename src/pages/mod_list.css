@@ -2,13 +2,16 @@
 
 .mod-list {
     padding-top: 1em;
+    display: grid;
+    grid-auto-flow: row;
+    grid-auto-rows: max-content;
 }
 
 .mod {
     display: grid;
-    padding: 0.5em 1em;
+    padding: 0 1em;
     column-gap: 1em;
-    grid-template-columns: 2em 30% 1fr;
+    grid-template-columns: 1.2em 2em 30% 1fr;
     overflow-x: hidden;
     overflow-y: scroll;
     white-space: nowrap;
@@ -24,4 +27,9 @@
     width: 2em;
     height: 2em;
     transform: translate(0, -12.50%) scaleX(-1);
+}
+
+.delete {
+    width: 1.4em;
+    height: 1.4em;
 }

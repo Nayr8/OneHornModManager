@@ -42,4 +42,26 @@ impl ManagerBindings {
             let _: () = tauri::invoke("apply", &Null).await.unwrap();
         })
     }
+
+    pub fn delete(index: usize, mods: UseStateHandle<Status<Vec<Mod>, ()>>) {
+        #[derive(Serialize)]
+        struct Args {
+            index: usize,
+        }
+        spawn_local(async move {
+            let _: () = tauri::invoke("delete", &Args { index }).await.unwrap();
+            ManagerBindings::get_mods(mods);
+        })
+    }
+
+    pub fn toggle_mod_enabled(index: usize, mods: UseStateHandle<Status<Vec<Mod>, ()>>) {
+        #[derive(Serialize)]
+        struct Args {
+            index: usize,
+        }
+        spawn_local(async move {
+            let _: () = tauri::invoke("toggle_mod_enabled", &Args { index }).await.unwrap();
+            ManagerBindings::get_mods(mods);
+        })
+    }
 }

@@ -29,6 +29,8 @@ fn main() {
             state::commands::get_mod_details,
             state::commands::add_current_mod,
             state::commands::apply,
+            state::commands::delete,
+            state::commands::toggle_mod_enabled,
 
             // File Browser
             file_browser::commands::redirect_browser,
