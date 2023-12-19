@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use crate::bindings;
 use crate::helpers::localisation::LocalisationHelper;
 use crate::menus::side_bar::SideBar;
 use crate::models::AppState;
@@ -11,6 +12,8 @@ pub fn App() -> Html {
     let state = use_state(|| AppState::ModList);
 
     use_effect_with_deps({
+        bindings::bind_logging();
+
         let t = t.clone();
         move |()| {
             LocalisationHelper::change("en-GB".into(), t);

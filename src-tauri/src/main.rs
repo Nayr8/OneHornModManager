@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 
+use log::{error, info, warn};
 use spin::Mutex;
 use crate::file_browser::FileBrowser;
 use crate::state::State;
@@ -11,6 +12,21 @@ mod file_browser;
 mod helper;
 mod models;
 mod translation;
+
+#[tauri::command]
+fn info(message: String) {
+    info!("UI: {message}");
+}
+
+#[tauri::command]
+fn warn(message: String) {
+    warn!("UI: {message}");
+}
+
+#[tauri::command]
+fn error(message: String) {
+    error!("UI: {message}");
+}
 
 
 fn main() {
@@ -23,6 +39,11 @@ fn main() {
         .manage(Mutex::new(state))
         .manage(Mutex::new(FileBrowser::new()))
         .invoke_handler(tauri::generate_handler![
+            // Logging
+            info,
+            warn,
+            error,
+
             // State
             state::commands::create_profile,
             state::commands::get_mods,
