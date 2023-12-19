@@ -3,6 +3,7 @@ use serde::Serialize;
 use tauri_sys::tauri;
 use yew::platform::spawn_local;
 use yew::UseStateHandle;
+use uuid::Uuid;
 use crate::bindings::Null;
 use crate::models::{Mod, ModDetails};
 use crate::Status;
@@ -62,6 +63,38 @@ impl ManagerBindings {
         spawn_local(async move {
             let _: () = tauri::invoke("toggle_mod_enabled", &Args { index }).await.unwrap();
             ManagerBindings::get_mods(mods);
+        })
+    }
+
+    pub fn create_profile(name: String) {
+        #[derive(Serialize)]
+        struct Args {
+            name: String,
+        }
+        spawn_local(async move {
+            let _: () = tauri::invoke("create_profile", &Args { name }).await.unwrap();
+        })
+    }
+
+    pub fn switch_profile(profile: Uuid) {
+        #[derive(Serialize)]
+        struct Args {
+            profile: Uuid,
+        }
+        spawn_local(async move {
+            let _: () = tauri::invoke("switch_profile", &Args { profile }).await.unwrap();
+        })
+    }
+
+    pub fn get_profiles(profiles: UseStateHandle<Option<Vec<(Uuid, String)>>>) {
+        spawn_local(async move {
+            profiles.set(Some(tauri::invoke("get_profiles", &Null).await.unwrap()));
+        })
+    }
+
+    pub fn get_current_profile(profile: UseStateHandle<Option<(Uuid, String)>>) {
+        spawn_local(async move {
+            profile.set(Some(tauri::invoke("get_current_profile", &Null).await.unwrap()));
         })
     }
 }

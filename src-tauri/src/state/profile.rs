@@ -16,6 +16,10 @@ impl Profile {
         }
     }
 
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
     pub fn get_mods(&self) -> &[ModState] {
         self.mods.as_slice()
     }

@@ -27,7 +27,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     match *browser_state {
         BrowserState::FileBrowser => html! {
             <div class="file-browser">
-                <Nav t={props.t.clone()}/>
+                <Nav/>
                 <Location t={props.t.clone()} current_dir={current_directory.clone()}/>
                 <QuickAccess t={props.t.clone()} current_dir={current_directory.clone()} selected_file={selected_file.clone()}/>
                 <FileList t={props.t.clone()} current_dir={current_directory.clone()} selected_file={selected_file.clone()}/>
@@ -49,13 +49,8 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
 
 }
 
-#[derive(Properties, PartialEq)]
-struct NavProps {
-    pub t: UseStateHandle<LocalisationHelper>,
-}
-
 #[function_component]
-fn Nav(props: &NavProps) -> Html {
+fn Nav() -> Html {
     html! {
         <div class="nav">
             <Button>{"Back"}</Button>
@@ -278,6 +273,4 @@ fn AddMod(props: &AddModProps) -> Html {
             }
         },
     }
-
-
 }

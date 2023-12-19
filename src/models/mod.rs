@@ -12,6 +12,8 @@ pub struct Mod {
 pub enum AppState {
     ModList,
     FileBrowser,
+    Profiles,
+    Settings,
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]

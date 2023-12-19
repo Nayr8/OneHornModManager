@@ -15,6 +15,8 @@ pub fn SideBar(props: &SideBarProps) -> Html {
     let disabled = match *props.state {
         AppState::ModList => 0,
         AppState::FileBrowser => 1,
+        AppState::Profiles => 2,
+        AppState::Settings => 3,
     };
 
     let mut buttons = vec![
@@ -39,14 +41,20 @@ pub fn SideBar(props: &SideBarProps) -> Html {
         SideBarButtonProps {
             tooltip: props.t.trans("menu:sidebar:change_profile"),
             svg_path: "public/images/change_profile.svg".into(),
-            onclick: Default::default(),
-            disabled: true,
+            onclick: Callback::from({
+                let state = props.state.clone();
+                move |_| { state.set(AppState::Profiles); }
+            }),
+            disabled: false,
         },
         SideBarButtonProps {
             tooltip: props.t.trans("menu:sidebar:settings"),
             svg_path: "public/images/settings.svg".into(),
-            onclick: Default::default(),
-            disabled: true,
+            onclick: Callback::from({
+                let state = props.state.clone();
+                move |_| { state.set(AppState::Settings); }
+            }),
+            disabled: false,
         },
         SideBarButtonProps {
             tooltip: props.t.trans("menu:sidebar:apply"),

@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use log::{error, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 use package_helper::{Meta, PackageReader};
 use crate::helper::PathHelper;
 use crate::models::{ModDetails, ModState, SelectedNewModInfo};
@@ -91,6 +91,23 @@ impl State {
     pub fn create_profile(&mut self, name: String) {
         self.current_profile = Uuid::new_v4();
         self.profiles.insert(self.current_profile, Profile::new(name));
+    }
+
+    pub fn switch_profile(&mut self, profile: Uuid) {
+        if self.profiles.contains_key(&profile) {
+            self.current_profile = profile;
+        } else {
+            error!("Could not switch profile. '{profile}' is not a profile")
+        }
+    }
+
+    pub fn get_profiles(&self) -> Vec<(Uuid, String)> {
+        self.profiles.iter().filter(|(id, _)| **id != self.current_profile)
+            .map(|(id, profile)| (*id, profile.name().to_owned())).collect()
+    }
+
+    pub fn get_current_profile(&self) -> (Uuid, String) {
+        (self.current_profile, self.profiles.get(&self.current_profile).unwrap().name().to_owned())
     }
 
     pub fn get_mods(&self) -> &[ModState] {
@@ -278,6 +295,7 @@ impl State {
             let mut path = mods_folder_path.clone();
 
             let mut src_path = None;
+            debug!("Reading packages for mod as {}", mod_state.path.to_string_lossy());
             let dir = std::fs::read_dir(&mod_state.path).unwrap();
             for entry in dir {
                 let Ok(entry) = entry else { continue };
@@ -317,10 +335,13 @@ impl State {
             return; // TODO return and handle error
         }
 
-        for path in self.mod_data_to_remove_on_apply.drain(..) {
-            if let Err(error) = std::fs::remove_dir_all(&path) {
-                error!("Could not remove mod data from {}: {error:?}", path.to_string_lossy());
+        if !self.mod_data_to_remove_on_apply.is_empty() {
+            for path in self.mod_data_to_remove_on_apply.drain(..) {
+                if let Err(error) = std::fs::remove_dir_all(&path) {
+                    error!("Could not remove mod data from {}: {error:?}", path.to_string_lossy());
+                }
             }
+            self.save();
         }
         info!("Mod settings applied");
     }
@@ -345,6 +366,7 @@ impl State {
         };
 
         self.mod_data_to_remove_on_apply.push(mod_state.path);
+        self.save();
     }
 
     pub fn toggle_mod_enabled(&mut self, mod_index: usize) {

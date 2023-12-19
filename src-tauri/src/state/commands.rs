@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use log::info;
 use spin::Mutex;
+use uuid::Uuid;
 use crate::models::{Mod, ModDetails};
 use crate::state::State;
 
@@ -10,6 +11,26 @@ pub fn create_profile(state: tauri::State<Mutex<State>>, name: String) {
     info!("Creating new profile: {name}");
     let mut state = state.inner().lock();
     state.create_profile(name);
+}
+#[tauri::command]
+pub fn switch_profile(state: tauri::State<Mutex<State>>, profile: Uuid) {
+    info!("Switching profile to '{profile}'");
+    let mut state = state.inner().lock();
+    state.switch_profile(profile);
+}
+
+#[tauri::command]
+pub fn get_profiles(state: tauri::State<Mutex<State>>) -> Vec<(Uuid, String)> {
+    info!("Getting profiles");
+    let state = state.inner().lock();
+    state.get_profiles()
+}
+
+#[tauri::command]
+pub fn get_current_profile(state: tauri::State<Mutex<State>>) -> (Uuid, String) {
+    info!("Getting current profile");
+    let state = state.inner().lock();
+    state.get_current_profile()
 }
 
 #[tauri::command]
