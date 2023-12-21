@@ -66,23 +66,27 @@ impl ManagerBindings {
         })
     }
 
-    pub fn create_profile(name: String) {
+    pub fn create_profile(name: String, profile: UseStateHandle<Option<(Uuid, String)>>, profiles: UseStateHandle<Option<Vec<(Uuid, String)>>>) {
         #[derive(Serialize)]
         struct Args {
             name: String,
         }
         spawn_local(async move {
             let _: () = tauri::invoke("create_profile", &Args { name }).await.unwrap();
+            ManagerBindings::get_current_profile(profile);
+            ManagerBindings::get_profiles(profiles);
         })
     }
 
-    pub fn switch_profile(profile: Uuid) {
+    pub fn switch_profile(profile_id: Uuid, profile: UseStateHandle<Option<(Uuid, String)>>, profiles: UseStateHandle<Option<Vec<(Uuid, String)>>>) {
         #[derive(Serialize)]
         struct Args {
             profile: Uuid,
         }
         spawn_local(async move {
-            let _: () = tauri::invoke("switch_profile", &Args { profile }).await.unwrap();
+            let _: () = tauri::invoke("switch_profile", &Args { profile: profile_id }).await.unwrap();
+            ManagerBindings::get_current_profile(profile);
+            ManagerBindings::get_profiles(profiles);
         })
     }
 

@@ -21,6 +21,11 @@
       "choose_file": "Add",
       "error_getting_mod_details": "Error getting mod details",
       "add_selected_mod": "Add"
+    },
+    "profiles": {
+      "current_profile": "Current Profile",
+      "profiles": "Profiles",
+      "create_account": "Create"
     }
   }
 }

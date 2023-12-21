@@ -79,12 +79,12 @@ pub fn SideBar(props: &SideBarProps) -> Html {
                 />
             }) }
             <div/>
-            <SideBarButton
+            /*<SideBarButton
                 tooltip={props.t.trans("menu:sidebar:logs_console")}
                 svg_path="public/images/logs_console.svg"
                 onclick={|_| {}}
                 disabled=true
-            />
+            />*/
         </div>
     }
 }

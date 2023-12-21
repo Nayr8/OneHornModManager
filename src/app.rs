@@ -9,7 +9,7 @@ use crate::pages::{FileBrowser, ModList, Profiles, Settings};
 #[function_component]
 pub fn App() -> Html {
     let t = use_state(|| LocalisationHelper::default());
-    let state = use_state(|| AppState::ModList);
+    let state = use_state(|| AppState::Profiles);
 
     use_effect_with_deps({
         bindings::bind_logging();
