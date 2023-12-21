@@ -13,6 +13,7 @@ wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3", features = ["HtmlTemplateElement", "Node", "InputEvent"] }
 js-sys = "0.3"
 uuid = { version = "1.6.1", features = ["serde", "v4", "js"] }
+log = { version = "0.4.20", features = ["std"] }
 
 tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", features = ["all"] }
 

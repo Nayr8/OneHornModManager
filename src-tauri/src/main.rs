@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 
-use log::{error, info, warn};
+use log::{info, Level, logger, Record};
 use spin::Mutex;
 use crate::file_browser::FileBrowser;
 use crate::state::State;
@@ -13,19 +13,38 @@ mod helper;
 mod models;
 mod translation;
 
-#[tauri::command]
-fn info(message: String) {
-    info!("UI: {message}");
+fn log(level: Level, message: String, target: String,
+       module_path: Option<String>, file: Option<String>, line: Option<u32>) {
+
+    let module_path = module_path.as_ref().map(|s| s.as_str());
+    let file = file.as_ref().map(|s| s.as_str());
+
+    let mut binding = Record::builder();
+    logger().log(&binding
+        .args(format_args!("{}", message))
+        .level(level)
+        .target(&target)
+        .module_path(module_path)
+        .file(file)
+        .line(line)
+        .build());
 }
 
 #[tauri::command]
-fn warn(message: String) {
-    warn!("UI: {message}");
+fn info(message: String, target: String,
+        module_path: Option<String>, file: Option<String>, line: Option<u32>) {
+    log(Level::Info, message, target, module_path, file, line);
 }
 
 #[tauri::command]
-fn error(message: String) {
-    error!("UI: {message}");
+fn warn(message: String, target: String,
+        module_path: Option<String>, file: Option<String>, line: Option<u32>) {
+    log(Level::Warn, message, target, module_path, file, line);
+}
+
+#[tauri::command]
+fn error(message: String, target: String, module_path: Option<String>, file: Option<String>, line: Option<u32>) {
+    log(Level::Error, message, target, module_path, file, line);
 }
 
 

@@ -65,15 +65,19 @@ pub fn Profiles(props: &ProfilesProps) -> Html {
                 <input type="text" value={input.as_str().to_owned()} class="create-profile-input" oninput={input_handler}/>
                 <Button onclick={add_profile} class="create-profile-button">{props.t.trans("page:profiles:create_account")}</Button>
                 <div class="profiles-list">
-                    {profiles_unwrapped.iter().map(|(id, name)| html! {
-                        <><Button class="profile" onclick={{
-                            let profile = profile.clone();
-                            let profiles = profiles.clone();
-                            let id = id.clone();
-                            move |_| {
-                                ManagerBindings::switch_profile(id, profile.clone(), profiles.clone());
-                            }
-                        }}>{name}</Button><div/></>
+                    {profiles_unwrapped.iter().map(|(id, name)| {
+                        let profile = profile.clone();
+                        let profiles = profiles.clone();
+                        let id = id.clone();
+                        let onclick = move |_| {
+                            ManagerBindings::switch_profile(id, profile.clone(), profiles.clone());
+                        };
+                        html! {
+                            <>
+                                <Button class="profile" onclick={onclick}>{name}</Button>
+                                <div/>
+                            </>
+                        }
                     }).collect::<Html>()}
                 </div>
             </div>

@@ -1,5 +1,9 @@
+use log::{error, info, warn};
+use wasm_bindgen::JsValue;
+use web_sys::console;
 use yew::prelude::*;
 use crate::bindings;
+use crate::bindings::UILogger;
 use crate::helpers::localisation::LocalisationHelper;
 use crate::menus::side_bar::SideBar;
 use crate::models::AppState;
@@ -9,11 +13,9 @@ use crate::pages::{FileBrowser, ModList, Profiles, Settings};
 #[function_component]
 pub fn App() -> Html {
     let t = use_state(|| LocalisationHelper::default());
-    let state = use_state(|| AppState::Profiles);
+    let state = use_state(|| AppState::ModList);
 
     use_effect_with_deps({
-        bindings::bind_logging();
-
         let t = t.clone();
         move |()| {
             LocalisationHelper::change("en-GB".into(), t);
