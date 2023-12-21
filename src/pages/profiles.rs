@@ -1,7 +1,7 @@
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use crate::bindings::ManagerBindings;
-use crate::components::{Button, Spinner};
+use crate::components::{Button, Spinner, Svg};
 use crate::helpers::localisation::LocalisationHelper;
 
 
@@ -62,20 +62,26 @@ pub fn Profiles(props: &ProfilesProps) -> Html {
                     {props.t.trans("page:profiles:profiles")}
                 </div>
                 <div/>
-                <input type="text" value={input.as_str().to_owned()} class="create-profile-input" oninput={input_handler}/>
-                <Button onclick={add_profile} class="create-profile-button">{props.t.trans("page:profiles:create_account")}</Button>
                 <div class="profiles-list">
+                    <input type="text" value={input.as_str().to_owned()} class="create-profile-input" oninput={input_handler}/>
+                    <Button onclick={add_profile} class="create-profile-button">{props.t.trans("page:profiles:create_account")}</Button>
                     {profiles_unwrapped.iter().map(|(id, name)| {
                         let profile = profile.clone();
                         let profiles = profiles.clone();
+                        let profiles2 = profiles.clone();
                         let id = id.clone();
                         let onclick = move |_| {
                             ManagerBindings::switch_profile(id, profile.clone(), profiles.clone());
                         };
+                        let delete = move |_| {
+                            ManagerBindings::delete_profile(id, profiles2.clone());
+                        };
                         html! {
                             <>
                                 <Button class="profile" onclick={onclick}>{name}</Button>
-                                <div/>
+                                <Button style="align-self: center;justify-self: center" onclick={delete}>
+                                    <Svg svg_path="public/images/delete.svg" style="width: 1.2em;height: 1.2em"/>
+                                </Button>
                             </>
                         }
                     }).collect::<Html>()}

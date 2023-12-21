@@ -25,6 +25,12 @@ pub fn get_profiles(state: tauri::State<Mutex<State>>) -> Vec<(Uuid, String)> {
     let state = state.inner().lock();
     state.get_profiles()
 }
+#[tauri::command]
+pub fn delete_profile(state: tauri::State<Mutex<State>>, profile: Uuid) {
+    info!("Deleting profile '{profile}'");
+    let mut state = state.inner().lock();
+    state.delete_profile(profile);
+}
 
 #[tauri::command]
 pub fn get_current_profile(state: tauri::State<Mutex<State>>) -> (Uuid, String) {

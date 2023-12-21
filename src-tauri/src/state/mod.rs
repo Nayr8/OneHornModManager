@@ -101,6 +101,25 @@ impl State {
         }
     }
 
+    pub fn delete_profile(&mut self, profile_id: Uuid) {
+        if self.current_profile == profile_id {
+            error!("Cannot delete active profile");
+            return;
+        }
+
+        match self.profiles.get(&profile_id) {
+            Some(profile) => {
+                for mod_state in profile.get_mods() {
+                    self.mod_data_to_remove_on_apply.push(mod_state.path.clone());
+                }
+                self.profiles.remove(&profile_id);
+            },
+            None => {
+                error!("Tried to delete profile {profile_id} but it does not exist");
+            }
+        }
+    }
+
     pub fn get_profiles(&self) -> Vec<(Uuid, String)> {
         self.profiles.iter().filter(|(id, _)| **id != self.current_profile)
             .map(|(id, profile)| (*id, profile.name().to_owned())).collect()

@@ -1,5 +1,5 @@
 use js_sys::{Function, Object};
-use log::{error, Level, Log, Metadata, Record};
+use log::{Level, Log, Metadata, Record};
 use serde::{Deserialize, Serialize};
 use tauri_sys::tauri;
 use wasm_bindgen::closure::Closure;

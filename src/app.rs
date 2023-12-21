@@ -1,9 +1,4 @@
-use log::{error, info, warn};
-use wasm_bindgen::JsValue;
-use web_sys::console;
 use yew::prelude::*;
-use crate::bindings;
-use crate::bindings::UILogger;
 use crate::helpers::localisation::LocalisationHelper;
 use crate::menus::side_bar::SideBar;
 use crate::models::AppState;

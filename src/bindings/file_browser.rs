@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 use serde::Serialize;
 use tauri_sys::tauri;
-use wasm_bindgen::JsValue;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use crate::bindings::Null;
@@ -14,7 +13,6 @@ impl FileBrowserBindings {
         spawn_local(async move {
             let returned_common_paths: Vec<(CommonPath, PathBuf)> = tauri::invoke("get_common_paths", &Null).await.unwrap();
             common_paths.set(Some(returned_common_paths));
-            web_sys::console::log_1(&JsValue::from_str("test1"));
         })
     }
 

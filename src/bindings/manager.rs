@@ -101,4 +101,16 @@ impl ManagerBindings {
             profile.set(Some(tauri::invoke("get_current_profile", &Null).await.unwrap()));
         })
     }
+
+    pub fn delete_profile(profile_id: Uuid, profiles: UseStateHandle<Option<Vec<(Uuid, String)>>>) {
+        #[derive(Serialize)]
+        struct Args {
+            profile: Uuid,
+        }
+        spawn_local(async move {
+            let _: () = tauri::invoke("delete_profile", &Args { profile: profile_id }).await.unwrap();
+            ManagerBindings::get_profiles(profiles);
+        })
+    }
 }
+

@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 
-use log::{info, Level, logger, Record};
+use log::{Level, logger, Record};
 use spin::Mutex;
 use crate::file_browser::FileBrowser;
 use crate::state::State;
@@ -68,6 +68,7 @@ fn main() {
             state::commands::switch_profile,
             state::commands::get_profiles,
             state::commands::get_current_profile,
+            state::commands::delete_profile,
             state::commands::get_mods,
             state::commands::get_mod_details,
             state::commands::add_current_mod,
