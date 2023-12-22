@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666666 8.4666666"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="error.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="px"
+     inkscape:zoom="10.240635"
+     inkscape:cx="7.7143654"
+     inkscape:cy="26.365553"
+     inkscape:window-width="1668"
+     inkscape:window-height="1323"
+     inkscape:window-x="40"
+     inkscape:window-y="925"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       sodipodi:type="star"
+       style="fill:#d40000;stroke-width:0.264583"
+       id="path2"
+       inkscape:flatsided="true"
+       sodipodi:sides="3"
+       sodipodi:cx="0.018945772"
+       sodipodi:cy="0.0063755754"
+       sodipodi:r1="4.3965626"
+       sodipodi:r2="2.1982813"
+       sodipodi:arg1="0.52359878"
+       sodipodi:arg2="1.5707963"
+       inkscape:rounded="5.6864236e-15"
+       inkscape:randomized="0"
+       d="m 3.8264806,2.2046569 -7.6150697,-10e-8 3.80753489,-6.5948438 z"
+       inkscape:transform-center-y="-1.2220542"
+       transform="matrix(1.1118305,0,0,1.1118269,4.212269,5.3311756)" />
+    <rect
+       style="fill:#f9f9f9;stroke-width:0.258178"
+       id="rect2"
+       width="0.92604166"
+       height="3.7041667"
+       x="3.7703125"
+       y="2.1166666"
+       rx="1.0794758"
+       ry="0.46126458" />
+    <circle
+       style="fill:#f9f9f9;stroke-width:0.239156"
+       id="path3"
+       cx="4.2333331"
+       cy="6.5484376"
+       r="0.46302083" />
+  </g>
+</svg>

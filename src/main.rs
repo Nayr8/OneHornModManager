@@ -1,20 +1,25 @@
 mod app;
+mod menus;
+mod helpers;
 mod components;
-mod logger;
+mod models;
+mod pages;
 mod bindings;
 
-mod listeners;
-mod pages;
-pub mod bottom_bar;
-pub mod console;
-pub mod top_bar;
-mod helpers;
-
+use log::LevelFilter;
 use app::App;
-use crate::logger::Logger;
+use crate::bindings::UILogger;
 
+#[derive(PartialEq)]
+pub enum Status<T: PartialEq, ERR: PartialEq> {
+    Loading,
+    Loaded(T),
+    Error(ERR),
+}
 
 fn main() {
-    Logger::init();
+    log::set_boxed_logger(Box::new(UILogger)).unwrap();
+    log::set_max_level(LevelFilter::Info);
+    bindings::bind_logging();
     yew::Renderer::<App>::new().render();
 }

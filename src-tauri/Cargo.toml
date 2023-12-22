@@ -1,0 +1,36 @@
+[package]
+name = "one-horn-rewrite"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.4", features = [] }
+
+[dependencies]
+tauri = { version = "1.4", features = ["shell-open"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.6.1", features = ["serde", "v4"] }
+hashbrown = { version = "0.14.3", features = ["serde"] }
+spin = "0.9.8"
+dirs = "5.0.1"
+steamlocate = "1.2.1"
+log = "0.4.20"
+simple_logger = "4.3.0"
+zip-extract = "0.1.2"
+xml-builder = "0.5.2"
+symlink = "0.1.0"
+
+
+package-helper = { path = "../package-helper" }
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]

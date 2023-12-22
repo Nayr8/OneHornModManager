@@ -1,11 +1,12 @@
-pub mod select;
+mod svg;
+mod button;
+mod tooltip;
+mod spinner;
+mod error_message;
 
-pub mod button;
-pub use button::Button;
 
-pub mod element;
-pub use element::Element;
-
-pub mod spinner;
-pub use spinner::Spinner;
-
+pub use svg::*;
+pub use button::*;
+pub use tooltip::*;
+pub use spinner::*;
+pub use error_message::*;

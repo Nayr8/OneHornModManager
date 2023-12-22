@@ -1,0 +1,42 @@
+
+.profiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.current-profile {
+    display: grid;
+    text-align: center;
+}
+
+.create-profile-input {
+    background: transparent;
+    border: var(--text) 2px solid;
+    border-radius: 0.2em;
+    color: var(--text);
+}
+
+.create-profile-button {
+    padding: 0 1em;
+    margin-right: 1em;
+}
+
+.profiles-list-outer {
+    margin-top: 2em;
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    grid-template-rows: max-content max-content 1fr;
+}
+
+.profiles-list {
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    grid-auto-rows: max-content;
+    text-align: center;
+    overflow-y: scroll;
+}
+
+.profile {
+    font-size: 1.2em;
+    padding: 0.4em;
+}

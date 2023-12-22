@@ -1,0 +1,31 @@
+{
+  "menu": {
+    "sidebar": {
+      "home": "Mod list",
+      "add_mod": "Add mod",
+      "change_profile": "Switch profile",
+      "settings": "Settings",
+      "apply": "Apply mods"
+    }
+  },
+  "page": {
+    "mod_list": {
+      "error_getting_mods": "Error getting mods"
+    },
+    "file_browser": {
+      "quick_access": "Quick Access",
+      "home": "Home",
+      "documents": "Documents",
+      "downloads": "Downloads",
+      "desktop": "Desktop",
+      "choose_file": "Add",
+      "error_getting_mod_details": "Error getting mod details",
+      "add_selected_mod": "Add"
+    },
+    "profiles": {
+      "current_profile": "Current Profile",
+      "profiles": "Profiles",
+      "create_account": "Create"
+    }
+  }
+}

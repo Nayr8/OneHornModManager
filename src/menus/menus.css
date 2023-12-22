@@ -1,0 +1,14 @@
+
+.side-bar {
+    border-right: solid 3px var(--text);
+    height: 100%;
+    padding: 1em;
+    display: grid;
+    grid-template-rows: repeat(5, max-content) 1fr max-content 0.5em;
+    row-gap: 1em;
+}
+
+.menu-image {
+    width: 2.5em;
+    height: 2.5em;
+}

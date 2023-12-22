@@ -1,28 +1,19 @@
 use yew::prelude::*;
 
-#[derive(PartialEq, Copy, Clone, Default)]
-pub enum SpinnerSize {
-    Small,
-    #[default]
-    Normal,
-}
 #[derive(Properties, PartialEq)]
 pub struct SpinnerProps {
     #[prop_or_default]
-    pub class: Classes,
-    #[prop_or_default]
     pub style: String,
     #[prop_or_default]
-    pub size: SpinnerSize,
+    pub class: Classes,
+    pub size: f32,
 }
 
-#[function_component(Spinner)]
-pub fn spinner(props: &SpinnerProps) -> Html {
-    let spinner_class = match props.size {
-        SpinnerSize::Small => "small-spinner",
-        SpinnerSize::Normal => "spinner",
-    };
+
+#[function_component]
+pub fn Spinner(props: &SpinnerProps) -> Html {
+    let style = format!("width: {0}em;height: {0}em;border-width: {1}em;{2}", props.size, props.size / 15.0, props.style);
     html! {
-        <div class={classes!(spinner_class, props.class.clone())} style={props.style.clone()} />
+        <div class={classes!("spinner", props.class.clone())} style={style}/>
     }
 }
