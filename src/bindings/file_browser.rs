@@ -16,21 +16,46 @@ impl FileBrowserBindings {
         })
     }
 
-    pub fn read_current_dir(current_directory: UseStateHandle<Option<(String, Vec<FileEntry>)>>) {
+    pub fn read_current_dir(current_directory: UseStateHandle<Option<(String, Vec<FileEntry>)>>, can_go_back_forward: UseStateHandle<Option<(bool, bool)>>) {
         spawn_local(async move {
             let current_dir = tauri::invoke("read_current_dir", &Null).await.unwrap();
-            current_directory.set(Some(current_dir))
+            current_directory.set(Some(current_dir));
+            FileBrowserBindings::can_go_back_forward(can_go_back_forward);
         })
     }
 
-    pub fn redirect_browser(path: PathBuf, current_directory: UseStateHandle<Option<(String, Vec<FileEntry>)>>) {
+    pub fn redirect_browser(path: PathBuf, current_directory: UseStateHandle<Option<(String, Vec<FileEntry>)>>,
+                            can_go_back_forward: UseStateHandle<Option<(bool, bool)>>) {
         #[derive(Serialize)]
         struct Args {
             path: PathBuf
         }
         spawn_local(async move {
             let _: () = tauri::invoke("redirect_browser", &Args { path }).await.unwrap();
-            Self::read_current_dir(current_directory)
+            Self::read_current_dir(current_directory, can_go_back_forward)
+        })
+    }
+
+    fn can_go_back_forward(can_go_back_forward: UseStateHandle<Option<(bool, bool)>>) {
+        spawn_local(async move {
+            let resp = tauri::invoke("can_go_back_forward", &Null).await.unwrap();
+            can_go_back_forward.set(Some(resp))
+        })
+    }
+
+    pub fn go_forward(current_directory: UseStateHandle<Option<(String, Vec<FileEntry>)>>,
+                      can_go_back_forward: UseStateHandle<Option<(bool, bool)>>) {
+        spawn_local(async move {
+            let _: () = tauri::invoke("go_forward", &Null).await.unwrap();
+            Self::read_current_dir(current_directory, can_go_back_forward)
+        })
+    }
+
+    pub fn go_back(current_directory: UseStateHandle<Option<(String, Vec<FileEntry>)>>,
+                   can_go_back_forward: UseStateHandle<Option<(bool, bool)>>) {
+        spawn_local(async move {
+            let _: () = tauri::invoke("go_back", &Null).await.unwrap();
+            Self::read_current_dir(current_directory, can_go_back_forward)
         })
     }
 }

@@ -88,7 +88,6 @@ fn main() {
             translation::load_translation,
 
         ])
-        //.invoke_handler(register_translation_commands())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

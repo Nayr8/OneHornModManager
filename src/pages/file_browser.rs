@@ -16,21 +16,23 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     let current_directory = use_state(|| None);
     let selected_file = use_state(|| None);
     let browser_state = use_state(|| BrowserState::FileBrowser);
+    let can_go_back_forward = use_state(|| None);
 
     use_effect_with_deps({
         let current_directory = current_directory.clone();
+        let can_go_back_forward = can_go_back_forward.clone();
         move |_| {
-            FileBrowserBindings::read_current_dir(current_directory);
+            FileBrowserBindings::read_current_dir(current_directory, can_go_back_forward);
         }
     }, ());
 
     match *browser_state {
         BrowserState::FileBrowser => html! {
             <div class="file-browser">
-                <Nav/>
+                <Nav current_dir={current_directory.clone()} can_go_back_forward={can_go_back_forward.clone()} />
                 <Location t={props.t.clone()} current_dir={current_directory.clone()}/>
-                <QuickAccess t={props.t.clone()} current_dir={current_directory.clone()} selected_file={selected_file.clone()}/>
-                <FileList t={props.t.clone()} current_dir={current_directory.clone()} selected_file={selected_file.clone()}/>
+                <QuickAccess t={props.t.clone()} current_dir={current_directory.clone()} selected_file={selected_file.clone()} can_go_back_forward={can_go_back_forward.clone()}/>
+                <FileList t={props.t.clone()} current_dir={current_directory.clone()} selected_file={selected_file.clone()} can_go_back_forward={can_go_back_forward.clone()}/>
                 <SelectedFile t={props.t.clone()} selected_file={selected_file.clone()} browser_state={browser_state.clone()}/>
             </div>
         },
@@ -49,12 +51,55 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
 
 }
 
+#[derive(Properties, PartialEq)]
+struct NavProps {
+    can_go_back_forward: UseStateHandle<Option<(bool, bool)>>,
+    current_dir: UseStateHandle<Option<(String, Vec<FileEntry>)>>,
+}
+
 #[function_component]
-fn Nav() -> Html {
+fn Nav(props: &NavProps) -> Html {
+    let can_go_back_forward2 = use_state(|| (false, false));
+    use_effect_with_deps({
+        let can_go_back_forward2 = can_go_back_forward2.clone();
+        move |can_go_back_forward| {
+            if let Some(can_go_back_forward) = *can_go_back_forward {
+                can_go_back_forward2.set(can_go_back_forward)
+            }
+        }
+    }, (*props.can_go_back_forward).clone());
+
+    let go_forward = {
+        let current_dir = props.current_dir.clone();
+        let can_go_back_forward = props.can_go_back_forward.clone();
+        move |_| {
+            FileBrowserBindings::go_forward(current_dir.clone(), can_go_back_forward.clone());
+        }
+    };
+    let go_back = {
+        let current_dir = props.current_dir.clone();
+        let can_go_back_forward = props.can_go_back_forward.clone();
+        move |_| {
+            FileBrowserBindings::go_back(current_dir.clone(), can_go_back_forward.clone());
+        }
+    };
+
     html! {
         <div class="nav">
-            <Button>{"Back"}</Button>
-            <Button>{"Forward"}</Button>
+            <Button disabled={!can_go_back_forward2.0} onclick={go_back}>
+                <Svg
+                    svg_path="public/images/arrow.svg"
+                    style="width: 2.7em;height: 1.8em;transform: scaleX(-1)"
+                    override_colour={if can_go_back_forward2.0 {"var(--text)"} else {"var(--disabled)"}}
+                />
+            </Button>
+            <Button disabled={!can_go_back_forward2.1} onclick={go_forward}>
+                <Svg
+                    svg_path="public/images/arrow.svg"
+                    style="width: 2.7em;height: 1.8em"
+                    override_colour={if can_go_back_forward2.1 {"var(--text)"} else {"var(--disabled)"}}
+                />
+            </Button>
         </div>
     }
 }
@@ -85,6 +130,7 @@ struct QuickAccessProps {
     t: UseStateHandle<LocalisationHelper>,
     current_dir: UseStateHandle<Option<(String, Vec<FileEntry>)>>,
     selected_file: UseStateHandle<Option<FileEntry>>,
+    can_go_back_forward: UseStateHandle<Option<(bool, bool)>>,
 }
 
 #[function_component]
@@ -105,8 +151,9 @@ fn QuickAccess(props: &QuickAccessProps) -> Html {
                     let path = path.clone();
                     let current_dir = props.current_dir.clone();
                     let selected_file = props.selected_file.clone();
+                    let can_go_back_forward = props.can_go_back_forward.clone();
                     let onclick = move |_: MouseEvent| {
-                        FileBrowserBindings::redirect_browser(path.clone(), current_dir.clone());
+                        FileBrowserBindings::redirect_browser(path.clone(), current_dir.clone(), can_go_back_forward.clone());
                         selected_file.set(None);
                     };
                     html! {
@@ -135,6 +182,7 @@ struct FileListProps {
     t: UseStateHandle<LocalisationHelper>,
     current_dir: UseStateHandle<Option<(String, Vec<FileEntry>)>>,
     selected_file: UseStateHandle<Option<FileEntry>>,
+    can_go_back_forward: UseStateHandle<Option<(bool, bool)>>,
 }
 
 #[function_component]
@@ -154,15 +202,16 @@ fn FileList(props: &FileListProps) -> Html {
                         let path = entry.path.clone();
                         let current_dir = props.current_dir.clone();
                         let selected_file = props.selected_file.clone();
+                        let can_go_back_forward = props.can_go_back_forward.clone();
                         move |_| {
-                            FileBrowserBindings::redirect_browser(path.clone(), current_dir.clone());
+                            FileBrowserBindings::redirect_browser(path.clone(), current_dir.clone(), can_go_back_forward.clone());
                             selected_file.set(None);
                         }
                     })
                 };
                 html! {
                     <Button class="file" onclick={onclick}>
-                        <Svg svg_path={entry.entry_type.to_svg_path()} style="display: flex;width: 1em;height: 1em;transform: translate(0, 0.2em)" />
+                        <Svg svg_path={entry.entry_type.to_svg_path(entry.path.extension())} style="display: flex;width: 1.2em;height: 1.2em" />
                         <div>{&entry.file_name}</div>
                     </Button>
                 }

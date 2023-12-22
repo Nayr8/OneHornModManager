@@ -1,4 +1,6 @@
+use std::ffi::OsStr;
 use std::path::PathBuf;
+use log::error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, PartialEq, Clone)]
@@ -41,7 +43,7 @@ impl CommonPath {
         match self {
             CommonPath::Home => "public/images/home.svg",
             CommonPath::Documents => "public/images/documents.svg",
-            CommonPath::Downloads => "public/images/home.svg",
+            CommonPath::Downloads => "public/images/downloads.svg",
             CommonPath::Desktop => "public/images/desktop.svg",
         }
     }
@@ -61,10 +63,21 @@ pub enum EntryType {
 }
 
 impl EntryType {
-    pub fn to_svg_path(&self) -> &'static str {
-        match self {
-            EntryType::File => "public/images/home.svg",
-            EntryType::Directory => "public/images/home.svg",
+    pub fn to_svg_path(&self, extension: Option<&OsStr>) -> &'static str {
+        let extension = extension.map(OsStr::to_string_lossy);
+        let extension: Option<&str> = extension.as_ref().map(|e| e.as_ref());
+        match (self, extension) {
+            (EntryType::Directory, _) => "public/images/folder.svg",
+            (EntryType::File, Some("zip")) => "public/images/file.svg",
+            (EntryType::File, Some("pak")) => "public/images/pak.svg",
+            (EntryType::File, Some(ext)) => {
+                error!("Cannot get icon for file with extension {ext}");
+                "public/images/error.svg"
+            },
+            (EntryType::File, None) => {
+                error!("Cannot get icon for file with no extension");
+                "public/images/error.svg"
+            },
         }
     }
 }
