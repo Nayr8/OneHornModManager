@@ -63,13 +63,13 @@ pub fn ModRow(props: &ModRowProps) -> Html {
     html! {
         <div class="mod">
             <Button onclick={delete_mod}>
-                <Svg svg_path="public/images/delete.svg" class="delete" />
+                <Svg svg_path="public/images/delete.svg" width=1.4 height=1.4 />
             </Button>
-            <Button onclick={toggle_mod_enabled}>
+            <Button onclick={toggle_mod_enabled} class="state-switch">
                 if props.mod_data.enabled {
-                    <Svg svg_path="public/images/switch.svg" class="state-switch-enabled" override_colour="var(--enabled-switch)" />
+                    <Svg svg_path="public/images/switch.svg" width=2.0 height=2.0 override_colour="var(--enabled-switch)" />
                 } else {
-                    <Svg svg_path="public/images/switch.svg" class="state-switch-disabled" override_colour="var(--disabled-switch)" />
+                    <Svg svg_path="public/images/switch.svg" width=2.0 height=2.0 flip_x=true override_colour="var(--disabled-switch)" />
                 }
             </Button>
             <div>{&props.mod_data.name}</div>

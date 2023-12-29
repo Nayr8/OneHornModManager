@@ -107,7 +107,7 @@ fn side_bar_button(props: &SideBarButtonProps) -> Html {
     html! {
         <Tooltip tooltip={props.tooltip.clone()} disabled={props.disabled}>
             <Button onclick={props.onclick.clone()} disabled={props.disabled}>
-                <Svg svg_path={props.svg_path.clone()} class="menu-image" override_colour={override_colour}/>
+                <Svg svg_path={props.svg_path.clone()} width=2.5 height=2.5 override_colour={override_colour}/>
             </Button>
         </Tooltip>
     }

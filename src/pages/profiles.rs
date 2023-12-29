@@ -80,7 +80,7 @@ pub fn Profiles(props: &ProfilesProps) -> Html {
                             <>
                                 <Button class="profile" onclick={onclick}>{name}</Button>
                                 <Button style="align-self: center;justify-self: center" onclick={delete}>
-                                    <Svg svg_path="public/images/delete.svg" style="width: 1.2em;height: 1.2em"/>
+                                    <Svg svg_path="public/images/delete.svg" width=1.2 height=1.2/>
                                 </Button>
                             </>
                         }

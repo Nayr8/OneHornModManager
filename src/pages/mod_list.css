@@ -17,19 +17,6 @@
     white-space: nowrap;
 }
 
-.state-switch-enabled {
-    width: 2em;
-    height: 2em;
+.state-switch {
     transform: translate(0, -12.50%);
-}
-
-.state-switch-disabled {
-    width: 2em;
-    height: 2em;
-    transform: translate(0, -12.50%) scaleX(-1);
-}
-
-.delete {
-    width: 1.4em;
-    height: 1.4em;
 }

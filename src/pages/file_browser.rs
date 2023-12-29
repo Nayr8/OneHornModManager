@@ -89,14 +89,17 @@ fn Nav(props: &NavProps) -> Html {
             <Button disabled={!can_go_back_forward2.0} onclick={go_back}>
                 <Svg
                     svg_path="public/images/arrow.svg"
-                    style="width: 2.7em;height: 1.8em;transform: scaleX(-1)"
+                    width=2.7
+                    height=1.8
+                    flip_x=true
                     override_colour={if can_go_back_forward2.0 {"var(--text)"} else {"var(--disabled)"}}
                 />
             </Button>
             <Button disabled={!can_go_back_forward2.1} onclick={go_forward}>
                 <Svg
                     svg_path="public/images/arrow.svg"
-                    style="width: 2.7em;height: 1.8em"
+                    width=2.7
+                    height=1.8
                     override_colour={if can_go_back_forward2.1 {"var(--text)"} else {"var(--disabled)"}}
                 />
             </Button>
@@ -158,7 +161,7 @@ fn QuickAccess(props: &QuickAccessProps) -> Html {
                     };
                     html! {
                         <Button class="common-path-button" onclick={onclick}>
-                            <Svg svg_path={path_type.to_svg_path()} class="quick-access-image" />
+                            <Svg svg_path={path_type.to_svg_path()} class="quick-access-image" width=1.4 height=1.4 />
                             <div style="font-size: 1.4em">{props.t.trans(path_type.to_translation_string())}</div>
                         </Button>
                     }
@@ -211,7 +214,7 @@ fn FileList(props: &FileListProps) -> Html {
                 };
                 html! {
                     <Button class="file" onclick={onclick}>
-                        <Svg svg_path={entry.entry_type.to_svg_path(entry.path.extension())} style="display: flex;width: 1.2em;height: 1.2em" />
+                        <Svg svg_path={entry.entry_type.to_svg_path(entry.path.extension())} style="display: flex" width=1.2 height=1.2 />
                         <div>{&entry.file_name}</div>
                     </Button>
                 }
