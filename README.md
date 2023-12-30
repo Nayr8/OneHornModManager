@@ -1,7 +1,14 @@
-# Tauri + Yew
+# One Horn Mod Manager
 
-This template should help get you started developing with Tauri and Yew.
+## Development Setup Instructions (Linux)
 
-## Recommended IDE Setup
+Install the webkit2gtk library through your preferred method
 
-[VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+Install the wasm target for rust `rustup target add wasm32-unknown-unknown`
+
+Install the tauri prerequisites with:
+`cargo install tauri-cli trunk`
+
+If not done already add the cargo binaries to your PATH
+
+Run `cargo tauri dev`
